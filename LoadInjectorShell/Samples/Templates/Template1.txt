@@ -1,0 +1,9 @@
+﻿
+Template Files are just normal text files with tokens which will be substitiuted each iteration with the supplied variables
+
+Identified:       @uuid
+Name:             @name
+Sequence Number:  @seqNum
+
+@timestamp
+

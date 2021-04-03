@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<BMS>
+	<MessageType>3</MessageType>
+<ParkingStand>B2</ParkingStand>
+	<StatusInformation>
+		<DeviceCode>AHU-GH-37-PBB-01</DeviceCode>
+		<DeviceType>PBB</DeviceType>
+		<StatusCode>FAULT</StatusCode>
+		<Time>@@DATE@@T10:00:00</Time>
+</StatusInformation>
+</BMS>

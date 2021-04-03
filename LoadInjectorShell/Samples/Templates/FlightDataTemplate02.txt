@@ -1,0 +1,16 @@
+
+Message Constructed from @lineDescription at @timestamp
+
+Index:           @index
+Airline:         @airline
+Flight Number:   @fltNum
+STO:             @timeSTO
+STO DateTime:    @dateTimeSTO
+Departing From:  @from
+Arriving At:     @to
+# First Pax:     @firstpax
+# Biz Pax:       @bizpax
+# Econ Pax:      @econpax
+Extra Data:      @extradata
+
+Data from AMS Flight:   @amsairline

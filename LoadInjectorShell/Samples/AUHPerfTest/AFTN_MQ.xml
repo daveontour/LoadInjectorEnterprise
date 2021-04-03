@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+	<soap:Header>
+		<soap:MessageMetadata xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aip="http://www.sita.aero/aip/XMLSchema">
+			<aip:Source>AFTN</aip:Source>
+			<aip:Timestamp>2020-11-17T03:11:19Z</aip:Timestamp>
+			<aip:MessageType>PublishFlightDataInput</aip:MessageType>
+			<aip:ProcessingResponseRequired>false</aip:ProcessingResponseRequired>
+			<aip:UUID>@uuid@</aip:UUID>
+		</soap:MessageMetadata>
+		<soap:OperationData xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aip="http://www.sita.aero/aip/XMLSchema">
+			<aip:OperationName>FlightUpdate.024_AFTN</aip:OperationName>
+		</soap:OperationData>
+	</soap:Header>
+	<soap:Body>
+		<aip:PublishFlightDataInput xmlns:aip="http://www.sita.aero/aip/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+			<aip:FlightData>
+				<aip:FlightID>
+					<aip:FlightUpdateMatchConditions>
+						<aip:UniqueFlightMatchCondition Priority="1">
+							<aip:AirlineCondition>
+								<aip:ICAO>
+									<aip:Equal>@icao@</aip:Equal>
+								</aip:ICAO>
+							</aip:AirlineCondition>
+							<aip:FlightNumberCondition>
+								<aip:Equal>@flightno@</aip:Equal>
+							</aip:FlightNumberCondition>
+							<aip:STOCondition>
+								<aip:Between>
+									<aip:RangeFrom>@date@T00:00:00+04:00</aip:RangeFrom>
+									<aip:RangeTo>@date@T23:59:00+04:00</aip:RangeTo>
+								</aip:Between>
+							</aip:STOCondition>
+							<aip:FlightNatureCondition>
+								<aip:Equal>DEPARTURE</aip:Equal>
+							</aip:FlightNatureCondition>
+							<aip:AirportCondition>
+								<aip:ICAO>
+									<aip:Equal>OMAA</aip:Equal>
+								</aip:ICAO>
+							</aip:AirportCondition>
+						</aip:UniqueFlightMatchCondition>
+						<aip:UniqueFlightMatchCondition Priority="2">
+							<aip:STOCondition>
+								<aip:Between>
+									<aip:RangeFrom>@date@T00:00:00+04:00</aip:RangeFrom>
+									<aip:RangeTo>@date@T23:59:00+04:00</aip:RangeTo>
+								</aip:Between>
+							</aip:STOCondition>
+							<aip:FlightNatureCondition>
+								<aip:Equal>DEPARTURE</aip:Equal>
+							</aip:FlightNatureCondition>
+							<aip:AirportCondition>
+								<aip:ICAO>
+									<aip:Equal>OMAA</aip:Equal>
+								</aip:ICAO>
+							</aip:AirportCondition>
+							<aip:PrimaryAircraftCondition>
+								<aip:RegistrationCondition>
+									<aip:Equal>@reg@</aip:Equal>
+								</aip:RegistrationCondition>
+							</aip:PrimaryAircraftCondition>
+						</aip:UniqueFlightMatchCondition>
+						<aip:UniqueFlightMatchCondition Priority="3">
+							<aip:STOCondition>
+								<aip:Between>
+									<aip:RangeFrom>@date@T00:00:00+04:00</aip:RangeFrom>
+									<aip:RangeTo>@date@T23:59:00+04:00</aip:RangeTo>
+								</aip:Between>
+							</aip:STOCondition>
+							<aip:FlightNatureCondition>
+								<aip:Equal>DEPARTURE</aip:Equal>
+							</aip:FlightNatureCondition>
+							<aip:AirportCondition>
+								<aip:ICAO>
+									<aip:Equal>OMAA</aip:Equal>
+								</aip:ICAO>
+							</aip:AirportCondition>
+							<aip:CustomFieldCondition FieldName="S--G_Callsign">
+								<aip:String>
+									<aip:Equal>@callsign@</aip:Equal>
+								</aip:String>
+							</aip:CustomFieldCondition>
+						</aip:UniqueFlightMatchCondition>
+						<aip:UniqueFlightMatchCondition Priority="4">
+							<aip:STOCondition>
+								<aip:Between>
+									<aip:RangeFrom>@date@T00:00:00+04:00</aip:RangeFrom>
+									<aip:RangeTo>@date@T23:59:00+04:00</aip:RangeTo>
+								</aip:Between>
+							</aip:STOCondition>
+							<aip:FlightNatureCondition>
+								<aip:Equal>DEPARTURE</aip:Equal>
+							</aip:FlightNatureCondition>
+							<aip:AirportCondition>
+								<aip:ICAO>
+									<aip:Equal>OMAA</aip:Equal>
+								</aip:ICAO>
+							</aip:AirportCondition>
+							<aip:CustomFieldCondition FieldName="S--G_ATCICAOFlightId">
+								<aip:String>
+									<aip:Equal>@atcicaoid@</aip:Equal>
+								</aip:String>
+							</aip:CustomFieldCondition>
+						</aip:UniqueFlightMatchCondition>
+					</aip:FlightUpdateMatchConditions>
+				</aip:FlightID>
+				<aip:FlightEvents>
+					<aip:FlightEvent Index="1">
+						<aip:EventCode>de--_EstimatedDeparture_Source01</aip:EventCode>
+						<aip:DateTime>@date@T14:55:00+04:00</aip:DateTime>
+					</aip:FlightEvent>
+					<aip:FlightEvent Index="2">
+						<aip:EventCode>de--_CancelTime</aip:EventCode>
+						<aip:DateTime xsi:nil="true"/>
+					</aip:FlightEvent>
+				</aip:FlightEvents>
+				<aip:Route>
+					<aip:Origin>
+						<aip:ICAO>OMAA</aip:ICAO>
+					</aip:Origin>
+					<aip:Destination>
+						<aip:ICAO>OPIS</aip:ICAO>
+					</aip:Destination>
+				</aip:Route>
+				<aip:CustomFields>
+					<aip:AODBFields>
+						<aip:KeyValue Key="S--G_Qualifier_Source01">
+							<aip:String>J</aip:String>
+						</aip:KeyValue>
+						<aip:KeyValue Key="I--G_EstimatedElapsedTime">
+							<aip:Integer>157</aip:Integer>
+						</aip:KeyValue>
+						<aip:KeyValue Key="S--G_AlternateAerodromePrimary">
+							<aip:String>OPLA</aip:String>
+						</aip:KeyValue>
+						<aip:KeyValue Key="S--G_Registration_Source01">
+							<aip:String>APBLU</aip:String>
+						</aip:KeyValue>
+						<aip:KeyValue Key="S--G_AircraftType_Source01">
+							<aip:String>A320</aip:String>
+						</aip:KeyValue>
+					</aip:AODBFields>
+				</aip:CustomFields>
+			</aip:FlightData>
+		</aip:PublishFlightDataInput>
+	</soap:Body>
+</soap:Envelope>

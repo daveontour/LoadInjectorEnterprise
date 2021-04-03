@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>600</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <amstimeout>600</amstimeout>
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <logFile>${{basedir}}/logs/Loader.log</logFile>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources>
+      <exceldatadriven name="Excel Data Driven Source" dataFile=".\Data\flights.xlsx" excelSheet="Sheet1" timeElement="B" excelRowStart="2" timeElementFormat="HH:mm" excelRowEnd="1440">
+        <trigger name="STO" id="excel-sto" delta="0"/>
+        <trigger name="STO-1" id="excel-sto-1" delta="-1" />
+        <trigger name="STO" id="excel-sto+1" delta="1" />
+      </exceldatadriven>
+  </eventdrivensources>
+  <ratedrivensources/>
+  <lines>
+    <destination protocol="TEXT" name="Simple flight Data Output" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable name="Descriptive Name" type="fixed" token="@lineDescription" fixedValue="Excel Data Triggered Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="excelCol" excelCol="A" />
+      <variable token="@airline" type="excelCol" excelCol="D" />
+      <variable token="@fltNum" type="excelCol" excelCol="E" />
+      <variable token="@timeSTO" type="excelCol" excelCol="B" />
+      <variable token="@dateTimeSTO" type="excelCol" excelCol="C" />
+      <variable token="@from" type="excelCol" excelCol="F" />
+      <variable token="@to" type="excelCol" excelCol="G" />
+      <variable token="@firstpax" type="excelCol" excelCol="I" />
+      <variable token="@bizpax" type="excelCol" excelCol="J" />
+      <variable token="@econpax" type="excelCol" excelCol="K" />
+      <variable token="@extradata" type="excelCol" excelCol="H" />
+      <subscribed>excel-sto</subscribed>
+      <subscribed>excel-sto-1</subscribed>
+      <subscribed>excel-sto+1</subscribed>
+    </destination>
+  </lines>
+</config>

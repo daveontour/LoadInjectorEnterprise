@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken>aafc8412-3576-40c0-86b4-54d8e9e49351</amstoken>
+    <aptcode>ABC</aptcode>
+    <aptcodeicao>ABCD</aptcodeicao>
+    <startAt enabled="False">06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <serverDiff>0</serverDiff>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <amstimeout>60</amstimeout>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources />
+  <ratedrivensources>
+    <ratedriven name="AMS and CSV Data" flttype="both" ID="amsdata" flightSetFrom="-1000" flightSetTo="1000" dataSource="CSV" dataFile=".\Data\flights.csv" csvFileHeaders="True" />
+  </ratedrivensources>
+  <lines>
+    <destination name="Sample of AMS and CSV Data" protocol="TEXT" templateFile=".\Templates\template.txt">
+      <variable token="@airline" type="flightInfo" sub="airlineCode" />
+      <subscribed>amsdata</subscribed>
+      <variable token="@flt" type="flightInfo" sub="fltNumber" />
+      <variable token="@color" type="csvfield" field="7" />
+    </destination>
+  </lines>
+</config>

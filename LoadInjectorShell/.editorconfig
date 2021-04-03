@@ -1,0 +1,10 @@
+﻿[*.cs]
+
+# CS1998: Async method lacks 'await' operators and will run synchronously
+dotnet_diagnostic.CS1998.severity = silent
+
+# S2386: Mutable fields should not be "public static"
+dotnet_diagnostic.S2386.severity = none
+
+# Default severity for all analyzer diagnostics
+dotnet_analyzer_diagnostic.severity = none

@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources>
+      <xmldatadriven name="XML Data Driven Source" sourceType="file" dataFile=".\Data\flights.xml" repeatingElement="//flight" timeElement="./sto" timeElementFormat="HH:mm">
+        <trigger name="STO" id="xml-sto" />
+        <trigger name="STO-3" id="xml-sto-3" delta="-3" />
+        <trigger name="STO+2" id="xml-sto+2" delta="2" />
+      </xmldatadriven>
+    <csvdatadriven name="CSV Data Driven Source" sourceType="file" timeElement="1" dataFile=".\Data\flights.csv" timeElementFormat="HH:mm">
+      <trigger name="STO" id="csv_sto" />
+      <trigger name="STO-5" id="csv_sto-5" delta="-5" />
+      <trigger name="STO+5" id="csv_sto+5" delta="5" />
+    </csvdatadriven>
+  </eventdrivensources>
+  <lines>
+    <destination protocol="TEXT" name="Descriptive Name" messagesPerMinute="60" flttype="none" triggerType="trigger" triggerID="xml-sto,xml-sto-3,xml-sto+2" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable type="fixed" token="@lineDescription" fixedValue="XML Data Triggered Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable type="xmlElement" token="@index" xmlXPath="./index" />
+      <variable token="@airline" type="xmlElement" xmlXPath="./airline" />
+      <variable token="@fltNum" type="xmlElement" xmlXPath="./flightNum" />
+      <variable token="@timeSTO" type="xmlElement" xmlXPath="./sto" />
+      <variable token="@dateTimeSTO" type="xmlElement" xmlXPath="./stoDateTime" />
+      <variable token="@from" type="xmlElement" xmlXPath="./departure" />
+      <variable token="@to" type="xmlElement" xmlXPath="./arrival" />
+      <variable token="@firstpax" type="xmlElement" xmlXPath="./pax/first" />
+      <variable token="@bizpax" type="xmlElement" xmlXPath="./pax/business" />
+      <variable token="@econpax" type="xmlElement" xmlXPath="./pax/eccon" />
+      <variable token="@extradata" type="xmlElement" xmlXPath="./data/color" />
+      <subscribed>xml-sto</subscribed>
+      <subscribed>xml-sto-3</subscribed>
+      <subscribed>xml-sto+2</subscribed>
+    </destination>
+    <destination protocol="TEXT" name="Simple Flight Data Output" messagesPerMinute="60" flttype="none" refreshFlight="False" triggerType="trigger" triggerID="csv_sto,csv_sto-5,csv_sto+5" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable name="Descriptive Name" type="fixed" token="@lineDescription" fixedValue="CSV Data Triggered Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="csvfield" field="0" />
+      <variable token="@airline" type="csvfield" field="3" />
+      <variable token="@fltNum" type="csvfield" field="4" />
+      <variable token="@timeSTO" type="csvfield" field="1" />
+      <variable token="@dateTimeSTO" type="csvfield" field="2" />
+      <variable token="@from" type="csvfield" field="5" />
+      <variable token="@to" type="csvfield" field="6" />
+      <variable token="@firstpax" type="csvfield" field="8" />
+      <variable token="@bizpax" type="csvfield" field="9" />
+      <variable token="@econpax" type="csvfield" field="10" />
+      <variable token="@extradata" type="csvfield" field="7" />
+      <subscribed>csv_sto</subscribed>
+      <subscribed>csv_sto-5</subscribed>
+      <subscribed>csv_sto+5</subscribed>
+    </destination>
+  </lines>
+</config>

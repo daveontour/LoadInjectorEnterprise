@@ -1,0 +1,42 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>This is a sample build on Sample01 by adding a second destination line with a different template, set of variables, messaging rate and destination type
+ </comments>
+  </settings>
+  <eventdrivensources/>
+  <ratedrivensources>
+    <ratedriven name="One Second Pulsar" dataSource="PULSAR" ID="onesecondpulsar" messagesPerMinute="60" flttype="none" />
+    <ratedriven name="Half Second Pulsar" dataSource="PULSAR" ID="halfsecondpulsar" messagesPerMinute="120" flttype="none" />
+  </ratedrivensources>
+  <lines>
+    <destination name="Destination Line 1"  templateFile=".\Templates\Sample01Template.txt" protocol="FILE" appendFile="False" destinationFile=".\Output\Sample02\Line1File@seqNum.txt">
+      <variable type="valueSequence" token="@name">
+        <value>Dave</value>
+        <value>Alice</value>
+        <value>Bob</value>
+        <value>Charlie</value>
+      </variable>
+      <variable token="@uuid" type="uuid" />
+      <variable token="@seqNum" type="sequence" seed="0" digits="4" />
+      <subscribed>onesecondpulsar</subscribed>
+    </destination>
+    <destination name="Destination Line 2" templateFile=".\Templates\Sample02Template.txt" protocol="MSMQ" queue=".\private$\lisample2">
+      <variable token="@uuid" type="uuid" />
+      <variable token="@num" type="intgaussian" normalInt="100" stdDev="20" />
+      <variable token="@date" type="datetime" relative="False" lowerOffset="-20" upperOffset="21" />
+      <variable token="@seqNum" type="sequence" seed="3000" digits="8" />
+      <subscribed>halfsecondpulsar</subscribed>
+    </destination>
+  </lines>
+</config>

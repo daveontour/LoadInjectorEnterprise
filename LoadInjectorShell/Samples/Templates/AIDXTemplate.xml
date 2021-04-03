@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<IATA_AIDX_FlightLegNotifRQ xmlns="http://www.iata.org/IATA/2007/00" xmlns:ba="http://baplc.com/extensionSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" AltLangID="en-us" PrimaryLangID="en-us" Target="Test" Version="15.1" TimeStamp="2015-06-03T14:29:53.147Z" TransactionIdentifier="FLT:RTOR" SequenceNmbr="2072">
+	<Originator CompanyShortName="@companyShortName"/>
+	<DeliveringSystem CompanyShortName="@companyShortName"/>
+	<FlightLeg>
+		<LegIdentifier>
+			<Airline CodeContext="3">@airline</Airline>
+			<FlightNumber>@fltNum</FlightNumber>
+			<DepartureAirport CodeContext="3">@departure</DepartureAirport>
+			<ArrivalAirport CodeContext="3">@arrival</ArrivalAirport>
+			<OriginDate>@originDate</OriginDate>
+			<RepeatNumber>1</RepeatNumber>
+		</LegIdentifier>
+		<LegData>
+			<OperationalStatus RepeatIndex="1" CodeContext="1245">SCH</OperationalStatus>
+			<OperationalStatus RepeatIndex="2" CodeContext="1245">SCH</OperationalStatus>
+			<ServiceType>J</ServiceType>
+			<OwnerAirline>
+				<Airline>@airline</Airline>
+			</OwnerAirline>
+			<AirportResources Usage="Actual">
+				<Resource DepartureOrArrival="Departure">
+					<Runway/>
+					<AircraftTerminal>@depTerminal</AircraftTerminal>
+					<PublicTerminal RepeatIndex="1">@depTerminal</PublicTerminal>
+				</Resource>
+				<Resource DepartureOrArrival="Arrival">
+					<Runway/>
+					<AircraftTerminal>@arrTerminal</AircraftTerminal>
+					<PublicTerminal RepeatIndex="1">@arrTerminal</PublicTerminal>
+				</Resource>
+			</AirportResources>
+			<OperationTime CodeContext="9750" RepeatIndex="1" TimeType="TAR" OperationQualifier="SRT" xsi:nil="true"/>
+			<OperationTime CodeContext="9750" RepeatIndex="2" TimeType="SCT" OperationQualifier="OFB">@scheduledOFB</OperationTime>
+			<OperationTime CodeContext="9750" RepeatIndex="5" TimeType="TAR" OperationQualifier="TKO" xsi:nil="true"/>
+			<OperationTime CodeContext="9750" RepeatIndex="6" TimeType="ACT" OperationQualifier="TKO" xsi:nil="true"/>
+			<OperationTime CodeContext="9750" RepeatIndex="7" TimeType="ACT" OperationQualifier="TDN" xsi:nil="true"/>
+			<OperationTime CodeContext="9750" RepeatIndex="9" TimeType="CAL" OperationQualifier="OFB">@calcOFB</OperationTime>
+			<AircraftInfo>
+				<AircraftType>@acType</AircraftType>
+				<Registration>@acCountry-@acRego1@acRego2@acRego3</Registration>
+			</AircraftInfo>
+		</LegData>
+	</FlightLeg>
+</IATA_AIDX_FlightLegNotifRQ>

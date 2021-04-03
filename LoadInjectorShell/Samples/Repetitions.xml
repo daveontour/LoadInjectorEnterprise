@@ -1,0 +1,40 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>10</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <amstimeout>60</amstimeout>
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <logFile>${{basedir}}/logs/Loader.log</logFile>
+    <repeats>4</repeats>
+    <repeatRest>5</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>Using an Excel spreadsheet as the source of iteration data, this demonstrates specifyig the number of times to run a test and the time to wait between successive tests</comments>
+  </settings>
+  <eventdrivensources />
+  <ratedrivensources>
+    <ratedriven name="Excel Rate Driven Source" flttype="none" dataSource="Excel" excelRowStart="2" excelRowEnd="1440" dataFile=".\Data\flights.xlsx" excelSheet="Sheet1" ID="excelrate" />
+  </ratedrivensources>
+  <lines>
+    <destination protocol="TEXT" name="Simple flight Data Output" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable name="Descriptive Name" type="fixed" token="@lineDescription" fixedValue="Excel Rate Driven Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="excelCol" excelCol="A" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@airline" type="excelCol" excelCol="D" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@fltNum" type="excelCol" excelCol="E" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@timeSTO" type="excelCol" excelCol="B" excelRowStart="2" excelRowEnd="1440" excelDataType="DateTime" excelDataFormat="HH:mm" />
+      <variable token="@dateTimeSTO" type="excelCol" excelCol="C" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@from" type="excelCol" excelCol="F" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@to" type="excelCol" excelCol="G" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@firstpax" type="excelCol" excelCol="I" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@bizpax" type="excelCol" excelCol="J" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@econpax" type="excelCol" excelCol="K" excelRowStart="2" excelRowEnd="1440" />
+      <variable token="@extradata" type="excelCol" excelCol="H" excelRowStart="2" excelRowEnd="1440" />
+      <subscribed>excelrate</subscribed>
+    </destination>
+  </lines>
+</config>

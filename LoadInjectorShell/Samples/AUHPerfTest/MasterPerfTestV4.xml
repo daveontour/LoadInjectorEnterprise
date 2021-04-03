@@ -1,0 +1,96 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://AUHMTAAMSAPP/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode>AUH</aptcode>
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Trace</logLevel>
+    <logFile>${{basedir}}/logs/Loader.log</logFile>
+    <serverDiff>0</serverDiff>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources />
+  <ratedrivensources>
+    <ratedriven name="Departures 4 mpm" flttype="dep" ID="dep4mpm" messagesPerMinute="4" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Arrivals 8 mpm" flttype="arr" ID="arr8mpm" messagesPerMinute="8" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Departures 9 mpm" flttype="dep" ID="dep9mpm" messagesPerMinute="9" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Arrivals 4 mpm" flttype="arr" ID="arr4mpm" messagesPerMinute="4" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Arrivals 15 mpm" flttype="arr" ID="arr15mpm" messagesPerMinute="15" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Departures 17 mpm" flttype="dep" ID="dep17mpm" messagesPerMinute="17" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Departures 5 mpm" flttype="dep" ID="dep5mpm" messagesPerMinute="5" refreshFlight="False" flightSetFrom="-30" flightSetTo="30" />
+    <ratedriven name="Pulsar 4pm" dataSource="PULSAR" messagesPerMinute="4" ID="pulsar4" refreshFlight="False" />
+    <ratedriven name="Pulsar 6pm" dataSource="PULSAR" messagesPerMinute="6" ID="pulsar6" />
+    <ratedriven name="Pulsar 9pm" dataSource="PULSAR" messagesPerMinute="9" ID="pulsar9" />
+  </ratedrivensources>
+  <lines>
+    <destination protocol="MQ" name="IKUSI" templateFile=".\AUHPerfTest\ikusi.xml" host="10.6.148.43" port="1416" queue="IKUSI.FIDS.IN" channel="IKUSI.MTB.SVRCONN" queueMgr="AUHQMGR">
+      <variable token="@icaoCode@" type="flightInfo" sub="airlineCodeICAO" />
+      <variable token="@flightNumber@" type="flightInfo" sub="fltNumber" />
+      <variable name="Descriptive Name" type="fixed" token="@remark@" fixedValue="GOP" />
+      <subscribed>dep4mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="SITATEX_LDM_Arrival" host="10.6.148.43" port="1416" queue="JA.SITATEX.MQ.IN" queueMgr="AUHQMGR" channel="IKUSI.MTB.SVRCONN" templateFile=".\AUHPerfTest\LDM_Arrival.txt">
+      <variable type="flightInfo" token="@IATA@" sub="airlineCode" />
+      <variable token="@FLIGHTNUMBER@" type="flightInfo" sub="fltNumber" />
+      <variable token="@date@" type="timestamp" format="dd" />
+      <subscribed>arr8mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="SITATEX_MVT_Departure" templateFile=".\AUHPerfTest\MVT_Departure_1.txt" host="10.6.148.43" port="1416" queue="JA.SITATEX.MQ.IN" queueMgr="AUHQMGR" channel="IKUSI.MTB.SVRCONN">
+      <variable token="@@IATA@@" type="flightInfo" sub="airlineCode" />
+      <variable token="@@FLIGHTNO@@" type="flightInfo" sub="fltNumber" />
+      <variable name="Descriptive Name" type="fixed" token="@@date@@" fixedValue="25" />
+      <subscribed>dep9mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="BHS" templateFile=".\AUHPerfTest\BHS_crisplant.txt" host="10.6.148.43" port="1416" queue="BHS2AODBMTB" queueMgr="AUHQMGR" channel="BHS.MTB.SVRCONN">
+      <variable token="@@IATA@@" type="flightInfo" sub="airlineCode" />
+      <variable token="@@FLIGHTNUMBER@@" type="flightInfo" sub="fltNumber" />
+      <variable name="Descriptive Name" type="fixed" fixedValue="2020-11-25" token="@@DATE@@" />
+      <subscribed>arr4mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="BMS MTB" templateFile=".\AUHPerfTest\BMS.txt" host="10.6.148.43" port="1416" queue="BMS2AODB" queueMgr="AUHQMGR" channel="BMS.MTB.SVRCONN">
+      <variable token="@@DATE@@" type="fixed" fixedValue="2020-11-25" />
+      <subscribed>dep17mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="AFTN" templateFile=".\AUHPerfTest\AFTN_Mail.txt" refreshFlight="False" host="10.6.148.43" port="1416" queueMgr="AUHQMGR" queue="JA.AFTN.MQ.IN" channel="HERMES.TEST.SVRCONN">
+      <variable name="Descriptive Name" type="fixed" fixedValue="201125" token="@@DATE@@" />
+      <variable token="@@ICAO@@" type="flightInfo" sub="airlineCodeICAO" />
+      <variable token="@@FLIGHTNUMBER@@" type="flightInfo" sub="fltNumber" />
+      <subscribed>dep5mpm</subscribed>
+    </destination>
+    <destination protocol="MQ" name="Hermes" templateFile=".\AUHPerfTest\Hermes_Arrival_1.xml" refreshFlight="False" host="10.6.148.43" port="1416" queue="JA.HERMES.FTP.IN" queueMgr="AUHQMGR" channel="GLASSFISH.SVRCONN">
+      <variable token="@@icaoCode@@" type="flightInfo" sub="airlineCodeICAO" />
+      <variable token="@@flightNumber@@" type="flightInfo" sub="fltNumber" />
+      <variable token="@@sto@@" type="datetime" format="yyyyMMddHHmm00" lowerOffset="10" upperOffset="20" relative="False" />
+      <subscribed>arr4mpm</subscribed>
+    </destination>
+    <destination protocol="HTTP" name="BRS" getURL="http://10.6.148.43:28080/JA_BRS_SITA_WS/firstLastBagService/" templateFile=".\AUHPerfTest\BRS.txt" postURL="http://10.6.148.43:28080/JA_BRS_SITA_WS/firstLastBagService/firstLastBagService.wsdl" httpLogPath="C:\intiaz\LI-files" refreshFlight="False" timeout="5">
+      <header name="SOAPAction">http://10.6.148.43:28080/JA_BRS_SITA_WS/firstLastBagService/</header>
+      <variable token="@@DATE@@" type="datetime" relative="False" format="yy-MM-dd" />
+      <subscribed>pulsar4</subscribed>
+    </destination>
+    <destination protocol="MQ" name="VDGS" messagesPerMinute="15" flttype="arr" templateFile=".\AUHPerfTest\VDGS_FMT.txt" host="10.6.148.43" port="1416" queue="VDGS2AODB" queueMgr="AUHQMGR" channel="VDGS.MTB.SVRCONN" flightSetTo="30" flightSetFrom="-30">
+      <variable token="@@DATE@@" type="datetime" relative="False" format="YYYY-MM-DD" />
+      <variable type="flightInfo" token="@@IATA@@" sub="airlineCode" />
+      <variable token="@@FlightNumber@@" type="flightInfo" sub="fltNumber" />
+      <subscribed>arr15mpm</subscribed>
+    </destination>
+    <destination protocol="HTTPGET" name="CUPPS" getURL="http://10.6.148.43:28080/JA_CUTE_LVI_HTTP/RMSLogin/CUPPS.xml?wksname=AUHMTDMF02&amp;user=EY" timeout="5">
+      <subscribed>pulsar9</subscribed>
+    </destination>
+    <destination protocol="HTTP" name="WWW" templateFile=".\AUHPerfTest\WWW_Sample.txt" postURL="http://10.6.148.43:28081/JA_WWW_GFIS_WS/getExtData/fidsService.wsdl" refreshFlight="False" timeout="5">
+      <variable token="@@SDATE@@" type="datetime" relative="False" format="yyyy-MM-dd" />
+      <subscribed>pulsar6</subscribed>
+    </destination>
+    <destination protocol="TCPSERVER" name="DMU_TBD" closeConnection="False" tcpServerPort="8002" tcpServerIP="10.6.148.51" templateFile=".\AUHPerfTest\DMU_TCP.txt">
+      <variable token="@@ICAO@@" type="flightInfo" sub="airlineCodeICAO" />
+      <variable token="@@FLIGHTNUMBER@@" type="flightInfo" sub="fltNumber" />
+      <variable token="@@DATE@@" type="datetime" relative="False" format="MMDD" />
+      <subscribed>dep4mpm</subscribed>
+    </destination>
+  </lines>
+</config>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" xmlns:aip="http://www.sita.aero/aip/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" encodingStyle="http://www.w3.org/2001/12/soap-encoding">
+	<soap:Header>
+		<soap:MessageMetadata>
+			<aip:Source>BHS</aip:Source>
+			<aip:Timestamp>2018-08-27T14:25:00+04:00</aip:Timestamp>
+			<aip:MessageType>PublishFlightDataInput</aip:MessageType>
+		</soap:MessageMetadata>
+		<soap:OperationData>
+			<aip:OperationName>FlightUpdate.042_MTB_BHS</aip:OperationName>
+		</soap:OperationData>
+	</soap:Header>
+	<soap:Body>
+		<aip:PublishFlightDataInput>
+			<aip:FlightData>
+				<aip:FlightID>
+					<aip:Airport>
+						<aip:IATA>AUH</aip:IATA>
+					</aip:Airport>
+					<aip:Airline>
+						<aip:IATA>@@IATA@@</aip:IATA>
+					</aip:Airline>
+					<aip:FlightNumber>@@FLIGHTNUMBER@@</aip:FlightNumber>
+					<aip:STO>
+						<aip:Date>@@DATE@@</aip:Date>
+					</aip:STO>
+					<aip:FlightNature>ARRIVAL</aip:FlightNature>
+				</aip:FlightID>
+				<aip:ServiceType>J</aip:ServiceType>
+				<aip:FlightEvents>
+					<aip:FlightEvent Index="1">
+						<aip:EventCode CodeContext="0000">de--_BagLoadStart</aip:EventCode>
+						<aip:DateTime>@@DATE@@T12:15:00+04:00</aip:DateTime>
+					</aip:FlightEvent>
+					<aip:FlightEvent Index="2">
+						<aip:EventCode CodeContext="0000">de--_BagLoadEnd</aip:EventCode>
+						<aip:DateTime>@@DATE@@T13:45:00+04:00</aip:DateTime>
+					</aip:FlightEvent>
+				</aip:FlightEvents>
+				<aip:ResourceAllocations>
+					<aip:ResourceAllocation>
+						<aip:Resource Identifier="3">
+							<aip:ResourceType>BAGGAGECLAIM</aip:ResourceType>
+							<aip:Code>3</aip:Code>
+						</aip:Resource>
+						<aip:TimeSlot>
+							<aip:Start>@@DATE@@T18:00:00+04:00</aip:Start>
+							<aip:Stop>@@DATE@@T20:00:00+04:00</aip:Stop>
+						</aip:TimeSlot>
+					</aip:ResourceAllocation>
+				</aip:ResourceAllocations>
+				<aip:CustomFields>
+					<aip:AODBFields>
+						<aip:KeyValue Key="B--G_BaggageResourceUnAllocationIndicator">
+							<aip:Boolean>false</aip:Boolean>
+						</aip:KeyValue>
+					</aip:AODBFields>
+				</aip:CustomFields>
+			</aip:FlightData>
+		</aip:PublishFlightDataInput>
+	</soap:Body>
+</soap:Envelope>

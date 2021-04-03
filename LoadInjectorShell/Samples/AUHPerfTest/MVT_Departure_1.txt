@@ -1,0 +1,13 @@
+=TEXT
+MVT
+@@IATA@@@@FLIGHTNO@@/@date@.A6AUB.AUH
+AD0400/E0417 EA0755 KTM
+PAX/115 +02INF 
+
+
+
+
+
+
+
+

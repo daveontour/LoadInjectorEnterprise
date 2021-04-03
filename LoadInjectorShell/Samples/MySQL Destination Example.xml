@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <logFile>${{basedir}}/logs/Loader.log</logFile>
+    <serverDiff>0</serverDiff>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources/>
+  <ratedrivensources>
+    <ratedriven name="One Second Pulsar" dataSource="PULSAR" ID="onesecondpulsar" messagesPerMinute="60" flttype="none" />
+  </ratedrivensources>
+  <lines>
+    <destination protocol="MYSQL" name="MySQL Destination Example" showResults="True" connStr="Server=localhost;Database=sample;Uid=@user;Pwd=@pass" templateFile=".\Templates\SQLTemplate.sql">
+      <variable token="@userID" type="sequence" seed="1000" digits="4" />
+      <variable token="@comment" type="uuid" />
+      <variable name="Descriptive Name" type="fixed" token="@user" fixedValue="admin" />
+      <variable name="Descriptive Name" type="fixed" token="@pass" fixedValue="admin" />
+      <variable token="@ts" type="timestamp" />
+    </destination>
+  </lines>
+</config>

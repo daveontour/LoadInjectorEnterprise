@@ -1,0 +1,483 @@
+<wsdl:definitions xmlns:s="http://www.w3.org/2001/XMLSchema"
+	xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/"
+	xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://tempuri.org/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/"
+	xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	targetNamespace="http://tempuri.org/">
+	<wsdl:types>
+		<s:schema elementFormDefault="qualified" targetNamespace="http://tempuri.org/">
+			<s:element name="GetExtDepartureData_AR">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="Airline"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtDepartureData_ARResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtDepartureData_ARResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadArrivalsData_AR">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadArrivalsData_ARResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtEtihadArrivalsData_ARResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtDepartureData">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="Airline"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtDepartureDataResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtDepartureDataResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadArrivalsData">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadArrivalsDataResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtEtihadArrivalsDataResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadDepartureData">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadDepartureDataResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtEtihadDepartureDataResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtArrivalData">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="Airline"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtArrivalDataResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtArrivalDataResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadDepartureData_AR">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtEtihadDepartureData_ARResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtEtihadDepartureData_ARResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtArrivalData_AR">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1" name="APIKey"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="sdate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="eDate"
+							type="s:string" />
+						<s:element minOccurs="0" maxOccurs="1" name="Airline"
+							type="s:string" />
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+			<s:element name="GetExtArrivalData_ARResponse">
+				<s:complexType>
+					<s:sequence>
+						<s:element minOccurs="0" maxOccurs="1"
+							name="GetExtArrivalData_ARResult">
+							<s:complexType mixed="true">
+								<s:sequence>
+									<s:any />
+								</s:sequence>
+							</s:complexType>
+						</s:element>
+					</s:sequence>
+				</s:complexType>
+			</s:element>
+		</s:schema>
+	</wsdl:types>
+	<wsdl:message name="GetExtDepartureData_ARSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtDepartureData_AR" />
+	</wsdl:message>
+	<wsdl:message name="GetExtDepartureData_ARSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtDepartureData_ARResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadArrivalsData_ARSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadArrivalsData_AR" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadArrivalsData_ARSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadArrivalsData_ARResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtDepartureDataSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtDepartureData" />
+	</wsdl:message>
+	<wsdl:message name="GetExtDepartureDataSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtDepartureDataResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadArrivalsDataSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadArrivalsData" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadArrivalsDataSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadArrivalsDataResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadDepartureDataSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadDepartureData" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadDepartureDataSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadDepartureDataResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtArrivalDataSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtArrivalData" />
+	</wsdl:message>
+	<wsdl:message name="GetExtArrivalDataSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtArrivalDataResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadDepartureData_ARSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadDepartureData_AR" />
+	</wsdl:message>
+	<wsdl:message name="GetExtEtihadDepartureData_ARSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtEtihadDepartureData_ARResponse" />
+	</wsdl:message>
+	<wsdl:message name="GetExtArrivalData_ARSoapIn">
+		<wsdl:part name="parameters" element="tns:GetExtArrivalData_AR" />
+	</wsdl:message>
+	<wsdl:message name="GetExtArrivalData_ARSoapOut">
+		<wsdl:part name="parameters" element="tns:GetExtArrivalData_ARResponse" />
+	</wsdl:message>
+	<wsdl:portType name="Service1Soap">
+		<wsdl:operation name="GetExtDepartureData_AR">
+			<wsdl:input message="tns:GetExtDepartureData_ARSoapIn" />
+			<wsdl:output message="tns:GetExtDepartureData_ARSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData_AR">
+			<wsdl:input message="tns:GetExtEtihadArrivalsData_ARSoapIn" />
+			<wsdl:output message="tns:GetExtEtihadArrivalsData_ARSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtDepartureData">
+			<wsdl:input message="tns:GetExtDepartureDataSoapIn" />
+			<wsdl:output message="tns:GetExtDepartureDataSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData">
+			<wsdl:input message="tns:GetExtEtihadArrivalsDataSoapIn" />
+			<wsdl:output message="tns:GetExtEtihadArrivalsDataSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData">
+			<wsdl:input message="tns:GetExtEtihadDepartureDataSoapIn" />
+			<wsdl:output message="tns:GetExtEtihadDepartureDataSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData">
+			<wsdl:input message="tns:GetExtArrivalDataSoapIn" />
+			<wsdl:output message="tns:GetExtArrivalDataSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData_AR">
+			<wsdl:input message="tns:GetExtEtihadDepartureData_ARSoapIn" />
+			<wsdl:output message="tns:GetExtEtihadDepartureData_ARSoapOut" />
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData_AR">
+			<wsdl:input message="tns:GetExtArrivalData_ARSoapIn" />
+			<wsdl:output message="tns:GetExtArrivalData_ARSoapOut" />
+		</wsdl:operation>
+	</wsdl:portType>
+	<wsdl:binding name="Service1Soap" type="tns:Service1Soap">
+		<soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="GetExtDepartureData_AR">
+			<soap:operation soapAction="http://tempuri.org/GetExtDepartureData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData_AR">
+			<soap:operation soapAction="http://tempuri.org/GetExtEtihadArrivalsData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtDepartureData">
+			<soap:operation soapAction="http://tempuri.org/GetExtDepartureData"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData">
+			<soap:operation soapAction="http://tempuri.org/GetExtEtihadArrivalsData"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData">
+			<soap:operation soapAction="http://tempuri.org/GetExtEtihadDepartureData"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData">
+			<soap:operation soapAction="http://tempuri.org/GetExtArrivalData"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData_AR">
+			<soap:operation soapAction="http://tempuri.org/GetExtEtihadDepartureData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData_AR">
+			<soap:operation soapAction="http://tempuri.org/GetExtArrivalData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:binding name="Service1Soap12" type="tns:Service1Soap">
+		<soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="GetExtDepartureData_AR">
+			<soap12:operation soapAction="http://tempuri.org/GetExtDepartureData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData_AR">
+			<soap12:operation soapAction="http://tempuri.org/GetExtEtihadArrivalsData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtDepartureData">
+			<soap12:operation soapAction="http://tempuri.org/GetExtDepartureData"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadArrivalsData">
+			<soap12:operation soapAction="http://tempuri.org/GetExtEtihadArrivalsData"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData">
+			<soap12:operation soapAction="http://tempuri.org/GetExtEtihadDepartureData"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData">
+			<soap12:operation soapAction="http://tempuri.org/GetExtArrivalData"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtEtihadDepartureData_AR">
+			<soap12:operation soapAction="http://tempuri.org/GetExtEtihadDepartureData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="GetExtArrivalData_AR">
+			<soap12:operation soapAction="http://tempuri.org/GetExtArrivalData_AR"
+				style="document" />
+			<wsdl:input>
+				<soap12:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap12:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	<wsdl:service name="Service1">
+		<wsdl:port name="Service1Soap" binding="tns:Service1Soap">
+			<soap:address location="http://localhost:8080/JA_WWW_GFIS_WS/getExtData" />
+		</wsdl:port>
+		<wsdl:port name="Service1Soap12" binding="tns:Service1Soap12">
+			<soap12:address location="http://localhost:8080/JA_WWW_GFIS_WS/getExtData" />
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

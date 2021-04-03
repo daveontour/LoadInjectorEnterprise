@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://www.w3.org/2001/12/soap-envelope" xmlns:aip="http://www.sita.aero/aip/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" encodingStyle="http://www.w3.org/2001/12/soap-encoding" xsi:schemaLocation="http://www.w3.org/2001/12/soap-envelope file:///C:/Users/Administrator/Desktop/AIP%20Schema%20AUH/SITA_AIP_Message.xsd">
+	<soap:Header>
+		<soap:MessageMetadata>
+			<aip:Source>VDGSFMT</aip:Source>
+			<aip:Timestamp>@DATE@T11:21:00+04:00</aip:Timestamp>
+			<aip:MessageType>PublishFlightDataInput</aip:MessageType>
+		</soap:MessageMetadata>
+		<soap:OperationData>
+			<aip:OperationName>FlightUpdate.021_VDGSFMT</aip:OperationName>
+		</soap:OperationData>
+	</soap:Header>
+	<soap:Body>
+		<aip:PublishFlightDataInput>
+			<aip:FlightData>
+				<aip:FlightID>
+					<aip:AIPUniqueID>ARR_360599</aip:AIPUniqueID>
+					<aip:Airline>
+						<aip:IATA>@IATA@</aip:IATA>
+					</aip:Airline>
+					<aip:FlightNumber>@FlightNumber@</aip:FlightNumber>
+					<aip:STO>
+						<aip:Date>@DATE@</aip:Date>
+					</aip:STO>
+					<aip:Airport>
+						<aip:IATA>AUH</aip:IATA>
+					</aip:Airport>
+					<aip:FlightNature>ARRIVAL</aip:FlightNature>
+				</aip:FlightID>
+				<aip:FlightEvents>
+					<aip:FlightEvent Index="1">
+						<aip:EventCode CodeContext="0000">de--_IntermediateStandInBlock</aip:EventCode>
+						<aip:DateTime>@DATE@T10:32:00+04:00</aip:DateTime>
+					</aip:FlightEvent>
+				</aip:FlightEvents>
+			</aip:FlightData>
+		</aip:PublishFlightDataInput>
+	</soap:Body>
+</soap:Envelope> 

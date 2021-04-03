@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>300</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken>aafc8412-3576-40c0-86b4-54d8e9e49351</amstoken>
+    <aptcode>ABC</aptcode>
+    <aptcodeicao>ABCD</aptcodeicao>
+    <amstimeout />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <logFile>${{basedir}}/logs/Loader.log</logFile>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>This illustrates the use of a time field in a CSV file to trigger the sending of the message.
+
+</comments>
+  </settings>
+  <eventdrivensources>
+    <csvdatadriven name="CSV Data Driven Source" sourceType="file" timeElement="0" dataFile=".\Data\flights.csv" timeElementFormat="HH:mm" relativeTime="True" csvHasHeaders="True">
+      <trigger name="STO" id="csv_sto" />
+      <trigger name="STO-5" id="csv_sto-5" delta="-5" />
+      <trigger name="STO+5" id="csv_sto+5" delta="5" />
+    </csvdatadriven>
+  </eventdrivensources>
+  <ratedrivensources />
+  <lines>
+    <destination protocol="TEXT" name="Simple Flight Data Output" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable name="Descriptive Name" type="fixed" token="@lineDescription" fixedValue="CSV Data Triggered Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="csvfield" field="0" />
+      <variable token="@airline" type="csvfield" field="3" />
+      <variable token="@fltNum" type="csvfield" field="4" />
+      <variable token="@timeSTO" type="csvfield" field="1" />
+      <variable token="@dateTimeSTO" type="csvfield" field="2" />
+      <variable token="@from" type="csvfield" field="5" />
+      <variable token="@to" type="csvfield" field="6" />
+      <variable token="@firstpax" type="csvfield" field="8" />
+      <variable token="@bizpax" type="csvfield" field="9" />
+      <variable token="@econpax" type="csvfield" field="10" />
+      <variable token="@extradata" type="csvfield" field="7" />
+      <subscribed>csv_sto</subscribed>
+      <subscribed>csv_sto-5</subscribed>
+      <subscribed>csv_sto+5</subscribed>
+    </destination>
+  </lines>
+</config>

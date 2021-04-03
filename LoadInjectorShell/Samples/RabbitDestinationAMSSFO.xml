@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>10</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <aptcodeicao />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>4</repeats>
+    <repeatRest>15</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources/>
+  <ratedrivensources/>
+  <lines>
+    <destination protocol="RABBITMQ" name="Descriptive Name" messagesPerMinute="120" flttype="none" triggerType="rate" templateFile=".\Templates\FlightDataTemplate.txt" dataSource="JSON" dataFile=".\Data\flights.json" repeatingElement="$.Flights[*]" refreshFlight="False" connection="localhost" rabbitPort="5672" rabbitUser="guest" rabbitPass="guest" rabbitVHost="amssfo" queue="daveo">
+      <variable type="fixed" token="@lineDescription" fixedValue="JSON Rate Driven Source" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="jsonElement" field="$.index" />
+      <variable token="@airline" type="jsonElement" field="$.airline" />
+      <variable token="@fltNum" type="jsonElement" field="$.flightNum" />
+      <variable token="@timeSTO" type="jsonElement" field="$.sto" />
+      <variable token="@dateTimeSTO" type="jsonElement" field="$.stoDateTime" />
+      <variable token="@from" type="jsonElement" field="$.departure" />
+      <variable token="@to" type="jsonElement" field="$.arrival" />
+      <variable token="@firstpax" type="jsonElement" field="$.pax.first" />
+      <variable token="@bizpax" type="jsonElement" field="$.pax.business" />
+      <variable token="@econpax" type="jsonElement" field="$.pax.eccon" />
+      <variable token="@extradata" type="jsonElement" field="$.data.color" />
+    </destination>
+  </lines>
+</config>

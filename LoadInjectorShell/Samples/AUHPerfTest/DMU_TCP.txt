@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<message>
+	<control>
+		<messageStamp>2019-05-01T10:34:24Z</messageStamp>
+		<messageType>flightPlan</messageType>
+		<recipientId>aodb</recipientId>
+		<senderId>dmu</senderId>
+		<sourceStamp>2019-05-01T10:34:24Z</sourceStamp>
+	</control>
+	<flightPlan>
+		<KEY>@@ICAO@@@@FLIGHTNUMBER@@ OMAA 0843 @@DATE@@ OMAL</KEY>
+		<callsign>NDR342</callsign>
+		<ADEP>OMAA</ADEP>
+		<ADES>OMAL</ADES>
+	</flightPlan>
+</message>

@@ -1,0 +1,4 @@
+﻿Identified:       @uuid
+Random Number:    @num
+Random Date Time: @date
+Sequence Number:  @seqNum

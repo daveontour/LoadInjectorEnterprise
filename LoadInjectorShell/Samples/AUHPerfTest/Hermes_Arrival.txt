@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HERMES_Data xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<FIS_Flight version="1.0">
+		<flight_Identification>
+			<ALC3>ETD</ALC3>
+			<FLNO>407</FLNO>
+			<STOA>20140301103000</STOA>
+			<ARRDEP>A</ARRDEP>
+		</flight_Identification>
+		<ACT3>320</ACT3>
+		<REGN>A6ETB</REGN>
+		<TCAR>12473</TCAR>
+		<TMAI>0</TMAI>
+		<LCAR>12473</LCAR>
+		<TRCAR>0</TRCAR>
+		<TSCAR>2222</TSCAR>
+		<LMAI>0</LMAI>
+		<TRMA>0</TRMA>
+		<TSMA>0</TSMA>
+	</FIS_Flight>
+</HERMES_Data>

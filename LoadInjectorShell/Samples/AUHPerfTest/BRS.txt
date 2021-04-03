@@ -1,0 +1,28 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:dat="http://www.statistics.brs/firstlast/dataobjects/">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <dat:FirstLastBagServiceRQ>
+         <AirlineCode>EY</AirlineCode>
+         <FlightNumber>@FlightNumber@</FlightNumber>
+         <FlightDate>@@DATE@@</FlightDate>
+         <Station>AUH</Station>
+         <FlightKey>AUH,@@DATE@@</FlightKey>
+         <FirstLastFlag>F</FirstLastFlag>
+         <ScanDateTime>@@DATE@@T00:42:00</ScanDateTime>
+         <Belt>BELT4</Belt>
+         <DeviceId>HHTID001</DeviceId>
+         <UserId>USER12@gmail</UserId>
+      </dat:FirstLastBagServiceRQ>
+   </soapenv:Body>
+</soapenv:Envelope>
+
+
+
+
+
+
+
+
+
+
+

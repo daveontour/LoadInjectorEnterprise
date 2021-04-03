@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken />
+    <aptcode />
+    <aptcodeicao />
+    <amstimeout />
+    <startAt enabled="False"> 06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources>
+     <jsondatadriven name="JSON Data Driven Source" sourceType="file" dataFile=".\Data\flights.json" repeatingElement="$.Flights[*]" timeElement="$.sto" timeElementFormat="HH:mm">
+        <trigger name="STO" id="json-sto" delta="0" />
+      </jsondatadriven>
+  </eventdrivensources>
+  <ratedrivensources/>
+  <lines>
+    <destination protocol="TEXT" name="JSON Data" templateFile=".\Templates\FlightDataTemplate.txt">
+      <variable type="fixed" token="@lineDescription" fixedValue="JSON Data Triggered" />
+      <variable token="@timestamp" type="timestamp" />
+      <variable token="@index" type="jsonElement"  field="$.index" />
+      <variable token="@airline" type="jsonElement" field="$.airline" />
+      <variable token="@fltNum" type="jsonElement" field="$.flightNum" />
+      <variable token="@timeSTO" type="jsonElement" field="$.sto" />
+      <variable token="@dateTimeSTO" type="jsonElement" field="$.stoDateTime" />
+      <variable token="@from" type="jsonElement" field="$.departure" />
+      <variable token="@to" type="jsonElement" field="$.arrival" />
+      <variable token="@firstpax" type="jsonElement" field="$.pax.first" />
+      <variable token="@bizpax" type="jsonElement" field="$.pax.business" />
+      <variable token="@econpax" type="jsonElement" field="$.pax.eccon" />
+      <variable token="@extradata" type="jsonElement" field="$.data.color" />
+      <subscribed>json-sto</subscribed>
+    </destination>
+  </lines>
+</config>

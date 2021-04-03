@@ -1,0 +1,139 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<config version ="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>600</duration>
+    <amshost>http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService</amshost>
+    <amstoken>aafc8412-3576-40c0-86b4-54d8e9e49351</amstoken>
+    <aptcode>ABC</aptcode>
+    <aptcodeicao>ABCD</aptcodeicao>
+    <startAt enabled="False">06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <serverDiff>0</serverDiff>
+    <comments>
+      This is an example using the STO of flights on AMS to trigger the sending of messages.
+      The template messages is fomratted to be an AIDX message. The template contains numerous tokens which are substitted in from the triggering flight or generated.
+      
+      This config has a single Injection Line, "AMS Flights Injection". This injection line uses arrival and departure flights within -180 min / +540 min
+      The injection line has multiple triggers defined. The triggers are based on a time offset from the STO of the flight. Normally this many triggers would not be defined; you would only define the ones that were specifically required.
+      
+      The config has a single Destination Line defined, "AMS to AIDX". This destination line subscribes to multiple defined triggers.
+      The Destination Line has "Refresh Flight" set. In this case, when the event is triggered, Load Injector will retrieve the current data for the flight before using it for the iteration. 
+      The output type of the destination line is defined as "TEXT". In this case Load injector will open a window and show the generated message.
+      
+      The variables illustrates some different features:
+
+      1/ @calcOFB is a DateTime variable which is relative to the STO of the flight. A random offset is applied to the STO to created the variable.
+      2/ @acType, @acCountry, @acRego1-4 all make use of lookups. The variable is defined as an random Integer within a fixed range. This integer is used as a Lookup Key. In this case, the lookup file is an Excel File. Load Injector uses the key to find the corresponding row in the Key Column and returns the value in the corresponding Value Column
+      3/ @depTerminal and @arrTerminal variables are Value variables where the value is selected at random from the provided list of values
+      4/ @companyShortName is a fixed variable that has the same value for each interation.
+      
+      It is important to remember that the variable tokens needs to be unique text withing the file. For example, if you had a token defined as @arrival and another defined as @arrivalTime, this would cause a problem as both start with "@arrival". (This caught me when I was creating this example! :) )
+    </comments>
+  </settings>
+  <eventdrivensources>
+      <amsdatadriven name="All Flights Injection" flttype="both" flightSetFrom="-180" flightSetTo="540">
+        <trigger name="All Flights STO +1 min" trigType="sto" id="all_sto+1" delta="1" />
+        <trigger name="All Flights STO +2 min" trigType="sto" id="all_sto+2" delta="2" />
+        <trigger name="All Flights STO +3 min" trigType="sto" id="all_sto+3" delta="3" />
+        <trigger name="All Flights STO +4 min" trigType="sto" id="all_sto+4" delta="4" />
+        <trigger name="All Flights STO +5 min" trigType="sto" id="all_sto+5" delta="5" />
+        <trigger name="All Flights STO +6 min" trigType="sto" id="all_sto+6" delta="6" />
+        <trigger name="All Flights STO +7 min" trigType="sto" id="all_sto+7" delta="7" />
+        <trigger name="All Flights STO +8 min" trigType="sto" id="all_sto+8" delta="8" />
+        <trigger name="All Flights STO +9 min" trigType="sto" id="all_sto+9" delta="9" />
+        <trigger name="All Flights STO +10 min" trigType="sto" id="all_sto+10" delta="10" />
+        <trigger name="All Flights STO +11 min" trigType="sto" id="all_sto+11" delta="11" />
+        <trigger name="All Flights STO +12 min" trigType="sto" id="all_sto+12" delta="12" />
+        <trigger name="All Flights STO +13 min" trigType="sto" id="all_sto+13" delta="13" />
+        <trigger name="All Flights STO +14 min" trigType="sto" id="all_sto+14" delta="14" />
+        <trigger name="All Flights STO +15 min" trigType="sto" id="all_sto+15" delta="15" />
+        <trigger name="All Flights STO +16 min" trigType="sto" id="all_sto+16" delta="16" />
+        <trigger name="All Flights STO +17 min" trigType="sto" id="all_sto+17" delta="17" />
+        <trigger name="All Flights STO +18 min" trigType="sto" id="all_sto+18" delta="18" />
+        <trigger name="All Flights STO +19 min" trigType="sto" id="all_sto+19" delta="19" />
+        <trigger name="All Flights STO +20 min" trigType="sto" id="all_sto+20" delta="20" />
+        <trigger name="All Flights STO +21 min" trigType="sto" id="all_sto+21" delta="21" />
+        <trigger name="All Flights STO +22 min" trigType="sto" id="all_sto+22" delta="22" />
+        <trigger name="All Flights STO +23 min" trigType="sto" id="all_sto+23" delta="23" />
+        <trigger name="All Flights STO +24 min" trigType="sto" id="all_sto+24" delta="24" />
+        <trigger name="All Flights STO +25 min" trigType="sto" id="all_sto+25" delta="25" />
+        <trigger name="All Flights STO +26 min" trigType="sto" id="all_sto+26" delta="26" />
+        <trigger name="All Flights STO +27 min" trigType="sto" id="all_sto+27" delta="27" />
+        <trigger name="All Flights STO +28 min" trigType="sto" id="all_sto+28" delta="28" />
+        <trigger name="All Flights STO +29 min" trigType="sto" id="all_sto+29" delta="29" />
+        <trigger name="All Flights STO +20 min" trigType="sto" id="all_sto+30" delta="30" />
+        <trigger name="All Flights STO -1 min" trigType="sto" id="all_sto-1" delta="-1" />
+        <trigger name="All Flights STO -2 min" trigType="sto" id="all_sto-2" delta="-2" />
+        <trigger name="All Flights STO -3 min" trigType="sto" id="all_sto-3" delta="-3" />
+        <trigger name="All Flights STO -4 min" trigType="sto" id="all_sto-4" delta="-4" />
+        <trigger name="All Flights STO -5 min" trigType="sto" id="all_sto-5" delta="-5" />
+        <trigger name="All Flights STO -6 min" trigType="sto" id="all_sto-6" delta="-6" />
+        <trigger name="All Flights STO -7 min" trigType="sto" id="all_sto-7" delta="-7" />
+        <trigger name="All Flights STO -8 min" trigType="sto" id="all_sto-8" delta="-8" />
+        <trigger name="All Flights STO -9 min" trigType="sto" id="all_sto-9" delta="-9" />
+        <trigger name="All Flights STO -10 min" trigType="sto" id="all_sto-10" delta="-10" />
+        <trigger name="All Flights STO -11 min" trigType="sto" id="all_sto-11" delta="-11" />
+        <trigger name="All Flights STO -12 min" trigType="sto" id="all_sto-12" delta="-12" />
+        <trigger name="All Flights STO -13 min" trigType="sto" id="all_sto-13" delta="-13" />
+        <trigger name="All Flights STO -14 min" trigType="sto" id="all_sto-14" delta="-14" />
+        <trigger name="All Flights STO -15 min" trigType="sto" id="all_sto-15" delta="-15" />
+        <trigger name="All Flights STO -16 min" trigType="sto" id="all_sto-16" delta="-16" />
+        <trigger name="All Flights STO -17 min" trigType="sto" id="all_sto-17" delta="-17" />
+        <trigger name="All Flights STO -18 min" trigType="sto" id="all_sto-18" delta="-18" />
+        <trigger name="All Flights STO -19 min" trigType="sto" id="all_sto-19" delta="-19" />
+        <trigger name="All Flights STO -20 min" trigType="sto" id="all_sto-20" delta="-20" />
+        <trigger name="All Flights STO -21 min" trigType="sto" id="all_sto-21" delta="-21" />
+        <trigger name="All Flights STO -22 min" trigType="sto" id="all_sto-22" delta="-22" />
+        <trigger name="All Flights STO -23 min" trigType="sto" id="all_sto-23" delta="-23" />
+        <trigger name="All Flights STO -24 min" trigType="sto" id="all_sto-24" delta="-24" />
+        <trigger name="All Flights STO -25 min" trigType="sto" id="all_sto-25" delta="-25" />
+        <trigger name="All Flights STO -26 min" trigType="sto" id="all_sto-26" delta="-26" />
+        <trigger name="All Flights STO -27 min" trigType="sto" id="all_sto-27" delta="-27" />
+        <trigger name="All Flights STO -28 min" trigType="sto" id="all_sto-28" delta="-28" />
+        <trigger name="All Flights STO -29 min" trigType="sto" id="all_sto-29" delta="-29" />
+        <trigger name="All Flights STO -20 min" trigType="sto" id="all_sto-30" delta="-30" />
+        <trigger name="All Flights STO" trigType="sto" id="all_sto" delta="0" />
+      </amsdatadriven>
+  </eventdrivensources>
+  <ratedrivensources/>
+  <lines>
+    <destination name="AMS to AIDX" protocol="TEXT" appendFile="False" triggerType="trigger"  destinationFile=".\Output\file@seqNum.txt" templateFile=".\Templates\AIDXTemplate.xml">
+      <variable type="fixed" token="@companyShortName" fixedValue="AMS" />
+      <variable token="@airline" type="flightInfo" sub="airlineCode" />
+      <variable token="@fltNum" type="flightInfo" sub="fltNumber" />
+      <variable token="@departure" type="flightInfo" sub="departureAirport" />
+      <variable token="@arrival" type="flightInfo" sub="arrivalAirport" />
+      <variable token="@originDate" type="flightInfo" sub="schedDate" />
+      <variable token="@depTerminal" type="value">
+        <value>1</value>
+        <value>2</value>
+        <value>3</value>
+        <value>4</value>
+      </variable>
+      <variable token="@arrTerminal" type="value">
+        <value>A</value>
+        <value>B</value>
+        <value>C</value>
+      </variable>
+      <variable token="@scheduledOFB" type="flightInfo" sub="schedTime" />
+      <variable token="@acType" type="intRange" lowerLimit="1" upperLimit="337" variableLookup="True" lookupSource="excel" excelLookupSheet="Sheet1" excelKeyColumn="A" excelValueColumn="B" dataFile=".\Data\LookupFile.xlsx" />
+      <variable token="@acCountry" type="intRange" lowerLimit="1" upperLimit="211" variableLookup="True" lookupSource="excel" dataFile=".\Data\LookupFile.xlsx" excelLookupSheet="Sheet1" excelKeyColumn="A" excelValueColumn="F" />
+      <variable token="@calcOFB" type="datetime" relative="True" lowerOffset="-15" upperOffset="15" />
+      <variable token="@acRego1" type="intRange" lowerLimit="1" upperLimit="26" variableLookup="True" lookupSource="excel" dataFile=".\Data\LookupFile.xlsx" excelLookupSheet="Sheet1" excelKeyColumn="A" excelValueColumn="K" />
+      <variable token="@acRego2" type="intRange" lowerLimit="1" upperLimit="26" variableLookup="True" lookupSource="excel" dataFile=".\Data\LookupFile.xlsx" excelLookupSheet="Sheet1" excelKeyColumn="A" excelValueColumn="K" />
+      <variable token="@acRego3" type="intRange" lowerLimit="1" upperLimit="26" variableLookup="True" lookupSource="excel" dataFile=".\Data\LookupFile.xlsx" excelLookupSheet="Sheet1" excelKeyColumn="A" excelValueColumn="K" />
+      <subscribed>all_sto-20</subscribed>
+      <subscribed>all_sto-15</subscribed>
+      <subscribed>all_sto-10</subscribed>
+      <subscribed>all_sto-5</subscribed>
+      <subscribed>all_sto-5</subscribed>
+      <subscribed>all_sto</subscribed>
+      <subscribed>all_sto+5</subscribed>
+      <subscribed>all_sto+10</subscribed>
+      <subscribed>all_sto+15</subscribed>
+      <subscribed>all_sto+20</subscribed>
+    </destination>
+  </lines>
+</config>

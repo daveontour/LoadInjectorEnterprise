@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FIDS_Data>
+  <BD_FREM version="1.5.0">
+    <flightIdentification>
+      <ALC3>@icaoCode@</ALC3>
+      <FLNO>@flightNumber@</FLNO>
+      <STAD>@date@174500</STAD>
+    </flightIdentification>
+    <REM>@remark@</REM>
+  </BD_FREM>
+</FIDS_Data>

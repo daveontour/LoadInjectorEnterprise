@@ -1,0 +1,16 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<config  version="4.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <settings>
+    <duration>60</duration>
+    <startAt enabled="False" >06:00:00</startAt>
+    <logLevel>Info</logLevel>
+    <repeats>1</repeats>
+    <repeatRest>0</repeatRest>
+    <comments>Any comments on the configurarion can be recorded here</comments>
+  </settings>
+  <eventdrivensources>
+  </eventdrivensources>
+  <ratedrivensources>
+  </ratedrivensources>
+  <lines/>
+</config>

@@ -1,0 +1,9 @@
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+	<s:Body>
+		<GetExtDepartureData xmlns="http://tempuri.org/" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+			<APIKey>13</APIKey>
+			<sdate>@@SDATE@@T0400</sdate>
+			<eDate>@@SDATE@@T1000</eDate>
+		</GetExtDepartureData>
+	</s:Body>
+</s:Envelope>
