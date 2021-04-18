@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Xml;
+using IBM.XMS.Util;
 using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime.ViewModels {
@@ -12,9 +13,11 @@ namespace LoadInjector.RunTime.ViewModels {
     public abstract class SourceControllerAbstract {
         public XmlNode node;
         public NgExecutionController executionController;
-        public IProgress<ControllerStatusReport> lineProgress;
-        public IProgress<ControllerStatusReport> controllerProgress;
+
+        //public IProgress<ControllerStatusReport> lineProgress;
+        //public IProgress<ControllerStatusReport> controllerProgress;
         public NLog.Logger logger;
+
         public TriggerEventDistributor eventDistributor;
         public string name;
 
@@ -56,17 +59,24 @@ namespace LoadInjector.RunTime.ViewModels {
         public bool refreshFlight;
         public List<RateDrivenSourceController> chainedController = new List<RateDrivenSourceController>();
 
-        public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
-            this.lineProgress = lineProgress;
-            foreach (RateDrivenSourceController ctl in chainedController) {
-                ctl.SetLineProgress(lineProgress);
-            }
-        }
+        public ClientHub clientHub;
 
-        protected SourceControllerAbstract(XmlNode node, int chainDepth, Progress<ControllerStatusReport> controllerProgress, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) {
+        public string executionNodeID;
+
+        public string uuid;
+
+        //public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
+        //    this.lineProgress = lineProgress;
+        //    foreach (RateDrivenSourceController ctl in chainedController) {
+        //        ctl.SetLineProgress(lineProgress);
+        //    }
+        //}
+
+        protected SourceControllerAbstract(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) {
             this.node = node;
             this.triggersInUse = triggersInUse;
-            this.controllerProgress = controllerProgress;
+            this.clientHub = executionController?.clientHub;
+            //          this.controllerProgress = controllerProgress;
             eventDistributor = executionController?.eventDistributor;
             this.executionController = executionController;
             logger = executionController?.logger;
@@ -76,6 +86,9 @@ namespace LoadInjector.RunTime.ViewModels {
 
             dataSourceType = node.Attributes["dataSource"]?.Value;
             flightSourceType = node.Attributes["flttype"]?.Value;
+
+            executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
+            executionNodeID = node.Attributes["uuid"]?.Value;
 
             if ((flightSourceType != null && flightSourceType != "none") || node.Name == "amsdatadriven") {
                 if (flightSourceType == "arr") {
@@ -203,7 +216,7 @@ namespace LoadInjector.RunTime.ViewModels {
 
             // Add the chained controllers
             foreach (XmlNode chained in node.SelectNodes("./chained")) {
-                chainedController.Add(new RateDrivenSourceController(chained, chainDepth++, controllerProgress, triggersInUse, serverOffset, executionController));
+                chainedController.Add(new RateDrivenSourceController(chained, chainDepth++, triggersInUse, serverOffset, executionController));
             }
         }
 
@@ -216,7 +229,7 @@ namespace LoadInjector.RunTime.ViewModels {
             ChainedEventsUI lineUI = new ChainedEventsUI(node, depth);
             children.Add(lineUI);
             uiList.Add(lineUI);
-            SetLineProgress(lineUI.controllerProgress);
+            //SetLineProgress(lineUI.controllerProgress);
             foreach (RateDrivenSourceController chain in chainedController) {
                 chain.AddChainedUI(depth + 1, children, uiList);
             }
@@ -504,28 +517,23 @@ namespace LoadInjector.RunTime.ViewModels {
         }
 
         public void SetMsgPerMin(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.LineMsgPerMin
-            };
-            lineProgress.Report(controllerStatusReport);
+            clientHub.SetMsgPerMin(this.executionNodeID, this.uuid, s);
         }
 
         public void SetConfiguredMsgPerMin(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.LineConfiguredMsgPerMin
-            };
-            lineProgress.Report(controllerStatusReport);
-            messagesPerMinute = double.Parse(s);
+            clientHub.SetConfiguredMsgPerMin(this.executionNodeID, this.uuid, s);
         }
 
         public void SetOutput(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.Console
-            };
-            lineProgress.Report(controllerStatusReport);
+            clientHub.SetLineOutput(this.executionNodeID, this.uuid, s);
+        }
+
+        public void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
+            clientHub.Report(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
+        }
+
+        public void ReportChain(string v, int messagesSent) {
+            clientHub.ReportChain(this.executionNodeID, this.uuid, v, messagesSent, v, messagesSent);
         }
     }
 }

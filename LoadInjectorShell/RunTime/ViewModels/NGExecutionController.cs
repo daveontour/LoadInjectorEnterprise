@@ -14,6 +14,8 @@ using System.Timers;
 using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
+using LoadInjector.Runtime.EngineComponents;
+using LoadInjector.RunTime.EngineComponents;
 using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
@@ -30,8 +32,9 @@ namespace LoadInjector.RunTime {
         public readonly List<FlightNode> arrflights = new List<FlightNode>();
         public readonly List<FlightNode> depflights = new List<FlightNode>();
 
-        private readonly Progress<ControllerStatusReport> controllerProgress;
+        //private readonly Progress<ControllerStatusReport> controllerProgress;
         public readonly List<LineExecutionController> destLines = new List<LineExecutionController>();
+
         public readonly List<AmsDirectExecutionController> amsLines = new List<AmsDirectExecutionController>();
         public readonly List<DataDrivenSourceController> amsDataDrivenLines = new List<DataDrivenSourceController>();
         public readonly List<DataDrivenSourceController> csvDataDrivenLines = new List<DataDrivenSourceController>();
@@ -80,7 +83,9 @@ namespace LoadInjector.RunTime {
         private readonly XmlNodeList amsDirect;
         private readonly XmlNodeList destinations;
 
-        public ExecutionUI exUI;
+        public ClientHub clientHub;
+
+        // public ExecutionUI exUI;
 
         private readonly string getFlightsTemplate = @"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:ams6=""http://www.sita.aero/ams6-xml-api-webservice"">
    <soapenv:Header/>
@@ -95,21 +100,33 @@ namespace LoadInjector.RunTime {
    </soapenv:Body>
 </soapenv:Envelope>";
 
+        private readonly string executionNodeUuid;
+
         public void SetExecutiuonUI(ExecutionUI exUI) {
-            this.exUI = exUI;
+            //this.exUI = exUI;
             eventDistributor.exUI = exUI;
-            exUI.StatusLabel = "Load Injector Execution";
+            //exUI.StatusLabel = "Load Injector Execution";
+            SetStatusLabel("Load Injector Execution");
         }
 
         public NgExecutionController(XmlDocument model, Progress<ControllerStatusReport> controllerProgress) {
+            try {
+                clientHub = new ClientHub("http://localhost:6220", this);
+            } catch (Exception ex) {
+                ConsoleMsg(ex.Message);
+            }
+
             eventDistributor = new TriggerEventDistributor(this);
             dataModel = model;
-            this.controllerProgress = controllerProgress;
+            //this.controllerProgress = controllerProgress;
             amsDataDrivenLines.Clear();
 
             List<string> triggersInUse = TriggersInUse(dataModel);
 
             XDocument doc = XDocument.Parse(dataModel.OuterXml);
+
+            this.executionNodeUuid = dataModel.SelectSingleNode("//settings").Attributes["executionNodeUuid"]?.Value;
+
             try {
                 string serverDiff = doc.Descendants("serverDiff").FirstOrDefault().Value;
                 serverOffset = Convert.ToInt32(60 * double.Parse(serverDiff));
@@ -145,7 +162,7 @@ namespace LoadInjector.RunTime {
                 if (CheckDisabled(node)) {
                     continue;
                 }
-                RateDrivenSourceController line = new RateDrivenSourceController(node, 0, controllerProgress, triggersInUse, serverOffset, this);
+                RateDrivenSourceController line = new RateDrivenSourceController(node, 0, triggersInUse, serverOffset, this);
 
                 rateDrivenLines.Add(line);
                 if (line.HasFlights() && line.InUse()) {
@@ -153,7 +170,7 @@ namespace LoadInjector.RunTime {
                 }
                 flightSets.Add(line.GetFlightSet());
                 if (!line.ConfigOK) {
-                    Console.WriteLine("Error: Configuration is not valid");
+                    ConsoleMsg("Error: Configuration is not valid");
                     SetButtonStatus(false, false, false);
                 }
             }
@@ -189,14 +206,14 @@ namespace LoadInjector.RunTime {
                     continue;
                 }
 
-                DataDrivenSourceController line = new DataDrivenSourceController(node, controllerProgress, triggersInUse, serverOffset, this);
+                DataDrivenSourceController line = new DataDrivenSourceController(node, triggersInUse, serverOffset, this);
                 typeList.Add(line);
                 if (line.HasFlights() && line.InUse()) {
                     requiresFlights = true;
                 }
                 flightSets.Add(line.GetFlightSet());
                 if (!line.ConfigOK) {
-                    Console.WriteLine("Error: Configuration is not valid");
+                    ConsoleMsg("Error: Configuration is not valid");
                     SetButtonStatus(false, false, false);
                 }
             }
@@ -204,21 +221,21 @@ namespace LoadInjector.RunTime {
 
         private void ValidateModel() {
             if (Parameters.SITAAMS) {
-                Console.WriteLine($"AMS Data Driven Source =  {amsEventDriven.Count}");
+                ConsoleMsg($"AMS Data Driven Source =  {amsEventDriven.Count}");
             }
-            Console.WriteLine($"CSV Data Driven Source =  {csvEventDriven.Count}");
-            Console.WriteLine($"Excel Data Driven Source =  {excelEventDriven.Count}");
-            Console.WriteLine($"XML Data Driven Source =  {xmlEventDriven.Count}");
-            Console.WriteLine($"JSON Data Driven Source =  {jsonEventDriven.Count}");
-            Console.WriteLine($"Database Data Driven Source =  {databaseEventDriven.Count}");
-            Console.WriteLine($"Rate Driven Source =  {rateDriven.Count}");
+            ConsoleMsg($"CSV Data Driven Source =  {csvEventDriven.Count}");
+            ConsoleMsg($"Excel Data Driven Source =  {excelEventDriven.Count}");
+            ConsoleMsg($"XML Data Driven Source =  {xmlEventDriven.Count}");
+            ConsoleMsg($"JSON Data Driven Source =  {jsonEventDriven.Count}");
+            ConsoleMsg($"Database Data Driven Source =  {databaseEventDriven.Count}");
+            ConsoleMsg($"Rate Driven Source =  {rateDriven.Count}");
             if (Parameters.SITAAMS) {
-                Console.WriteLine($"AMS Direct Update Lines =  {amsDirect.Count}");
+                ConsoleMsg($"AMS Direct Update Lines =  {amsDirect.Count}");
             }
-            Console.WriteLine($"Destinaton Lines =  {destinations.Count}");
+            ConsoleMsg($"Destinaton Lines =  {destinations.Count}");
 
             if ((amsDirect.Count + destinations.Count) == 0) {
-                Console.WriteLine("====> Config Error. No Output Lines Defined <====");
+                ConsoleMsg("====> Config Error. No Output Lines Defined <====");
             }
 
             List<string> amsTriggers = new List<string>();
@@ -227,18 +244,18 @@ namespace LoadInjector.RunTime {
                 foreach (XmlNode node in amsEventDriven) {
                     int numTriggers = node.SelectNodes(".//trigger").Count;
                     if (numTriggers == 0) {
-                        Console.WriteLine($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
+                        ConsoleMsg($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
                     }
                     foreach (XmlNode trigNode in node.SelectNodes(".//trigger")) {
                         string id = trigNode.Attributes["id"]?.Value;
                         if (id != null) {
                             if (amsTriggers.Contains(id)) {
-                                Console.WriteLine($"====> Config Error. AMS Event Trigger ID Defined Multiple Times: {id} <====");
+                                ConsoleMsg($"====> Config Error. AMS Event Trigger ID Defined Multiple Times: {id} <====");
                             } else {
                                 amsTriggers.Add(id);
                             }
                         } else {
-                            Console.WriteLine("====> Config Error. AMS Event Trigger ID is NULL <====");
+                            ConsoleMsg("====> Config Error. AMS Event Trigger ID is NULL <====");
                         }
                     }
                 }
@@ -249,18 +266,18 @@ namespace LoadInjector.RunTime {
             foreach (XmlNode node in csvEventDriven) {
                 int numTriggers = node.SelectNodes(".//trigger").Count;
                 if (numTriggers == 0) {
-                    Console.WriteLine($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
+                    ConsoleMsg($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
                 }
                 foreach (XmlNode trigNode in node.SelectNodes(".//trigger")) {
                     string id = trigNode.Attributes["id"]?.Value;
                     if (id != null) {
                         if (csvFields.Contains(id) || amsTriggers.Contains(id)) {
-                            Console.WriteLine($"====> Config Error. CSV Event Trigger ID Defined Multiple Times: {id} <====");
+                            ConsoleMsg($"====> Config Error. CSV Event Trigger ID Defined Multiple Times: {id} <====");
                         } else {
                             csvFields.Add(id);
                         }
                     } else {
-                        Console.WriteLine("====> Config Error. CSV Event Trigger ID is NULL <====");
+                        ConsoleMsg("====> Config Error. CSV Event Trigger ID is NULL <====");
                     }
                 }
             }
@@ -268,18 +285,18 @@ namespace LoadInjector.RunTime {
             foreach (XmlNode node in excelEventDriven) {
                 int numTriggers = node.SelectNodes(".//trigger").Count;
                 if (numTriggers == 0) {
-                    Console.WriteLine($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
+                    ConsoleMsg($"====> Config Error. No Event Triggers Defined for {node.Attributes["name"].Value} <====");
                 }
                 foreach (XmlNode trigNode in node.SelectNodes(".//trigger")) {
                     string id = trigNode.Attributes["id"]?.Value;
                     if (id != null) {
                         if (csvFields.Contains(id) || amsTriggers.Contains(id)) {
-                            Console.WriteLine($"====> Config Error. Excel Event Trigger ID Defined Multiple Times: {id} <====");
+                            ConsoleMsg($"====> Config Error. Excel Event Trigger ID Defined Multiple Times: {id} <====");
                         } else {
                             csvFields.Add(id);
                         }
                     } else {
-                        Console.WriteLine("====> Config Error. Excel Event Trigger ID is NULL <====");
+                        ConsoleMsg("====> Config Error. Excel Event Trigger ID is NULL <====");
                     }
                 }
             }
@@ -346,7 +363,7 @@ namespace LoadInjector.RunTime {
                 }
 
                 if (token == null) {
-                    Console.WriteLine("Warning! AMS Access Token Not Set");
+                    ConsoleMsg("Warning! AMS Access Token Not Set");
                 }
 
                 try {
@@ -355,7 +372,7 @@ namespace LoadInjector.RunTime {
                     apt_code = null;
                 }
                 if (apt_code == null) {
-                    Console.WriteLine("Warning! Airport Code Not Set");
+                    ConsoleMsg("Warning! Airport Code Not Set");
                 }
                 try {
                     apt_icao_code = doc.Descendants("aptcodeicao").FirstOrDefault().Value;
@@ -367,7 +384,7 @@ namespace LoadInjector.RunTime {
                     amshost = doc.Descendants("amshost").FirstOrDefault().Value;
                 } catch (Exception) {
                     amshost = "http://localhost/SITAAMSIntegrationService/v2/SITAAMSIntegrationService";
-                    Console.WriteLine("Warning! AMS Host set to the default");
+                    ConsoleMsg("Warning! AMS Host set to the default");
                 }
 
                 try {
@@ -399,12 +416,13 @@ namespace LoadInjector.RunTime {
 
                 LogManager.ReconfigExistingLoggers();
             } catch (Exception ex) {
-                Console.Write($"Logging error.{ex.Message}");
+                ConsoleMsg($"Logging error.{ex.Message}");
             }
         }
 
         public async Task AutoStartAsync(string[] args) {
-            exUI.VM.LockExecution = true;
+            LockVM(true);
+
             if (args == null) {
                 return;
             }
@@ -428,32 +446,15 @@ namespace LoadInjector.RunTime {
                 executedRepeats = 0;
             }
 
-            try {
-                Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                {
-                    exUI.StatusLabel = "Load Injector - Preparing Environment";
-                    Console.WriteLine("Preparation Phase Starting");
-                    SetButtonStatus(false, false, false);
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
-
+            ConsoleMsg("Load Injector - Preparing Environment");
+            SetButtonStatus(false, false, false);
             PercentComplete(0, true, "00:00:00");
+
             Configure(dataModel);
             eventDistributor.Stop();
             eventDistributor.ClearHandlers();
 
-            try {
-                Application.Current.Dispatcher.Invoke(delegate {
-                    exUI.SchedTriggers.Clear();
-                    exUI.OnPropertyChanged("lvTriggers");
-                    exUI.FiredTriggers.Clear();
-                    exUI.OnPropertyChanged("lvFiredTriggers");
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
+            ClearTriggerData();
 
             bool prepareOK = true;
 
@@ -469,32 +470,21 @@ namespace LoadInjector.RunTime {
                     bool testAMS = GetFlightsAsync(true).Result;
 
                     if (testAMS) {
-                        Console.WriteLine("== AMS Connectivity Verified ==");
+                        ConsoleMsg("== AMS Connectivity Verified ==");
                     } else {
-                        Console.WriteLine("=================================");
-                        Console.WriteLine("== Unable to connect to AMS  . ==");
-                        Console.WriteLine("==    Preparation Aborted      ==");
-                        Console.WriteLine("=================================");
+                        ConsoleMsg("== Unable to connect to AMS. Preparation Aborted==");
                         SetButtonStatus(false, true, false);
                         prepareOK = false;
                     }
 
-                    Console.WriteLine("=== Retrieving flights from AMS ===");
+                    ConsoleMsg("=== Retrieving flights from AMS ===");
                     bool amsOK = GetFlightsAsync().Result;
                     if (!amsOK) {
-                        Console.WriteLine("=================================");
-                        Console.WriteLine("== Unable to retrieve flights. ==");
-                        Console.WriteLine("==    Preparation Aborted      ==");
-                        Console.WriteLine("=================================");
+                        ConsoleMsg("== Unable to connect to AMS. Preparation Aborted==");
                         SetButtonStatus(false, true, false);
                         prepareOK = false;
                     } else {
-                        Console.WriteLine("=== Flights Retrieved from AMS ===");
-                        Console.WriteLine("\n\nFlights Available to Trigger Events  ====>");
-                        foreach (FlightNode flt in flights) {
-                            Console.WriteLine(flt.ToString());
-                        }
-                        Console.WriteLine("Flights Available to Trigger Events  <====\n");
+                        ConsoleMsg($"=== {flights.Count} Flights Retrieved from AMS ===");
                     }
                 });
             }
@@ -502,7 +492,7 @@ namespace LoadInjector.RunTime {
             bool atLeastOneActive = false;
 
             if (prepareOK) {
-                Console.WriteLine("Preparing Data Driven AMS Flight Injectors");
+                ConsoleMsg("Preparing Data Driven AMS Flight Injectors");
                 foreach (DataDrivenSourceController line in amsDataDrivenLines) {
                     line.PrepareAMS(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -512,7 +502,7 @@ namespace LoadInjector.RunTime {
                     }
                 }
 
-                Console.WriteLine("Preparing CSV Data Driven Injector");
+                ConsoleMsg("Preparing CSV Data Driven Injector");
                 foreach (DataDrivenSourceController line in csvDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -524,7 +514,7 @@ namespace LoadInjector.RunTime {
                     line.PrepareCSV();
                 }
 
-                Console.WriteLine("Preparing Excel Data Driven Injector");
+                ConsoleMsg("Preparing Excel Data Driven Injector");
                 foreach (DataDrivenSourceController line in excelDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -536,7 +526,7 @@ namespace LoadInjector.RunTime {
                     line.PrepareExcel();
                 }
 
-                Console.WriteLine("Preparing XML Data Driven Injector");
+                ConsoleMsg("Preparing XML Data Driven Injector");
                 foreach (DataDrivenSourceController line in xmlDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -548,7 +538,7 @@ namespace LoadInjector.RunTime {
                     line.PrepareXML();
                 }
 
-                Console.WriteLine("Preparing JSON Data Driven Injector");
+                ConsoleMsg("Preparing JSON Data Driven Injector");
                 foreach (DataDrivenSourceController line in jsonDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -559,7 +549,7 @@ namespace LoadInjector.RunTime {
                     }
                     line.PrepareJSON();
                 }
-                Console.WriteLine("Preparing DataBase Data Driven Injector");
+                ConsoleMsg("Preparing DataBase Data Driven Injector");
                 foreach (DataDrivenSourceController line in databaseDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -570,7 +560,7 @@ namespace LoadInjector.RunTime {
                     }
                     line.PrepareDB();
                 }
-                Console.WriteLine("Preparing Rate Driven Injector");
+                ConsoleMsg("Preparing Rate Driven Injector");
                 foreach (RateDrivenSourceController line in rateDrivenLines) {
                     line.Prepare(flights, arrflights, depflights);
                     if (!line.InUse()) {
@@ -589,41 +579,20 @@ namespace LoadInjector.RunTime {
                         Task.Run(() => line.PrePrepare()).Wait();
                     }
                 }
-                try {
-                    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                    {
-                        exUI.StatusLabel = "Load Injector - Preparation Complete";
-                        SetButtonStatus(true, true, false);
-                    });
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                }
+
+                SetStatusLabel("Load Injector - Preparation Complete");
                 SetButtonStatus(true, true, false);
-                Console.WriteLine("Preparation Phase Complete");
+                ConsoleMsg("Preparation Phase Complete");
             } else {
-                try {
-                    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                    {
-                        exUI.StatusLabel = "Load Injector - Preparation Error";
-                        SetButtonStatus(false, true, false);
-                    });
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                }
-                Console.WriteLine("Error: Preparing Destination");
+                SetStatusLabel("Load Injector - Preparation Error");
+                SetButtonStatus(false, true, false);
+                ConsoleMsg("Error: Preparing Destination");
             }
 
             if (!atLeastOneActive) {
-                try {
-                    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                    {
-                        exUI.StatusLabel = "Load Injector - No Active Destinations In Use";
-                        Console.WriteLine("Preparation Phase Complete - No Active Destinaion Lines");
-                        SetButtonStatus(false, true, false);
-                    });
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                }
+                SetStatusLabel("Load Injector - No Active Destinations In Use");
+                ConsoleMsg("Preparation Phase Complete - No Active Destinaion Lines");
+                SetButtonStatus(false, true, false);
                 return false;
             }
 
@@ -658,21 +627,13 @@ namespace LoadInjector.RunTime {
 
                     SetButtonStatus(false, false, false);
                 } else {
-                    Console.WriteLine("Scheduled Start is in the past - immediate execution");
+                    ConsoleMsg("Scheduled Start is in the past - immediate execution");
                     Task.Run(() => RunInternal());
                 }
 
-                Console.WriteLine($"Scheduling start for {start}");
-                exUI.StatusLabel = $"Scheduled Start: {start}";
-                try {
-                    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                    {
-                        exUI.CancelBtn.IsEnabled = true;
-                        exUI.CancelBtn.Visibility = Visibility.Visible;
-                    });
-                } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                }
+                ConsoleMsg($"Scheduling start for {start}");
+                SetStatusLabel($"Scheduled Start: {start}");
+                SetCancelBtnShow();
             } else {
                 Task.Run(() => RunInternal());
             }
@@ -681,30 +642,17 @@ namespace LoadInjector.RunTime {
         public void RunInternal() {
             if (executedRepeats >= repeats) {
                 executedRepeats = 0;
-                Application.Current.Dispatcher.Invoke(delegate {
-                    Console.WriteLine("Maximum Number of Configured Repetitions Met");
-                });
+                ConsoleMsg("Maximum Number of Configured Repetitions Met");
                 SetButtonStatus(false, true, false);
                 return;
             }
 
             executedRepeats++;
 
-            Application.Current.Dispatcher.Invoke(delegate {
-                Console.WriteLine($"Execution Repetition {executedRepeats} of {repeats}");
-            });
-
-            try {
-                Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                {
-                    exUI.CancelBtn.IsEnabled = false;
-                    exUI.CancelBtn.Visibility = Visibility.Hidden;
-                    exUI.StatusLabel = "Load Injector - Pre Execution";
-                    SetButtonStatus(false, false, false);
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
+            ConsoleMsg($"Execution Repetition {executedRepeats} of {repeats}");
+            SetStatusLabel("Load Injector - Pre Execution");
+            SetButtonStatus(false, false, false);
+            SetCancelBtnHidden();
 
             bool prepareOK = true;
 
@@ -725,27 +673,20 @@ namespace LoadInjector.RunTime {
             }
 
             if (!prepareOK) {
-                Console.WriteLine("=========>  Error  <======================");
-                Console.WriteLine("=>  Could Not Prepare Destination Lines <=");
+                // ConsoleMsg("=========>  Error  <======================");
+                ConsoleMsg("==>  Error - Could Not Prepare Destination Lines <==");
                 return;
             }
 
-            Console.WriteLine($"Test Execution Start. Duration = {duration} seconds");
+            ConsoleMsg($"Test Execution Start. Duration = {duration} seconds");
             PercentComplete(0, false, "00:00:00");
             SetButtonStatus(false, false, true);
-            try {
-                Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                {
-                    exUI.StatusLabel = $"Load Injector - Executing. Duration: {duration}s";
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
+            SetStatusLabel($"Load Injector - Executing. Duration: {duration}s");
 
             Tuple<int, int, TriggerRecord> result = eventDistributor.InitTriggers(duration);
 
             if (result == null) {
-                Console.WriteLine("No Triggers available for the configured time interval the test will be running");
+                ConsoleMsg("No Triggers available for the configured time interval the test will be running");
                 Stop(true);
                 return;
             }
@@ -796,11 +737,8 @@ namespace LoadInjector.RunTime {
             }
 
             eventDistributor.ScheduleFirst();
-            Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-            {
-                exUI.TriggerLabel = "Scheduled Triggers";
-                exUI.OnPropertyChanged("TriggerLabel");
-            });
+
+            SetTriggerLabel("Scheduled Triggers");
 
             timer = new Timer {
                 Interval = duration * 1000,
@@ -831,7 +769,7 @@ namespace LoadInjector.RunTime {
                     triggers.Add(node.InnerText);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error processing triggers in use: {ex.Message} ");
+                ConsoleMsg($"Error processing triggers in use: {ex.Message} ");
             }
             return triggers;
         }
@@ -886,17 +824,17 @@ namespace LoadInjector.RunTime {
             try {
                 timer?.Stop();
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                ConsoleMsg(ex.Message);
             }
             try {
                 eventDistributor?.Stop();
             } catch (Exception ex) {
-                Console.WriteLine($"Shutdown error: {ex.Message}");
+                ConsoleMsg($"Shutdown error: {ex.Message}");
             }
             try {
                 OnTimedEvent(manual);
             } catch (Exception ex) {
-                Console.WriteLine($"Shutdown error: {ex.Message}");
+                ConsoleMsg($"Shutdown error: {ex.Message}");
             }
         }
 
@@ -914,7 +852,7 @@ namespace LoadInjector.RunTime {
 
             eventDistributor?.Stop();
             SetButtonStatus(false, true, false);
-            Console.WriteLine("Scheduled Start Cancelled");
+            ConsoleMsg("Scheduled Start Cancelled");
         }
 
         public async Task<bool> GetFlightsAsync(bool test = false) {
@@ -923,7 +861,7 @@ namespace LoadInjector.RunTime {
             }
 
             if (!test) {
-                Console.WriteLine("Preparing Flights");
+                ConsoleMsg("Preparing Flights");
             }
             try {
                 if (test) {
@@ -935,8 +873,8 @@ namespace LoadInjector.RunTime {
                 // Check if any flights are required
                 if (minOffset == Int32.MaxValue || maxOffset == Int32.MinValue) {
                     logger.Info("No flights from AMS were required by any of the destinations");
-                    Console.WriteLine("No flights from AMS were required by any of the destination");
-                    Console.WriteLine("Preparing Flights - Complete");
+                    ConsoleMsg("No flights from AMS were required by any of the destination");
+                    ConsoleMsg("Preparing Flights - Complete");
                     return true;
                 }
 
@@ -949,8 +887,8 @@ namespace LoadInjector.RunTime {
                     .Replace("@airport", apt_code);
 
                 if (!test) {
-                    Console.WriteLine($"Retrieving flights on the server between {DateTime.Now.AddMinutes(minOffset):yyyy-MM-ddTHH:mm:ss} and {DateTime.Now.AddMinutes(maxOffset):yyyy-MM-ddTHH:mm:ss}");
-                    Console.WriteLine(flightsQuery);
+                    ConsoleMsg($"Retrieving flights on the server between {DateTime.Now.AddMinutes(minOffset):yyyy-MM-ddTHH:mm:ss} and {DateTime.Now.AddMinutes(maxOffset):yyyy-MM-ddTHH:mm:ss}");
+                    ConsoleMsg(flightsQuery);
                 }
 
                 try {
@@ -995,32 +933,32 @@ namespace LoadInjector.RunTime {
                                     }
                                 } else {
                                     if (!test) {
-                                        Console.WriteLine($"Unable to Prepare Flight. Response Status Code: {response.StatusCode}");
+                                        ConsoleMsg($"Unable to Prepare Flight. Response Status Code: {response.StatusCode}");
                                     } else {
-                                        Console.WriteLine($"Unable to Access Flights in AMS. Response Status Code: {response.StatusCode}");
+                                        ConsoleMsg($"Unable to Access Flights in AMS. Response Status Code: {response.StatusCode}");
                                     }
                                     return false;
                                 }
                             } catch (Exception ex) {
-                                Console.WriteLine($"Timeout ({timeout}s) retrieiving flights {ex.Message}");
+                                ConsoleMsg($"Timeout ({timeout}s) retrieiving flights {ex.Message}");
                                 return false;
                             }
                         }
                     }
                 } catch (Exception ex) {
                     logger.Error(ex.StackTrace);
-                    Console.WriteLine("Unable to Prepare Flights ");
+                    ConsoleMsg("Unable to Prepare Flights ");
                     return false;
                 }
                 if (!test) {
                     logger.Info($" Recieved Flights.  {flights.Count} flights available");
-                    Console.WriteLine($"Recieved Flights.  {flights.Count} flights available");
+                    ConsoleMsg($"Recieved Flights.  {flights.Count} flights available");
                 }
                 return true;
             } catch (Exception e) {
                 logger.Error(e.Message);
                 logger.Error(e);
-                Console.WriteLine($"Error Retrieving flights from AMS: {e.Message}");
+                ConsoleMsg($"Error Retrieving flights from AMS: {e.Message}");
                 return false;
             }
         }
@@ -1039,7 +977,7 @@ namespace LoadInjector.RunTime {
                     maxOffset = Math.Max(fltSetTo, maxOffset);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error determining min/max flight offset: {ex.Message}");
+                ConsoleMsg($"Error determining min/max flight offset: {ex.Message}");
                 Debug.WriteLine($"Error determining min/max flight offset: {ex.Message}");
             }
         }
@@ -1068,14 +1006,14 @@ namespace LoadInjector.RunTime {
                 eventDistributor?.Stop();
 
                 ClearLines();
-                Console.WriteLine($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
+                ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
                 if (executedRepeats < repeats && !stopped) {
                     if (repetitionTimer != null) {
                         repetitionTimer.Enabled = false;
                         repetitionTimer.Stop();
                     }
 
-                    Console.WriteLine($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
+                    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
                     repetitionTimer = new Timer {
                         Interval = repeatRest * 1000,
                         AutoReset = false,
@@ -1085,27 +1023,19 @@ namespace LoadInjector.RunTime {
 
                     DateTime next = DateTime.Now.AddSeconds(repeatRest);
 
-                    Console.WriteLine($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
+                    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
                     return;
                 }
 
                 SetButtonStatus(false, true, false);
             } catch (Exception ex) {
-                Console.WriteLine($"Error Stopping {ex.Message}");
+                ConsoleMsg($"Error Stopping {ex.Message}");
             }
 
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    exUI.StatusLabel = "Load Injector - Execution Complete";
-                    exUI.TriggerLabel = "Available Triggers";
-                    exUI.OnPropertyChanged("TriggerLabel");
-                    exUI.OnPropertyChanged("StatusLabel");
-                } catch (Exception ex) {
-                    Console.WriteLine($"exUI Error. {ex.Message}");
-                }
-            });
+            SetTriggerLabel("Available Triggers");
+            SetStatusLabel("Load Injector - Execution Complete");
 
-            Console.WriteLine("Test Execution Complete");
+            ConsoleMsg("Test Execution Complete");
         }
 
         public void NextExecution(Object source, ElapsedEventArgs e) {
@@ -1169,34 +1099,44 @@ namespace LoadInjector.RunTime {
         }
 
         private void OnStartEvent(Object source, ElapsedEventArgs e) {
-            Console.WriteLine("--- Scheduled Start Time ---");
+            ConsoleMsg("--- Scheduled Start Time ---");
             Task.Run(() => RunInternal());
         }
 
         private void PercentComplete(int percent, bool clearConsole = false, string timestr = null) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                PercentComplete = percent,
-                ClearConsole = clearConsole,
-                Timestr = timestr,
-                Type = Operation.Percent | Operation.ClearConsole | Operation.TimeStr
-            };
-            if (controllerProgress != null) {
-                IProgress<ControllerStatusReport> ip = controllerProgress;
-                ip.Report(controllerStatusReport);
-            }
+            this.clientHub.PercentComplete(this.executionNodeUuid, null, percent, clearConsole, timestr);
         }
 
         private void SetButtonStatus(bool execute, bool prepare, bool stop) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                Execute = execute,
-                Prepare = prepare,
-                Stop = stop,
-                Type = Operation.AllButtons
-            };
-            if (controllerProgress != null) {
-                IProgress<ControllerStatusReport> ip = controllerProgress;
-                ip.Report(controllerStatusReport);
-            }
+            this.clientHub.SetButtonStatus(this.executionNodeUuid, null, execute, prepare, stop);
+        }
+
+        private void SetStatusLabel(string label) {
+            clientHub.SetStatusLabel(this.executionNodeUuid, null, label);
+        }
+
+        private void SetTriggerLabel(string label) {
+            clientHub.SetTriggerLabel(this.executionNodeUuid, null, label);
+        }
+
+        private void ConsoleMsg(string msg) {
+            clientHub.ConsoleMsg(this.executionNodeUuid, null, msg);
+        }
+
+        private void ClearTriggerData() {
+            clientHub.ClearTriggerData(this.executionNodeUuid, null);
+        }
+
+        private void SetCancelBtnHidden() {
+            clientHub.SetCancelBtnHidden(this.executionNodeUuid, null);
+        }
+
+        private void SetCancelBtnShow() {
+            clientHub.SetCancelBtnShow(this.executionNodeUuid, null);
+        }
+
+        private void LockVM(bool v) {
+            clientHub.LockVM(this.executionNodeUuid, null, v);
         }
     }
 }

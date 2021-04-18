@@ -20,7 +20,7 @@ namespace LoadInjector.RunTime {
         private readonly string timeElementFormat;
         private readonly bool relativeTime;
 
-        public DataDrivenSourceController(XmlNode node, Progress<ControllerStatusReport> controllerProgress, List<string> triggersInUse, int serverOffset, NgExecutionController nGExecutionController) : base(node, 1, controllerProgress, triggersInUse, serverOffset, nGExecutionController) {
+        public DataDrivenSourceController(XmlNode node, List<string> triggersInUse, int serverOffset, NgExecutionController nGExecutionController) : base(node, 1, triggersInUse, serverOffset, nGExecutionController) {
             this.node = node;
             this.triggersInUse = triggersInUse;
             this.serverOffset = serverOffset;

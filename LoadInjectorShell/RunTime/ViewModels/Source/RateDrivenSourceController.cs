@@ -45,7 +45,7 @@ namespace LoadInjector.RunTime {
         private bool STOP;
         private readonly bool abortOnFlightListEnd;
 
-        public RateDrivenSourceController(XmlNode node, int chainDepth, Progress<ControllerStatusReport> controllerProgress, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) : base(node, chainDepth, controllerProgress, triggersInUse, serverOffset, executionController) {
+        public RateDrivenSourceController(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) : base(node, chainDepth, triggersInUse, serverOffset, executionController) {
             if (chainDepth > 0) {
                 isChained = true;
             }
@@ -297,29 +297,29 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        private void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
-            if (currentRate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
-                ControllerStatusReport report = new ControllerStatusReport() {
-                    Consolestr = v,
-                    Sent = messagesSent,
-                    Actual = currentRate,
-                    Config = messagesPerMinute,
-                    Type = Operation.LineReport
-                };
+        //private void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
+        //    if (currentRate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
+        //        ControllerStatusReport report = new ControllerStatusReport() {
+        //            Consolestr = v,
+        //            Sent = messagesSent,
+        //            Actual = currentRate,
+        //            Config = messagesPerMinute,
+        //            Type = Operation.LineReport
+        //        };
 
-                lineProgress.Report(report);
-            }
-        }
+        //        lineProgress.Report(report);
+        //    }
+        //}
 
-        private void ReportChain(string v, int messagesSent) {
-            ControllerStatusReport report = new ControllerStatusReport() {
-                Consolestr = v,
-                Sent = messagesSent,
-                Type = Operation.LineSent
-            };
+        //private void ReportChain(string v, int messagesSent) {
+        //    ControllerStatusReport report = new ControllerStatusReport() {
+        //        Consolestr = v,
+        //        Sent = messagesSent,
+        //        Type = Operation.LineSent
+        //    };
 
-            lineProgress.Report(report);
-        }
+        //    lineProgress.Report(report);
+        //}
 
         public double RoundToSignificantDigits(double d, int digits) {
             if (d == 0)

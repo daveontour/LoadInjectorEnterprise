@@ -1,7 +1,9 @@
 ﻿using LoadInjector.Common;
+using LoadInjector.Runtime.EngineComponents;
 using LoadInjector.RunTime.Models;
 using LoadInjector.RunTime.Views;
 using LoadInjector.ViewModels;
+using Microsoft.AspNet.SignalR;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -35,6 +37,8 @@ namespace LoadInjector.RunTime {
         public readonly List<ChainedEventsUI> chainDrivenLinesUserControls = new List<ChainedEventsUI>();
         public ObservableCollection<TriggerRecord> SchedTriggers { get; set; }
         public ObservableCollection<TriggerRecord> FiredTriggers { get; set; }
+
+        private readonly CentralMessagingHub centralMessagingHub;
 
         public void OnPropertyChanged(string propName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
@@ -97,7 +101,10 @@ namespace LoadInjector.RunTime {
 
         public string TriggerLabel {
             get => trigLabel;
-            set => trigLabel = value;
+            set {
+                trigLabel = value;
+                OnPropertyChanged("TriggerLabel");
+            }
         }
 
         public ExecutionUI() {
@@ -113,6 +120,9 @@ namespace LoadInjector.RunTime {
             lvFiredTriggers.ItemsSource = FiredTriggers;
             CollectionView view2 = (CollectionView)CollectionViewSource.GetDefaultView(lvFiredTriggers.ItemsSource);
             view2.SortDescriptions.Add(new SortDescription("TIME", ListSortDirection.Descending));
+
+            centralMessagingHub = new CentralMessagingHub(this);
+            centralMessagingHub.StartHub();
         }
 
         private TreeEditorViewModel myWin;
@@ -126,6 +136,19 @@ namespace LoadInjector.RunTime {
             get => dataModel;
             set {
                 dataModel = value;
+
+                string executionNodeID = Guid.NewGuid().ToString();
+
+                // Add unique Identifier for each node to the XML as well as an ID for the execution node
+                foreach (XmlNode node in dataModel.SelectNodes("//*")) {
+                    XmlAttribute newAttribute = DataModel.CreateAttribute("uuid");
+                    newAttribute.Value = Guid.NewGuid().ToString();
+                    node.Attributes.Append(newAttribute);
+
+                    XmlAttribute newAttribute2 = DataModel.CreateAttribute("executionNodeUuid");
+                    newAttribute2.Value = executionNodeID;
+                    node.Attributes.Append(newAttribute2);
+                }
 
                 Progress<ControllerStatusReport> controllerProgress = new Progress<ControllerStatusReport>(report => {
                     ControllerStatusChanged(report);
@@ -165,7 +188,7 @@ namespace LoadInjector.RunTime {
                 RateDrivenEventsUI lineUI = new RateDrivenEventsUI(source.node, 0);
                 GetSourcePanel().Children.Add(lineUI);
                 rateDrivenLinesUserControls.Add(lineUI);
-                source.SetLineProgress(lineUI.controllerProgress);
+                //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
                     chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls);
@@ -230,7 +253,7 @@ namespace LoadInjector.RunTime {
                 TriggeredEventsUI lineUI = new TriggeredEventsUI(source.node);
                 GetSourcePanel().Children.Add(lineUI);
                 uiList.Add(lineUI);
-                source.SetLineProgress(lineUI.controllerProgress);
+                //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
                     chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls);
@@ -285,8 +308,14 @@ namespace LoadInjector.RunTime {
         private void Prepare_Click(object sender, RoutedEventArgs e) {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             outputConsole.Clear();
-            executionControl.ClearLines();
-            _ = executionControl.PrepareAsync(true);
+
+            try {
+                centralMessagingHub.Hub.Clients.All.ClearAndPrepare();
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            //executionControl.ClearLines();
+            //_ = executionControl.PrepareAsync(true);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) {
@@ -297,12 +326,17 @@ namespace LoadInjector.RunTime {
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e) {
-            Task.Run(() => executionControl.Run());
+            try {
+                centralMessagingHub.Hub.Clients.All.Execute();
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            // Task.Run(() => executionControl.Run());
         }
 
         public void Stop_Click(object sender, RoutedEventArgs e) {
             try {
-                executionControl.Stop(true);
+                centralMessagingHub.Hub.Clients.All.Stop(true);
             } catch (Exception ex) {
                 Console.WriteLine($"Test Execution Manually Stopped Error {ex.Message}");
             }
