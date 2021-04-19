@@ -88,7 +88,7 @@ namespace LoadInjector.RunTime.ViewModels {
             flightSourceType = node.Attributes["flttype"]?.Value;
 
             executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
-            executionNodeID = node.Attributes["uuid"]?.Value;
+            uuid = node.Attributes["uuid"]?.Value;
 
             if ((flightSourceType != null && flightSourceType != "none") || node.Name == "amsdatadriven") {
                 if (flightSourceType == "arr") {
@@ -220,7 +220,7 @@ namespace LoadInjector.RunTime.ViewModels {
             }
         }
 
-        public void AddChainedUI(int depth, UIElementCollection children, List<ChainedEventsUI> uiList) {
+        public void AddChainedUI(int depth, UIElementCollection children, List<ChainedEventsUI> uiList, Dictionary<string, ChainedEventsUI> chainedUIMap) {
             if (CheckDisabled(node)) {
                 Disabled d = new Disabled(node);
                 children.Add(d);
@@ -228,10 +228,11 @@ namespace LoadInjector.RunTime.ViewModels {
             }
             ChainedEventsUI lineUI = new ChainedEventsUI(node, depth);
             children.Add(lineUI);
+            chainedUIMap.Add(lineUI.uuid, lineUI);
             uiList.Add(lineUI);
             //SetLineProgress(lineUI.controllerProgress);
             foreach (RateDrivenSourceController chain in chainedController) {
-                chain.AddChainedUI(depth + 1, children, uiList);
+                chain.AddChainedUI(depth + 1, children, uiList, chainedUIMap);
             }
         }
 

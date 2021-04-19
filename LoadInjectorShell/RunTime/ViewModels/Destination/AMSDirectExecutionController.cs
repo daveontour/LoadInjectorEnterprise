@@ -106,12 +106,12 @@ namespace LoadInjector.RunTime {
     </amsx-messages:Content>
 </amsx-messages:Envelope>";
 
-        public AmsDirectExecutionController(XmlNode node, IProgress<ControllerStatusReport> controllerProgress, NgExecutionController executionController) : base(node, controllerProgress, executionController) {
+        public AmsDirectExecutionController(XmlNode node, NgExecutionController executionController) : base(node, executionController) {
             if (!ConfigOK) {
                 return;
             }
-            destinationDirectory = SetVar("destinationDirectory", null);
-            protocol = SetVar("protocol", "WS");
+            this.destinationDirectory = SetVar("destinationDirectory", null);
+            this.protocol = SetVar("protocol", "WS");
         }
 
         internal void TriggerHandler(object sender, TriggerFiredEventArgs e) {
@@ -119,9 +119,8 @@ namespace LoadInjector.RunTime {
         }
 
         public override async void Execute() {
-            messagesSent = 0;
-            Sent(0);
-            SetRate(0);
+            this.messagesSent = 0;
+            Report(0, 0);
             stopwatch.Restart();
             foreach (string trigger in triggerIDs) {
                 eventDistributor.AddAMSLineHandler(trigger, this);
@@ -131,8 +130,7 @@ namespace LoadInjector.RunTime {
 
         public new bool PrePrepare() {
             messagesSent = 0;
-            Sent(0);
-            SetRate(0);
+            Report(0, 0);
             stopwatch.Stop();
             return base.PrePrepare();
         }
@@ -186,7 +184,7 @@ namespace LoadInjector.RunTime {
                         break;
                     } catch (Exception ex) {
                         logger.Warn($"Token Substitution Exception: {ex.Message}");
-                        Console.WriteLine($"Token Substitution Exception: {ex.Message}");
+                        ConsoleMsg($"Token Substitution Exception: {ex.Message}");
                     }
                 }
 
@@ -205,7 +203,7 @@ namespace LoadInjector.RunTime {
                     try {
                         File.WriteAllText(fullPath, message);
                     } catch (Exception ex) {
-                        Console.WriteLine($"Unable to record message to file ${fullPath}. {ex.Message}");
+                        ConsoleMsg($"Unable to record message to file ${fullPath}. {ex.Message}");
                     }
                 }
             } catch (Exception ex) {
@@ -229,16 +227,16 @@ namespace LoadInjector.RunTime {
                             if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Accepted || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.NoContent) {
                                 await ProcessResponse(response);
                                 logger.Trace($"AMS Flight Update Result = {response.StatusCode}");
-                                Console.WriteLine($"AMS Flight Update Result = {response.StatusCode}");
+                                ConsoleMsg($"AMS Flight Update Result = {response.StatusCode}");
                             } else {
                                 SetOutput($"Flight Update Failure({response.StatusCode})");
-                                Console.WriteLine($"Flight Update Failure({response.StatusCode})");
+                                ConsoleMsg($"Flight Update Failure({response.StatusCode})");
                             }
                         }
                     }
                 } catch (Exception ex) {
                     logger.Error(ex.StackTrace);
-                    Console.WriteLine($"Flight Update Failure({ex.Message})");
+                    ConsoleMsg($"Flight Update Failure({ex.Message})");
                     return;
                 }
             } else if (protocol == "MQ") {
@@ -248,7 +246,7 @@ namespace LoadInjector.RunTime {
                     SendMQ(mqmessage);
                 } catch (Exception ex) {
                     logger.Error(ex.StackTrace);
-                    Console.WriteLine($"Flight Update Failure({ex.Message})");
+                    ConsoleMsg($"Flight Update Failure({ex.Message})");
                     return;
                 }
             } else {
@@ -257,17 +255,16 @@ namespace LoadInjector.RunTime {
                     SendMSMQ(mqmessage);
                 } catch (Exception ex) {
                     logger.Error(ex.StackTrace);
-                    Console.WriteLine($"Flight Update Failure({ex.Message})");
+                    ConsoleMsg($"Flight Update Failure({ex.Message})");
                     return;
                 }
             }
 
-            Console.WriteLine($"AMS Direct Line: {name}. Message Sent");
+            ConsoleMsg($"AMS Direct Line: {name}. Message Sent");
             messagesSent++;
-            Sent(messagesSent);
-            avg = stopwatch.Elapsed.TotalMilliseconds / messagesSent;
+            this.avg = stopwatch.Elapsed.TotalMilliseconds / messagesSent;
             double rate = RoundToSignificantDigits(60000 / avg, 2);
-            SetRate(rate);
+            Report(messagesSent, rate);
         }
 
         public async Task ProcessResponse(HttpResponseMessage response) {
@@ -288,50 +285,50 @@ namespace LoadInjector.RunTime {
         private void ConfigureMQ(XmlNode defn) {
             try {
                 try {
-                    queueName = config.Attributes["queue"].Value;
+                    this.queueName = config.Attributes["queue"].Value;
                 } catch (Exception) {
-                    Console.WriteLine($"No Queue defined for {name}");
+                    ConsoleMsg($"No Queue defined for {name}");
                     return;
                 }
 
                 try {
-                    qMgr = defn.Attributes["queueMgr"].Value;
+                    this.qMgr = defn.Attributes["queueMgr"].Value;
                 } catch (Exception) {
-                    Console.WriteLine($"Queue Manager not defined for {name}");
+                    ConsoleMsg($"Queue Manager not defined for {name}");
                     return;
                 }
                 try {
-                    qSvrChan = defn.Attributes["channel"].Value;
+                    this.qSvrChan = defn.Attributes["channel"].Value;
                 } catch (Exception) {
-                    Console.WriteLine($"Channel not defined for {name}");
-                    return;
-                }
-
-                try {
-                    qHost = defn.Attributes["host"].Value;
-                } catch (Exception) {
-                    Console.WriteLine($"Queue  not defined for {name}");
+                    ConsoleMsg($"Channel not defined for {name}");
                     return;
                 }
 
                 try {
-                    qPort = defn.Attributes["port"].Value;
+                    this.qHost = defn.Attributes["host"].Value;
                 } catch (Exception) {
-                    Console.WriteLine($"Port not defined for {name}");
+                    ConsoleMsg($"Queue  not defined for {name}");
                     return;
                 }
 
                 try {
-                    qUser = defn.Attributes["username"].Value;
+                    this.qPort = defn.Attributes["port"].Value;
                 } catch (Exception) {
-                    qUser = null;
+                    ConsoleMsg($"Port not defined for {name}");
+                    return;
+                }
+
+                try {
+                    this.qUser = defn.Attributes["username"].Value;
+                } catch (Exception) {
+                    this.qUser = null;
                     logger.Info($"No username defined for {name}");
                 }
 
                 try {
-                    qPass = defn.Attributes["password"].Value;
+                    this.qPass = defn.Attributes["password"].Value;
                 } catch (Exception) {
-                    qPass = null;
+                    this.qPass = null;
                     logger.Info($"No password defined for {name}");
                 }
 
@@ -358,7 +355,7 @@ namespace LoadInjector.RunTime {
                 logger.Info("Error configuring MQ queue");
                 logger.Info(ex.Message);
                 logger.Info(ex.StackTrace);
-                Console.WriteLine($"Error configuring MQ access for {name}");
+                ConsoleMsg($"Error configuring MQ access for {name}");
             }
         }
 
@@ -366,7 +363,7 @@ namespace LoadInjector.RunTime {
             try {
                 queueName = config.Attributes["queue"].Value;
             } catch (Exception) {
-                Console.WriteLine($"No Queue defined for {name}");
+                ConsoleMsg($"No Queue defined for {name}");
                 return;
             }
             try {

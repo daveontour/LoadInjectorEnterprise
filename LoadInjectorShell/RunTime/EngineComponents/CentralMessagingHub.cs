@@ -132,7 +132,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.FiredTriggers.Clear();
                     CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
+                    Debug.WriteLine("Clearing Trigger Data error. " + ex.Message);
                 }
             });
         }
@@ -143,7 +143,74 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.PercentComplete = percent;
                     CentralMessagingHub.executionUI.ElapsedString = timestr;
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
+                    Debug.WriteLine("SettingPercent Complete error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetDestinationRate(string executionNodeID, string uuid, double s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.SetRate(s);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetDestinationSent(string executionNodeID, string uuid, int s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.Sent(s);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest sent error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetDestinationMsgPerMinute(string executionNodeID, string uuid, string s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.MsgPerMinExecution = s;
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest MsgPer Min error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetDestinationConfigMsgPerMin(string executionNodeID, string uuid, string s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.MsgPerMin = s;
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest Config Msg Per Min error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetDestinationOutput(string executionNodeID, string uuid, string s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.SetOutput(s);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest Output error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
+                    ui.Sent(messagesSent);
+                    ui.SetRate(rate);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest sent error. " + ex.Message);
                 }
             });
         }

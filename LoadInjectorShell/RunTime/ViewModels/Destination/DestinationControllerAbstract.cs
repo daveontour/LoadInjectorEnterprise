@@ -1,8 +1,10 @@
 ﻿using LoadInjector.Common;
+using LoadInjector.RunTime.EngineComponents;
 using LoadInjector.RunTime.Models;
 using LoadInjector.RunTime.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
@@ -15,11 +17,13 @@ namespace LoadInjector.RunTime {
         public DestinationEndPoint destinationEndPoint;
         public readonly object _locker = new object();
         public XmlNode config;
-        protected readonly IProgress<ControllerStatusReport> controllerProgress;
-        protected IProgress<ControllerStatusReport> lineProgress;
+
+        //protected IProgress<ControllerStatusReport> lineProgress;
         public string name;
+
         public List<string> values = new List<string>();
         public List<string[]> variableCSVValues = new List<string[]>();
+        public ClientHub clientHub;
 
         internal bool PrePrepare() {
             return true;
@@ -54,6 +58,8 @@ namespace LoadInjector.RunTime {
         protected Thread thread;
 
         public TriggerEventDistributor eventDistributor;
+        public string executionNodeID;
+        public string uuid;
 
         public string LineName { get; set; }
         public string LineType { get; set; }
@@ -66,17 +72,19 @@ namespace LoadInjector.RunTime {
 
         public abstract Task<bool> ProcessIteration(Tuple<Dictionary<string, string>, FlightNode> record);
 
-        public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
-            this.lineProgress = lineProgress;
-        }
+        //public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
+        //    this.lineProgress = lineProgress;
+        //}
 
-        protected DestinationControllerAbstract(XmlNode node, IProgress<ControllerStatusReport> controllerProgress, NgExecutionController executionController) {
-            config = node;
-            this.controllerProgress = controllerProgress;
-
+        protected DestinationControllerAbstract(XmlNode node, NgExecutionController executionController) {
+            this.config = node;
             this.executionController = executionController;
-            logger = executionController.logger;
-            eventDistributor = executionController.eventDistributor;
+            this.logger = executionController.logger;
+            this.eventDistributor = executionController.eventDistributor;
+            this.clientHub = executionController.clientHub;
+
+            this.executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
+            this.uuid = node.Attributes["uuid"]?.Value;
 
             try {
                 name = config.Attributes["name"].Value;
@@ -85,19 +93,19 @@ namespace LoadInjector.RunTime {
                 return;
             }
 
-            triggerIDs = SetTriggerIDS();
-            saveMessageFile = SetVar("saveMessageFile", null);
-            dataSource = SetVar("dataSource", null);
-            dataFile = SetVar("dataFile", null);
-            excelRowStart = SetVar("excelRowStart", -1);
+            this.triggerIDs = SetTriggerIDS();
+            this.saveMessageFile = SetVar("saveMessageFile", null);
+            this.dataSource = SetVar("dataSource", null);
+            this.dataFile = SetVar("dataFile", null);
+            this.excelRowStart = SetVar("excelRowStart", -1);
 
-            amsHost = SetVar("amshost", null);
-            amsToken = SetVar("amstoken", null);
-            amsAptCode = SetVar("aptcode", null);
-            amsTimeout = SetVar("amstimeout", null);
+            this.amsHost = SetVar("amshost", null);
+            this.amsToken = SetVar("amstoken", null);
+            this.amsAptCode = SetVar("aptcode", null);
+            this.amsTimeout = SetVar("amstimeout", null);
 
-            ConfigOK = true;
-            SetOutput($"Configured OK ({config.SelectNodes(".//variable").Count} variables defined)");
+            this.ConfigOK = true;
+            //SetOutput($"Configured OK ({config.SelectNodes(".//variable").Count} variables defined)");
         }
 
         public bool Prepare() {
@@ -107,8 +115,8 @@ namespace LoadInjector.RunTime {
             foreach (XmlNode variableConfig in config.SelectNodes(".//variable")) {
                 Variable var = new Variable(variableConfig);
                 if (!var.ConfigOK) {
-                    ConfigOK = false;
-                    Console.WriteLine("Error in variable config");
+                    this.ConfigOK = false;
+                    Debug.WriteLine("Error in variable config");
                     SetOutput("Error: Variable Configuration Error - " + var.ErrorMsg);
 
                     return false;
@@ -140,12 +148,7 @@ namespace LoadInjector.RunTime {
 
         public void Report(int messagesSent, double rate) {
             if (rate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
-                ControllerStatusReport report = new ControllerStatusReport() {
-                    Sent = messagesSent,
-                    Actual = rate,
-                    Type = Operation.DestinataionSendReport
-                };
-                lineProgress?.Report(report);
+                clientHub.SendDestinationReport(executionNodeID, uuid, messagesSent, rate);
             }
         }
 
@@ -167,44 +170,20 @@ namespace LoadInjector.RunTime {
         }
 
         public void SetOutput(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.Console
-            };
-            lineProgress?.Report(controllerStatusReport);
+            clientHub.SetDestinationOutput(executionNodeID, uuid, s);
         }
 
-        public void SetRate(double s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputDouble = s,
-                Type = Operation.LineRate
-            };
-            lineProgress?.Report(controllerStatusReport);
+        public void ConsoleMsg(String s) {
+            clientHub.ConsoleMsg(executionNodeID, uuid, s);
         }
 
-        public void Sent(int s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputInt = s,
-                Type = Operation.LineSent
-            };
-            lineProgress?.Report(controllerStatusReport);
-        }
+        //public void SetRate(double s) {
+        //    clientHub.SetDestinationRate(executionNodeID, uuid, s);
+        //}
 
-        public void SetMsgPerMin(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.LineMsgPerMin
-            };
-            lineProgress?.Report(controllerStatusReport);
-        }
-
-        public void SetConfiguredMsgPerMin(String s) {
-            ControllerStatusReport controllerStatusReport = new ControllerStatusReport {
-                OutputString = s,
-                Type = Operation.LineConfiguredMsgPerMin
-            };
-            lineProgress?.Report(controllerStatusReport);
-        }
+        //public void Sent(int s) {
+        //    clientHub.SetDestinationSent(executionNodeID, uuid, s);
+        //}
 
         public bool SetVar(string attrib, bool defaultValue) {
             bool value;

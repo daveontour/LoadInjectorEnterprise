@@ -30,7 +30,11 @@ namespace LoadInjector.RunTime.EngineComponents {
 
                 hubProxy.On("ClearAndPrepare", () => {
                     Debug.WriteLine("Client Side. ClearAndPrepare");
-                    ngExecutionController.PrepareAsync().Wait();
+                    try {
+                        ngExecutionController.PrepareAsync().Wait();
+                    } catch (Exception ex) {
+                        Debug.WriteLine("error in client Prepare Aync " + ex.Message);
+                    }
                 });
                 hubProxy.On("Execute", () => {
                     Debug.WriteLine("Client Side. Execute");
@@ -138,5 +142,46 @@ namespace LoadInjector.RunTime.EngineComponents {
                 this.hubProxy.Invoke("LockVM", executionNodeID, uuid, l);
             });
         }
+
+        internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
+            Debug.WriteLine($"Client Side Destination report {uuid}, sent {messagesSent}, rate {rate}");
+            Task.Run(() => {
+                try {
+                    this.hubProxy.Invoke("SendDestinationReport", executionNodeID, uuid, messagesSent, rate);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Error call SendDestination Report " + ex.Message);
+                }
+            });
+        }
+
+        internal void SetDestinationOutput(string executionNodeID, string uuid, string s) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("SetDestinationOutput", executionNodeID, uuid, s);
+            });
+        }
+
+        internal void SetDestinationRate(string executionNodeID, string uuid, double s) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("SetDestinationRate", executionNodeID, uuid, s);
+            });
+        }
+
+        internal void SetDestinationSent(string executionNodeID, string uuid, int s) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("SetDestinationSent", executionNodeID, uuid, s);
+            });
+        }
+
+        //internal void SetDestinationMsgPerMinute(string executionNodeID, string uuid, string s) {
+        //    Task.Run(() => {
+        //        this.hubProxy.Invoke("SetDestinationMsgPerMinute", executionNodeID, uuid, s);
+        //    });
+        //}
+
+        //internal void SetDestinationConfigMsgPerMin(string executionNodeID, string uuid, string s) {
+        //    Task.Run(() => {
+        //        this.hubProxy.Invoke("SetDestinationConfigMsgPerMin", executionNodeID, uuid, s);
+        //    });
+        //}
     }
 }

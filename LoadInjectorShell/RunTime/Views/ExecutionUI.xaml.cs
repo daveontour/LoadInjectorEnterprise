@@ -35,6 +35,12 @@ namespace LoadInjector.RunTime {
         public readonly List<TriggeredEventsUI> databaseDataDrivenLinesUserControls = new List<TriggeredEventsUI>();
         public readonly List<RateDrivenEventsUI> rateDrivenLinesUserControls = new List<RateDrivenEventsUI>();
         public readonly List<ChainedEventsUI> chainDrivenLinesUserControls = new List<ChainedEventsUI>();
+
+        public readonly Dictionary<string, LineUserControl> destUIMap = new Dictionary<string, LineUserControl>();
+        public readonly Dictionary<string, TriggeredEventsUI> ddUIMap = new Dictionary<string, TriggeredEventsUI>();
+        public readonly Dictionary<string, RateDrivenEventsUI> rateUIMap = new Dictionary<string, RateDrivenEventsUI>();
+        public readonly Dictionary<string, ChainedEventsUI> chainedUIMap = new Dictionary<string, ChainedEventsUI>();
+
         public ObservableCollection<TriggerRecord> SchedTriggers { get; set; }
         public ObservableCollection<TriggerRecord> FiredTriggers { get; set; }
 
@@ -187,11 +193,12 @@ namespace LoadInjector.RunTime {
                 }
                 RateDrivenEventsUI lineUI = new RateDrivenEventsUI(source.node, 0);
                 GetSourcePanel().Children.Add(lineUI);
+                rateUIMap.Add(source.uuid, lineUI);
                 rateDrivenLinesUserControls.Add(lineUI);
                 //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls);
+                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, chainedUIMap);
                 }
             }
 
@@ -217,7 +224,7 @@ namespace LoadInjector.RunTime {
                     LineUserControl lineUI = new LineUserControl(direct.config);
                     GetLinePanel().Children.Add(lineUI);
                     amsLinesUserControls.Add(lineUI);
-                    direct.SetLineProgress(lineUI.controllerProgress);
+                    // direct.SetLineProgress(lineUI.controllerProgress);
                 }
             }
 
@@ -234,7 +241,8 @@ namespace LoadInjector.RunTime {
                 LineUserControl lineUI = new LineUserControl(cnt.config);
                 GetLinePanel().Children.Add(lineUI);
                 directLinesUserControls.Add(lineUI);
-                cnt.SetLineProgress(lineUI.controllerProgress);
+                destUIMap.Add(cnt.uuid, lineUI);
+                // cnt.SetLineProgress(lineUI.controllerProgress);
             }
         }
 
@@ -252,11 +260,12 @@ namespace LoadInjector.RunTime {
                 }
                 TriggeredEventsUI lineUI = new TriggeredEventsUI(source.node);
                 GetSourcePanel().Children.Add(lineUI);
+                ddUIMap.Add(source.uuid, lineUI);
                 uiList.Add(lineUI);
                 //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls);
+                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, chainedUIMap);
                 }
             }
 
@@ -319,7 +328,7 @@ namespace LoadInjector.RunTime {
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) {
-            StatusLabel = null;
+            this.StatusLabel = null;
             CancelBtn.IsEnabled = false;
             CancelBtn.Visibility = Visibility.Hidden;
             executionControl.Cancel();

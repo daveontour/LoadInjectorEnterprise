@@ -9,13 +9,11 @@ namespace LoadInjector.RunTime {
 
     public class DestinationEndPoint : IDestinationEndPointController {
         private readonly SenderAbstract endPointDestination;
-        private readonly IProgress<ControllerStatusReport> controllerProgress;
         private readonly NLog.Logger logger;
 
         public bool OK_TO_RUN;
 
-        public DestinationEndPoint(XmlNode defn, NLog.Logger logger, IProgress<ControllerStatusReport> controllerProgress) {
-            this.controllerProgress = controllerProgress;
+        public DestinationEndPoint(XmlNode defn, NLog.Logger logger) {
             this.logger = logger;
 
             string protocol = defn.Attributes["protocol"].Value;
@@ -63,7 +61,7 @@ namespace LoadInjector.RunTime {
                 OutputString = s,
                 Type = Operation.Console
             };
-            controllerProgress.Report(controllerStatusReport);
+            // controllerProgress.Report(controllerStatusReport);
         }
     }
 }

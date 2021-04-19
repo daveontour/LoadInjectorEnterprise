@@ -12,7 +12,7 @@ namespace LoadInjector.RunTime {
     public class LineExecutionController : DestinationControllerAbstract {
         public Stopwatch stopwatch = new Stopwatch();
 
-        public LineExecutionController(XmlNode node, IProgress<ControllerStatusReport> controllerProgress, NgExecutionController executionController) : base(node, controllerProgress, executionController) {
+        public LineExecutionController(XmlNode node, NgExecutionController executionController) : base(node, executionController) {
             if (!ConfigOK) {
                 return;
             }
@@ -20,7 +20,7 @@ namespace LoadInjector.RunTime {
             LineType = config.Attributes["protocol"].Value;
 
             try {
-                destinationEndPoint = new DestinationEndPoint(config, logger, controllerProgress);
+                destinationEndPoint = new DestinationEndPoint(config, logger);
                 if (!destinationEndPoint.OK_TO_RUN) {
                     Console.WriteLine($"Error: End Point Configuration Problem for {name}");
                     ConfigOK = false;

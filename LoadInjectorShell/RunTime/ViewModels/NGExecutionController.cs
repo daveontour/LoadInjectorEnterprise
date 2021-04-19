@@ -182,7 +182,7 @@ namespace LoadInjector.RunTime {
                         continue;
                     }
 
-                    AmsDirectExecutionController line = new AmsDirectExecutionController(node, controllerProgress, this);
+                    AmsDirectExecutionController line = new AmsDirectExecutionController(node, this);
                     amsLines.Add(line);
                 }
             }
@@ -193,7 +193,7 @@ namespace LoadInjector.RunTime {
                     continue;
                 }
 
-                LineExecutionController line = new LineExecutionController(node, controllerProgress, this);
+                LineExecutionController line = new LineExecutionController(node, this);
                 destLines.Add(line);
             }
 

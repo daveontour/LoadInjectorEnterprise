@@ -8,9 +8,11 @@ using static LoadInjector.RunTime.Models.ControllerStatusReport;
 namespace LoadInjector.RunTime {
 
     public partial class ChainedEventsUI : UserControl, INotifyPropertyChanged {
-
         public XmlNode node;
         public readonly Progress<ControllerStatusReport> controllerProgress;
+        public readonly string executionNodeID;
+        public readonly string uuid;
+
         public string LineName { get; set; }
         public string Output { get; private set; }
         public double ActualRate { get; private set; }
@@ -20,64 +22,70 @@ namespace LoadInjector.RunTime {
         public int ChainedDepth { get; private set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
         public ChainedEventsUI(XmlNode node, int chaindepth) {
-            ChainedDepth = chaindepth;
-            LineName = node.Attributes["name"].Value;
+            this.ChainedDepth = chaindepth;
+            this.LineName = node.Attributes["name"].Value;
             InitializeComponent();
-            DataContext = this;
+            this.DataContext = this;
             this.node = node;
-            controllerProgress = new Progress<ControllerStatusReport>(ControllerStatusChanged);
+            // this.controllerProgress = new Progress<ControllerStatusReport>(ControllerStatusChanged);
+            this.executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
+            this.uuid = node.Attributes["uuid"]?.Value;
         }
 
-        private void ControllerStatusChanged(ControllerStatusReport e) {
+        //private void ControllerStatusChanged(ControllerStatusReport e) {
+        //    Operation op = e.Type;
 
-            Operation op = e.Type;
+        //    if (op == Operation.LineReport) {
+        //        Output = e.Consolestr;
+        //        ActualRate = e.Actual;
+        //        ConfigRate = e.Config;
+        //        MessagesSent = e.Sent;
 
-            if (op == Operation.LineReport) {
-                Output = e.Consolestr;
-                ActualRate = e.Actual;
-                ConfigRate = e.Config;
-                MessagesSent = e.Sent;
+        //        OnPropertyChanged("Output");
+        //        OnPropertyChanged("ActualRate");
+        //        OnPropertyChanged("ConfigRate");
+        //        OnPropertyChanged("MessagesSent");
 
-                OnPropertyChanged("Output");
-                OnPropertyChanged("ActualRate");
-                OnPropertyChanged("ConfigRate");
-                OnPropertyChanged("MessagesSent");
+        //        return;
+        //    }
 
-                return;
-            }
-
-            if ((op & Operation.Console) == Operation.Console) {
-                SetOutput(e.OutputString);
-            }
-            if ((op & Operation.LineRate) == Operation.LineRate) {
-                SetActualRate(e.OutputDouble);
-            }
-            if ((op & Operation.LineConfigRate) == Operation.LineConfigRate) {
-                SetConfigRate(e.OutputDouble);
-            }
-            if ((op & Operation.LineSent) == Operation.LineSent) {
-                SetMessagesSent(e.Sent);
-            }
-        }
+        //    if ((op & Operation.Console) == Operation.Console) {
+        //        SetOutput(e.OutputString);
+        //    }
+        //    if ((op & Operation.LineRate) == Operation.LineRate) {
+        //        SetActualRate(e.OutputDouble);
+        //    }
+        //    if ((op & Operation.LineConfigRate) == Operation.LineConfigRate) {
+        //        SetConfigRate(e.OutputDouble);
+        //    }
+        //    if ((op & Operation.LineSent) == Operation.LineSent) {
+        //        SetMessagesSent(e.Sent);
+        //    }
+        //}
 
         protected void OnPropertyChanged(string propName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
+
         public void SetOutput(string output) {
-            Output = output;
+            this.Output = output;
             OnPropertyChanged("Output");
         }
+
         public void SetActualRate(double output) {
-            ActualRate = output;
+            this.ActualRate = output;
             OnPropertyChanged("ActualRate");
         }
+
         public void SetConfigRate(double output) {
-            ConfigRate = output;
+            this.ConfigRate = output;
             OnPropertyChanged("ConfigRate");
         }
+
         public void SetMessagesSent(double output) {
-            MessagesSent = output;
+            this.MessagesSent = output;
             OnPropertyChanged("MessagesSent");
         }
     }
