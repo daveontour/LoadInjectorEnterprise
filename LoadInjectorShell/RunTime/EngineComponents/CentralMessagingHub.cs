@@ -8,6 +8,7 @@ using Owin;
 using Microsoft.Owin.Cors;
 using LoadInjector.RunTime;
 using System.Windows;
+using System.Collections.Generic;
 
 [assembly: OwinStartup(typeof(LoadInjector.Runtime.EngineComponents.StartupHub))]
 
@@ -63,6 +64,30 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.StatusLabel = message;
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting button status error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SetSourceLineOutput(string executionnodeID, string uuid, string s) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.sourceUIMap[uuid];
+                    ui?.SetOutput(s);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
+                }
+            });
+        }
+
+        public void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    var ui = CentralMessagingHub.executionUI.sourceUIMap[uuid];
+                    ui?.SetOutput(v);
+                    ui?.SetMessagesSent(messagesSent);
+                    ui?.SetActualRate(currentRate);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
                 }
             });
         }
@@ -138,6 +163,9 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void PercentComplete(string executionNodeID, string uuid, int percent, bool clearConsole, string timestr) {
+
+            Debug.WriteLine("----> setting Percent Complete  ");
+
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     CentralMessagingHub.executionUI.PercentComplete = percent;
@@ -212,6 +240,40 @@ namespace LoadInjector.Runtime.EngineComponents {
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Dest sent error. " + ex.Message);
                 }
+            });
+        }
+
+        public void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
+            try {
+                Application.Current.Dispatcher.Invoke(delegate {
+                    CentralMessagingHub.executionUI.SchedTriggers.Remove(rec);
+                    CentralMessagingHub.executionUI.OnPropertyChanged("lvTriggers");
+                    CentralMessagingHub.executionUI.FiredTriggers.Add(rec);
+                    CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
+                });
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void AddSchedTrigger(string executionNodeUuid, TriggerRecord triggerRecord) {
+            try {
+                Application.Current.Dispatcher.Invoke(delegate {
+                    CentralMessagingHub.executionUI.SchedTriggers.Add(triggerRecord);
+                });
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        public void SetSchedTrigger(string executionNodeUuid, List<TriggerRecord> sortedTriggers) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                CentralMessagingHub.executionUI.SchedTriggers.Clear();
+
+                foreach (TriggerRecord t in sortedTriggers) {
+                    CentralMessagingHub.executionUI.SchedTriggers.Add(t);
+                }
+                CentralMessagingHub.executionUI.OnPropertyChanged("lvTriggers");
             });
         }
     }

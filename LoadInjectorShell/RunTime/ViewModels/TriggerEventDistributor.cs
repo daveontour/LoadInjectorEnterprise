@@ -42,7 +42,8 @@ namespace LoadInjector.RunTime.ViewModels {
         private readonly Dictionary<LineExecutionController, LineExecutionController> lineCntlMap = new Dictionary<LineExecutionController, LineExecutionController>();
         public List<TriggerRecord> triggerRecords = new List<TriggerRecord>();
         public Queue<TriggerRecord> triggerQueue = new Queue<TriggerRecord>();
-        internal ExecutionUI exUI;
+
+        //internal ExecutionUI exUI;
         private readonly NgExecutionController executionController;
 
         public DateTime NextTrigger { get; set; }
@@ -112,18 +113,18 @@ namespace LoadInjector.RunTime.ViewModels {
 
         public void DistributeMessage(TriggerRecord rec) {
             //Used by event driven sources
-
-            try {
-                Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-                {
-                    exUI.SchedTriggers.Remove(rec);
-                    exUI.OnPropertyChanged("lvTriggers");
-                    exUI.FiredTriggers.Add(rec);
-                    exUI.OnPropertyChanged("lvFiredTriggers");
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
+            this.executionController.clientHub.DispatcherDistributeMessage(executionController.executionNodeUuid, rec);
+            //try {
+            //    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
+            //    {
+            //        exUI.SchedTriggers.Remove(rec);
+            //        exUI.OnPropertyChanged("lvTriggers");
+            //        exUI.FiredTriggers.Add(rec);
+            //        exUI.OnPropertyChanged("lvFiredTriggers");
+            //    });
+            //} catch (Exception ex) {
+            //    Console.WriteLine(ex.Message);
+            //}
 
             if (rec.refreshFlight && rec.record.Item2 != null) {
                 try {
@@ -167,13 +168,14 @@ namespace LoadInjector.RunTime.ViewModels {
             triggerRecords.Add(triggerRecord);
 
             // Add the trigger to list in the the tabbed table
-            try {
-                Application.Current.Dispatcher.Invoke(delegate {
-                    exUI.SchedTriggers.Add(triggerRecord);
-                });
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-            }
+            this.executionController.clientHub.AddSchedTrigger(executionController.executionNodeUuid, triggerRecord);
+            //try {
+            //    Application.Current.Dispatcher.Invoke(delegate {
+            //        exUI.SchedTriggers.Add(triggerRecord);
+            //    });
+            //} catch (Exception ex) {
+            //    Console.WriteLine(ex.Message);
+            //}
             return true;
         }
 
@@ -212,14 +214,16 @@ namespace LoadInjector.RunTime.ViewModels {
             }
 
             sortedTriggers.Sort((x, y) => { return x.TIME.CompareTo(y.TIME); });
-            Application.Current.Dispatcher.Invoke(delegate {
-                exUI.SchedTriggers.Clear();
 
-                foreach (TriggerRecord t in sortedTriggers) {
-                    exUI.SchedTriggers.Add(t);
-                }
-                exUI.OnPropertyChanged("lvTriggers");
-            });
+            this.executionController.clientHub.SetSchedTrigger(executionController.executionNodeUuid, sortedTriggers);
+            //Application.Current.Dispatcher.Invoke(delegate {
+            //    exUI.SchedTriggers.Clear();
+
+            //    foreach (TriggerRecord t in sortedTriggers) {
+            //        exUI.SchedTriggers.Add(t);
+            //    }
+            //    exUI.OnPropertyChanged("lvTriggers");
+            //});
 
             triggerQueue = new Queue<TriggerRecord>(sortedTriggers);
 

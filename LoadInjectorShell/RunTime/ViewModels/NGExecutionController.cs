@@ -100,16 +100,16 @@ namespace LoadInjector.RunTime {
    </soapenv:Body>
 </soapenv:Envelope>";
 
-        private readonly string executionNodeUuid;
+        public readonly string executionNodeUuid;
 
-        public void SetExecutiuonUI(ExecutionUI exUI) {
-            //this.exUI = exUI;
-            eventDistributor.exUI = exUI;
-            //exUI.StatusLabel = "Load Injector Execution";
-            SetStatusLabel("Load Injector Execution");
-        }
+        //public void SetExecutiuonUI(ExecutionUI exUI) {
+        //    //this.exUI = exUI;
+        //    eventDistributor.exUI = exUI;
+        //    //exUI.StatusLabel = "Load Injector Execution";
+        //    SetStatusLabel("Load Injector Execution");
+        //}
 
-        public NgExecutionController(XmlDocument model, Progress<ControllerStatusReport> controllerProgress) {
+        public NgExecutionController(XmlDocument model) {
             try {
                 clientHub = new ClientHub("http://localhost:6220", this);
             } catch (Exception ex) {
@@ -118,7 +118,6 @@ namespace LoadInjector.RunTime {
 
             eventDistributor = new TriggerEventDistributor(this);
             dataModel = model;
-            //this.controllerProgress = controllerProgress;
             amsDataDrivenLines.Clear();
 
             List<string> triggersInUse = TriggersInUse(dataModel);
@@ -496,7 +495,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in amsDataDrivenLines) {
                     line.PrepareAMS(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                     } else {
                         atLeastOneActive = true;
                     }
@@ -506,7 +505,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in csvDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                         continue;
                     } else {
                         atLeastOneActive = true;
@@ -518,7 +517,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in excelDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                         continue;
                     } else {
                         atLeastOneActive = true;
@@ -530,7 +529,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in xmlDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                         continue;
                     } else {
                         atLeastOneActive = true;
@@ -542,7 +541,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in jsonDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                         continue;
                     } else {
                         atLeastOneActive = true;
@@ -553,7 +552,7 @@ namespace LoadInjector.RunTime {
                 foreach (DataDrivenSourceController line in databaseDataDrivenLines) {
                     line.PrepareFlights(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                         continue;
                     } else {
                         atLeastOneActive = true;
@@ -564,7 +563,7 @@ namespace LoadInjector.RunTime {
                 foreach (RateDrivenSourceController line in rateDrivenLines) {
                     line.Prepare(flights, arrflights, depflights);
                     if (!line.InUse()) {
-                        line.SetOutput("No Destinations Using this Source");
+                        line.SetSourceLineOutput("No Destinations Using this Source");
                     } else {
                         atLeastOneActive = true;
                     }

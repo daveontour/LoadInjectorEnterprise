@@ -212,12 +212,13 @@ namespace LoadInjector.RunTime {
 
         // The sendTimer calls this function each time the timer goes off
         private void FireEvent(object sender, ElapsedEventArgs e) {
+            SetSourceLineOutput("Event Fired");
             //Unset it if run parameters exceeded
             if (maxRunTime > 0 && executionStopWatch.ElapsedMilliseconds / 1000 >= maxRunTime) {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
                 Console.WriteLine($"Rate Source {name}. Maximum Run Time Reached {messagesSent} Messages Sent");
-                SetOutput($"Maximum Run Time Reached {messagesSent} Messages Sent");
+                SetSourceLineOutput($"Maximum Run Time Reached {messagesSent} Messages Sent");
                 return;
             }
 
@@ -225,7 +226,7 @@ namespace LoadInjector.RunTime {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
                 Console.WriteLine($"Rate Source {name}. Maximum Number of Messages Reached. {messagesSent} Messages Sent");
-                SetOutput($"Maximum Number of Messages Reached. {messagesSent} Messages Sent");
+                SetSourceLineOutput($"Maximum Number of Messages Reached. {messagesSent} Messages Sent");
                 return;
             }
 
@@ -254,7 +255,7 @@ namespace LoadInjector.RunTime {
                 Tuple<Dictionary<string, string>, FlightNode> data = Next();
                 if (data == null) {
                     Console.WriteLine($"Source:{name}.No further data available");
-                    SetOutput("No further data available");
+                    SetSourceLineOutput("No further data available");
                     finished = true;
                     sendTimer.Enabled = false;
                     executionController.CheckForCompletion();
@@ -284,10 +285,10 @@ namespace LoadInjector.RunTime {
                 }
             } catch (DispatcherNullException) {
                 Console.WriteLine($"Source:{name}. NULL DISPATCHER");
-                SetOutput("NULL DISPATCHER");
+                SetSourceLineOutput("NULL DISPATCHER");
             } catch (FilterFailException) {
                 Console.WriteLine($"Source:{name}. Post Filtering. Iteration Flight did not pass the configured filter");
-                SetOutput("Iteration Flight did not pass the configured filter");
+                SetSourceLineOutput("Iteration Flight did not pass the configured filter");
             } catch (Exception ex) {
                 Console.WriteLine($"Error Distributing Rate Message: {ex.Message} ");
             }
@@ -336,7 +337,7 @@ namespace LoadInjector.RunTime {
             Report("Prepare", 0, 0, messagesPerMinute);
 
             if (!lineInUse) {
-                SetOutput("No destination lines are configured to use this source");
+                SetSourceLineOutput("No destination lines are configured to use this source");
                 return true;
             }
 

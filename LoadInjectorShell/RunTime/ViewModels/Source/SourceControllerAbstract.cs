@@ -65,18 +65,10 @@ namespace LoadInjector.RunTime.ViewModels {
 
         public string uuid;
 
-        //public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
-        //    this.lineProgress = lineProgress;
-        //    foreach (RateDrivenSourceController ctl in chainedController) {
-        //        ctl.SetLineProgress(lineProgress);
-        //    }
-        //}
-
         protected SourceControllerAbstract(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) {
             this.node = node;
             this.triggersInUse = triggersInUse;
             this.clientHub = executionController?.clientHub;
-            //          this.controllerProgress = controllerProgress;
             eventDistributor = executionController?.eventDistributor;
             this.executionController = executionController;
             logger = executionController?.logger;
@@ -220,7 +212,7 @@ namespace LoadInjector.RunTime.ViewModels {
             }
         }
 
-        public void AddChainedUI(int depth, UIElementCollection children, List<ChainedEventsUI> uiList, Dictionary<string, ChainedEventsUI> chainedUIMap) {
+        public void AddChainedUI(int depth, UIElementCollection children, List<ChainedEventsUI> uiList, Dictionary<string, SourceUI> chainedUIMap) {
             if (CheckDisabled(node)) {
                 Disabled d = new Disabled(node);
                 children.Add(d);
@@ -525,16 +517,16 @@ namespace LoadInjector.RunTime.ViewModels {
             clientHub.SetConfiguredMsgPerMin(this.executionNodeID, this.uuid, s);
         }
 
-        public void SetOutput(String s) {
-            clientHub.SetLineOutput(this.executionNodeID, this.uuid, s);
+        public void SetSourceLineOutput(String s) {
+            clientHub.SetSourceLineOutput(this.executionNodeID, this.uuid, s);
         }
 
         public void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
-            clientHub.Report(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
+            clientHub.SourceReport(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
         }
 
         public void ReportChain(string v, int messagesSent) {
-            clientHub.ReportChain(this.executionNodeID, this.uuid, v, messagesSent, v, messagesSent);
+            clientHub.SourceReportChain(this.executionNodeID, this.uuid, v, messagesSent, v, messagesSent);
         }
     }
 }

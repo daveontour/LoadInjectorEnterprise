@@ -104,7 +104,7 @@ namespace LoadInjector.RunTime {
 
         private bool SetTriggers(List<Dictionary<String, String>> records, string timeStrElement, string timeFormat) {
             if (records == null || records.Count == 0) {
-                SetOutput("No data records available to process");
+                SetSourceLineOutput("No data records available to process");
                 return true;
             }
 
@@ -202,7 +202,7 @@ namespace LoadInjector.RunTime {
                 eventDistributor.AddMonitorHandler(triggerID, this);
             }
 
-            SetOutput($"{setEvents} events set for triggering.");
+            SetSourceLineOutput($"{setEvents} events set for triggering.");
 
             foreach (RateDrivenSourceController chain in chainedController) {
                 chain.Prepare(null, null, null);
@@ -253,7 +253,7 @@ namespace LoadInjector.RunTime {
 
         public bool PrepareAMS(List<FlightNode> all, List<FlightNode> arr, List<FlightNode> dep) {
             if (!lineInUse) {
-                SetOutput("No destination lines configured to use triggers for this type of flight");
+                SetSourceLineOutput("No destination lines configured to use triggers for this type of flight");
                 return true;
             }
 
@@ -413,7 +413,7 @@ namespace LoadInjector.RunTime {
                 eventDistributor.AddMonitorHandler(triggerID, this);
             }
 
-            SetOutput($"{setEvents} events set for triggering.");
+            SetSourceLineOutput($"{setEvents} events set for triggering.");
 
             Console.WriteLine($"Complete Preparing Flights and Triggers for Line: {name}.\n");
 
@@ -424,22 +424,22 @@ namespace LoadInjector.RunTime {
             foreach (TriggerRecord record in eventDistributor.triggerQueue) {
                 if (triggersInUse.Contains(record.ID) && triggersThisLine.Contains(record.ID)) {
                     if (e.Flight != null) {
-                        SetOutput($"Trigger: {e.TriggerName}. Fired for {e.Flight.airlineCode}{e.Flight.fltNumber} at {DateTime.Now}. Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
+                        SetSourceLineOutput($"Trigger: {e.TriggerName}. Fired for {e.Flight.airlineCode}{e.Flight.fltNumber} at {DateTime.Now}. Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                         return;
                     } else {
-                        SetOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. Next Event {record.ID}  at {record.TIME}.");
+                        SetSourceLineOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. Next Event {record.ID}  at {record.TIME}.");
                         return;
                     }
                 }
             }
 
-            SetOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. No further scheduled events");
+            SetSourceLineOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. No further scheduled events");
             executionController.CheckForCompletion();
         }
 
         internal void Start(TriggerRecord first) {
             if (first == null) {
-                SetOutput("No triggers utilised from this line or triggers beyond test time");
+                SetSourceLineOutput("No triggers utilised from this line or triggers beyond test time");
                 return;
             }
 
@@ -447,18 +447,18 @@ namespace LoadInjector.RunTime {
             Task.Run(() => {
                 if (first.lineUid == uid) {
                     if (first.record.Item2 != null) {
-                        SetOutput($"Next Event {first.ID} for {first.record.Item2.DisplayFlight} at {first.TIME}.");
+                        SetSourceLineOutput($"Next Event {first.ID} for {first.record.Item2.DisplayFlight} at {first.TIME}.");
                     } else {
-                        SetOutput($"Next Event {first.ID} at {first.TIME}.");
+                        SetSourceLineOutput($"Next Event {first.ID} at {first.TIME}.");
                     }
                 } else {
                     foreach (TriggerRecord record in q) {
                         if (triggersInUse.Contains(record.ID) && triggersThisLine.Contains(record.ID)) {
                             if (record.record.Item2 != null) {
-                                SetOutput($"Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
+                                SetSourceLineOutput($"Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                                 return;
                             } else {
-                                SetOutput($"Next Event {record.ID} at {record.TIME}.");
+                                SetSourceLineOutput($"Next Event {record.ID} at {record.TIME}.");
                             }
                         }
                     }
@@ -467,7 +467,7 @@ namespace LoadInjector.RunTime {
         }
 
         internal void Stop() {
-            SetOutput("Test Run Complete");
+            SetSourceLineOutput("Test Run Complete");
         }
     }
 }

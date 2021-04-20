@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 
@@ -14,7 +15,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             this.ngExecutionController = ngExecutionController;
 
             Task.Run(async delegate {
-                await Task.Delay(1000);
                 await StartListnener(hostURL);
             });
         }
@@ -23,10 +23,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             try {
                 hubConnection = new HubConnection(hostURL);
                 hubProxy = hubConnection.CreateHubProxy("MyHub");
-
-                hubProxy.On<String>("Command", command => Console.WriteLine("Command Received was {0}", command));
-
-                hubProxy.On("Prepare", (command) => Console.WriteLine("Command Received was {0}", command));
 
                 hubProxy.On("ClearAndPrepare", () => {
                     Debug.WriteLine("Client Side. ClearAndPrepare");
@@ -87,9 +83,9 @@ namespace LoadInjector.RunTime.EngineComponents {
             });
         }
 
-        internal void SetLineOutput(string executionNodeID, string uuid, string s) {
+        internal void SetSourceLineOutput(string executionNodeID, string uuid, string s) {
             Task.Run(() => {
-                this.hubProxy.Invoke("SetOutput", executionNodeID, uuid, s);
+                this.hubProxy.Invoke("SetSourceLineOutput", executionNodeID, uuid, s);
             });
         }
 
@@ -105,17 +101,25 @@ namespace LoadInjector.RunTime.EngineComponents {
             });
         }
 
-        internal void Report(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
-            //throw new NotImplementedException();
+        internal void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("SourceReport", executionNodeID, uuid, v, messagesSent, currentRate, messagesPerMinute);
+            });
         }
 
-        internal void ReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {
+        internal void SourceReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {
             // throw new NotImplementedException();
         }
 
         internal void SetButtonStatus(string executionNodeID, string uuid, bool execute, bool prepare, bool stop) {
             Task.Run(() => {
                 this.hubProxy.Invoke("SetButtonStatus", executionNodeID, uuid, execute, prepare, stop);
+            });
+        }
+
+        internal void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("DispatcherDistributeMessage", executionNodeID, rec);
             });
         }
 
@@ -169,6 +173,18 @@ namespace LoadInjector.RunTime.EngineComponents {
         internal void SetDestinationSent(string executionNodeID, string uuid, int s) {
             Task.Run(() => {
                 this.hubProxy.Invoke("SetDestinationSent", executionNodeID, uuid, s);
+            });
+        }
+
+        internal void AddSchedTrigger(string executionNodeUuid, TriggerRecord triggerRecord) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("AddSchedTrigger", executionNodeUuid, triggerRecord);
+            });
+        }
+
+        internal void SetSchedTrigger(string executionNodeUuid, List<TriggerRecord> sortedTriggers) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("SetSchedTrigger", executionNodeUuid, sortedTriggers);
             });
         }
 

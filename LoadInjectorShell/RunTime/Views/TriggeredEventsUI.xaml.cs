@@ -7,14 +7,26 @@ using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
 
-    public partial class TriggeredEventsUI : UserControl, INotifyPropertyChanged {
-        public XmlNode node;
+    public interface SourceUI {
 
-        public readonly Progress<ControllerStatusReport> controllerProgress;
+        void SetOutput(string s);
+
+        void SetActualRate(double s);
+
+        void SeConfigRate(double s);
+
+        void SetMessagesSent(double s);
+    }
+
+    public partial class TriggeredEventsUI : UserControl, SourceUI, INotifyPropertyChanged {
+        public XmlNode node;
+        private string executionNodeID;
+        private string uuid;
+
         public string LineName { get; set; }
         public string Output { get; private set; }
-        public string ActualRate { get; private set; }
-        public string ConfigRate { get; private set; }
+        public double ActualRate { get; private set; }
+        public double ConfigRate { get; private set; }
         public double MessagesSent { get; private set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -28,28 +40,28 @@ namespace LoadInjector.RunTime {
             InitializeComponent();
             DataContext = this;
             this.node = node;
-            controllerProgress = new Progress<ControllerStatusReport>(ControllerStatusChanged);
+            this.executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
+            this.uuid = node.Attributes["uuid"]?.Value;
         }
 
-        private void ControllerStatusChanged(ControllerStatusReport e) {
-            Operation op = e.Type;
+        public void SetOutput(string s) {
+            Output = s;
+            OnPropertyChanged("Output");
+        }
 
-            if ((op & Operation.Console) == Operation.Console) {
-                Output = e.OutputString;
-                OnPropertyChanged("Output");
-            }
-            if ((op & Operation.LineRate) == Operation.LineRate) {
-                ActualRate = e.OutputString;
-                OnPropertyChanged("ActualRate");
-            }
-            if ((op & Operation.LineConfigRate) == Operation.LineConfigRate) {
-                ConfigRate = e.OutputString;
-                OnPropertyChanged("ConfigRate");
-            }
-            if ((op & Operation.LineSent) == Operation.LineSent) {
-                MessagesSent = e.OutputDouble;
-                OnPropertyChanged("MessagesSent");
-            }
+        public void SetActualRate(double s) {
+            ActualRate = s;
+            OnPropertyChanged("ActualRate");
+        }
+
+        public void SeConfigRate(double s) {
+            ConfigRate = s;
+            OnPropertyChanged("ConfigRate");
+        }
+
+        public void SetMessagesSent(double s) {
+            MessagesSent = s;
+            OnPropertyChanged("MessagesSent");
         }
     }
 }

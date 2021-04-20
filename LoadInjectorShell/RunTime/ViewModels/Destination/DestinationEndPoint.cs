@@ -61,7 +61,6 @@ namespace LoadInjector.RunTime {
                 OutputString = s,
                 Type = Operation.Console
             };
-            // controllerProgress.Report(controllerStatusReport);
         }
     }
 }

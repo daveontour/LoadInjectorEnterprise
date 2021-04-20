@@ -7,10 +7,11 @@ using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
 
-    public partial class ChainedEventsUI : UserControl, INotifyPropertyChanged {
+    public partial class ChainedEventsUI : UserControl, SourceUI, INotifyPropertyChanged {
         public XmlNode node;
-        public readonly Progress<ControllerStatusReport> controllerProgress;
+
         public readonly string executionNodeID;
+
         public readonly string uuid;
 
         public string LineName { get; set; }
@@ -29,41 +30,9 @@ namespace LoadInjector.RunTime {
             InitializeComponent();
             this.DataContext = this;
             this.node = node;
-            // this.controllerProgress = new Progress<ControllerStatusReport>(ControllerStatusChanged);
             this.executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
             this.uuid = node.Attributes["uuid"]?.Value;
         }
-
-        //private void ControllerStatusChanged(ControllerStatusReport e) {
-        //    Operation op = e.Type;
-
-        //    if (op == Operation.LineReport) {
-        //        Output = e.Consolestr;
-        //        ActualRate = e.Actual;
-        //        ConfigRate = e.Config;
-        //        MessagesSent = e.Sent;
-
-        //        OnPropertyChanged("Output");
-        //        OnPropertyChanged("ActualRate");
-        //        OnPropertyChanged("ConfigRate");
-        //        OnPropertyChanged("MessagesSent");
-
-        //        return;
-        //    }
-
-        //    if ((op & Operation.Console) == Operation.Console) {
-        //        SetOutput(e.OutputString);
-        //    }
-        //    if ((op & Operation.LineRate) == Operation.LineRate) {
-        //        SetActualRate(e.OutputDouble);
-        //    }
-        //    if ((op & Operation.LineConfigRate) == Operation.LineConfigRate) {
-        //        SetConfigRate(e.OutputDouble);
-        //    }
-        //    if ((op & Operation.LineSent) == Operation.LineSent) {
-        //        SetMessagesSent(e.Sent);
-        //    }
-        //}
 
         protected void OnPropertyChanged(string propName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
@@ -87,6 +56,10 @@ namespace LoadInjector.RunTime {
         public void SetMessagesSent(double output) {
             this.MessagesSent = output;
             OnPropertyChanged("MessagesSent");
+        }
+
+        public void SeConfigRate(double s) {
+            throw new NotImplementedException();
         }
     }
 }

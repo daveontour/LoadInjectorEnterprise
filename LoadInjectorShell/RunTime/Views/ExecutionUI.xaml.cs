@@ -37,9 +37,7 @@ namespace LoadInjector.RunTime {
         public readonly List<ChainedEventsUI> chainDrivenLinesUserControls = new List<ChainedEventsUI>();
 
         public readonly Dictionary<string, LineUserControl> destUIMap = new Dictionary<string, LineUserControl>();
-        public readonly Dictionary<string, TriggeredEventsUI> ddUIMap = new Dictionary<string, TriggeredEventsUI>();
-        public readonly Dictionary<string, RateDrivenEventsUI> rateUIMap = new Dictionary<string, RateDrivenEventsUI>();
-        public readonly Dictionary<string, ChainedEventsUI> chainedUIMap = new Dictionary<string, ChainedEventsUI>();
+        public readonly Dictionary<string, SourceUI> sourceUIMap = new Dictionary<string, SourceUI>();
 
         public ObservableCollection<TriggerRecord> SchedTriggers { get; set; }
         public ObservableCollection<TriggerRecord> FiredTriggers { get; set; }
@@ -156,13 +154,7 @@ namespace LoadInjector.RunTime {
                     node.Attributes.Append(newAttribute2);
                 }
 
-                Progress<ControllerStatusReport> controllerProgress = new Progress<ControllerStatusReport>(report => {
-                    ControllerStatusChanged(report);
-                }
-                );
-
-                executionControl = new NgExecutionController(value, controllerProgress);
-                executionControl.SetExecutiuonUI(this);
+                executionControl = new NgExecutionController(value);
 
                 // Construct the UI for all the lines of execution
                 PrepareLineUI();
@@ -193,12 +185,12 @@ namespace LoadInjector.RunTime {
                 }
                 RateDrivenEventsUI lineUI = new RateDrivenEventsUI(source.node, 0);
                 GetSourcePanel().Children.Add(lineUI);
-                rateUIMap.Add(source.uuid, lineUI);
+                sourceUIMap.Add(source.uuid, lineUI);
                 rateDrivenLinesUserControls.Add(lineUI);
                 //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, chainedUIMap);
+                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, sourceUIMap);
                 }
             }
 
@@ -260,12 +252,12 @@ namespace LoadInjector.RunTime {
                 }
                 TriggeredEventsUI lineUI = new TriggeredEventsUI(source.node);
                 GetSourcePanel().Children.Add(lineUI);
-                ddUIMap.Add(source.uuid, lineUI);
+                sourceUIMap.Add(source.uuid, lineUI);
                 uiList.Add(lineUI);
                 //source.SetLineProgress(lineUI.controllerProgress);
 
                 foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, chainedUIMap);
+                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, sourceUIMap);
                 }
             }
 
@@ -323,8 +315,6 @@ namespace LoadInjector.RunTime {
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
-            //executionControl.ClearLines();
-            //_ = executionControl.PrepareAsync(true);
         }
 
         private void Cancel_Click(object sender, RoutedEventArgs e) {
@@ -340,7 +330,6 @@ namespace LoadInjector.RunTime {
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
-            // Task.Run(() => executionControl.Run());
         }
 
         public void Stop_Click(object sender, RoutedEventArgs e) {
