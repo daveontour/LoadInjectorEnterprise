@@ -138,6 +138,7 @@ namespace LoadInjector.RunTime {
         private TreeEditorViewModel myWin;
         private Timer percentCompleteTimer;
         private int duration;
+        private Timer executionTimer;
 
         public TreeEditorViewModel VM {
             get => myWin;
@@ -384,6 +385,10 @@ namespace LoadInjector.RunTime {
             try {
                 centralMessagingHub.Hub.Clients.All.Execute();
 
+                ExecuteBtn.IsEnabled = false;
+                PrepareBtn.IsEnabled = false;
+                StopBtn.IsEnabled = true;
+
                 stopWatch.Reset();
                 stopWatch.Start();
 
@@ -393,6 +398,13 @@ namespace LoadInjector.RunTime {
                     Enabled = true
                 };
                 percentCompleteTimer.Elapsed += OnSecondEvent;
+
+                executionTimer = new Timer {
+                    Interval = duration * 1000,
+                    AutoReset = false,
+                    Enabled = true
+                };
+                executionTimer.Elapsed += OnExecutionCompleteEvent;
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -401,6 +413,12 @@ namespace LoadInjector.RunTime {
         public void Stop_Click(object sender, RoutedEventArgs e) {
             try {
                 centralMessagingHub.Hub.Clients.All.Stop(true);
+                StopBtn.IsEnabled = false;
+                PrepareBtn.IsEnabled = true;
+                ExecuteBtn.IsEnabled = false;
+
+                percentCompleteTimer.Enabled = false;
+                PercentComplete = 100;
             } catch (Exception ex) {
                 Console.WriteLine($"Test Execution Manually Stopped Error {ex.Message}");
             }
@@ -438,6 +456,80 @@ namespace LoadInjector.RunTime {
                     Debug.WriteLine("Setting Percent Complete" + ex.Message);
                 }
             });
+        }
+
+        private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
+            percentCompleteTimer.Enabled = false;
+            PercentComplete = 100;
+            double elapsed = stopWatch.Elapsed.TotalSeconds;
+            int sec = stopWatch.Elapsed.Seconds;
+            int min = stopWatch.Elapsed.Minutes;
+            int hour = stopWatch.Elapsed.Hours;
+
+            string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
+            string minStr = min < 10 ? $"0{min}" : $"{min}";
+            string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
+            ElapsedString = $"{hourStr}:{minStr}:{secStr}";
+
+            OnExecutionCompleteEvent(false);
+        }
+
+        private void OnExecutionCompleteEvent(bool stopped = false) {
+            // This is an Event Handler that handles the action when the timer goes off
+            // signalling the end of the test.
+
+            try {
+                centralMessagingHub.Hub.Clients.All.Stop(false);
+                StopBtn.IsEnabled = false;
+                PrepareBtn.IsEnabled = true;
+                ExecuteBtn.IsEnabled = false;
+            } catch (Exception ex) {
+                Console.WriteLine($"Test Execution Completed Stopped Error {ex.Message}");
+            }
+
+            //try {
+            //    int sec = stopWatch.Elapsed.Seconds;
+            //    int min = stopWatch.Elapsed.Minutes;
+            //    int hour = stopWatch.Elapsed.Hours;
+
+            //    string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
+            //    string minStr = min < 10 ? $"0{min}" : $"{min}";
+            //    string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
+
+            //    stopWatch?.Stop();
+            //    eventDistributor?.Stop();
+
+            //    ClearLines();
+            //    ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
+            //    if (executedRepeats < repeats && !stopped) {
+            //        if (repetitionTimer != null) {
+            //            repetitionTimer.Enabled = false;
+            //            repetitionTimer.Stop();
+            //        }
+
+            //        ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
+            //        repetitionTimer = new Timer {
+            //            Interval = repeatRest * 1000,
+            //            AutoReset = false,
+            //            Enabled = true
+            //        };
+            //        repetitionTimer.Elapsed += NextExecution;
+
+            //        DateTime next = DateTime.Now.AddSeconds(repeatRest);
+
+            //        ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
+            //        return;
+            //    }
+
+            //    //      SetButtonStatus(false, true, false);
+            //} catch (Exception ex) {
+            //    ConsoleMsg($"Error Stopping {ex.Message}");
+            //}
+
+            //SetTriggerLabel("Available Triggers");
+            ////          SetStatusLabel("Load Injector - Execution Complete");
+
+            //ConsoleMsg("Test Execution Complete");
         }
 
         public void ControllerStatusChanged(ControllerStatusReport e) {

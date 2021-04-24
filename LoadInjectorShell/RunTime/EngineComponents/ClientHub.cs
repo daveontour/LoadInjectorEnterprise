@@ -55,9 +55,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     Console.WriteLine("Client Side. InitModel");
                     XmlDocument doc = new XmlDocument();
                     doc.LoadXml(model);
-                    Task.Run(() => {
-                        ngExecutionController.InitModel(doc);
-                    });
+                    ngExecutionController.InitModel(doc);
                 });
 
                 hubConnection.Start().Wait();

@@ -456,10 +456,6 @@ namespace LoadInjector.RunTime {
                 executedRepeats = 0;
             }
 
-            //ConsoleMsg("Load Injector - Preparing Environment");
-            //SetButtonStatus(false, false, false);
-            //PercentComplete(0, true, "00:00:00");
-
             Configure(dataModel);
             eventDistributor.Stop();
             eventDistributor.ClearHandlers();
@@ -570,14 +566,22 @@ namespace LoadInjector.RunTime {
                     }
                     line.PrepareDB();
                 }
-                ConsoleMsg("Preparing Rate Driven Injector");
-                foreach (RateDrivenSourceController line in rateDrivenLines) {
-                    line.Prepare(flights, arrflights, depflights);
-                    if (!line.InUse()) {
-                        line.SetSourceLineOutput("No Destinations Using this Source");
-                    } else {
-                        atLeastOneActive = true;
+
+                ConsoleMsg($"Preparing Rate Driven Injector  {rateDrivenLines.Count}");
+
+                try {
+                    foreach (RateDrivenSourceController line in rateDrivenLines) {
+                        bool result = line.Prepare(flights, arrflights, depflights);
+                        Console.WriteLine($"Ratre Source Prepare  = {result}");
+
+                        if (!line.InUse()) {
+                            line.SetSourceLineOutput("No Destinations Using this Source");
+                        } else {
+                            atLeastOneActive = true;
+                        }
                     }
+                } catch (Exception ex) {
+                    Console.WriteLine($"Rate Source Error  = {ex.Message}");
                 }
 
                 foreach (LineExecutionController line in destLines) {
@@ -631,16 +635,12 @@ namespace LoadInjector.RunTime {
                         Enabled = true
                     };
                     timerStart.Elapsed += OnStartEvent;
-
-                    //SetButtonStatus(false, false, false);
                 } else {
                     ConsoleMsg("Scheduled Start is in the past - immediate execution");
                     Task.Run(() => RunInternal());
                 }
 
                 ConsoleMsg($"Scheduling start for {start}");
-                //          SetStatusLabel($"Scheduled Start: {start}");
-                // SetCancelBtnShow();
             } else {
                 Task.Run(() => RunInternal());
             }
@@ -657,9 +657,6 @@ namespace LoadInjector.RunTime {
             executedRepeats++;
 
             ConsoleMsg($"Execution Repetition {executedRepeats} of {repeats}");
-            //       SetStatusLabel("Load Injector - Pre Execution");
-            // SetButtonStatus(false, false, false);
-            //SetCancelBtnHidden();
 
             bool prepareOK = true;
 
@@ -680,15 +677,11 @@ namespace LoadInjector.RunTime {
             }
 
             if (!prepareOK) {
-                // ConsoleMsg("=========>  Error  <======================");
                 ConsoleMsg("==>  Error - Could Not Prepare Destination Lines <==");
                 return;
             }
 
             ConsoleMsg($"Test Execution Start. Duration = {duration} seconds");
-            //    PercentComplete(0, false, "00:00:00");
-            //    SetButtonStatus(false, false, true);
-            //         SetStatusLabel($"Load Injector - Executing. Duration: {duration}s");
 
             Tuple<int, int, TriggerRecord> result = eventDistributor.InitTriggers(duration);
 
@@ -991,38 +984,38 @@ namespace LoadInjector.RunTime {
             // signalling the end of the test.
 
             try {
-                int sec = stopWatch.Elapsed.Seconds;
-                int min = stopWatch.Elapsed.Minutes;
-                int hour = stopWatch.Elapsed.Hours;
+                //int sec = stopWatch.Elapsed.Seconds;
+                //int min = stopWatch.Elapsed.Minutes;
+                //int hour = stopWatch.Elapsed.Hours;
 
-                string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-                string minStr = min < 10 ? $"0{min}" : $"{min}";
-                string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
+                //string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
+                //string minStr = min < 10 ? $"0{min}" : $"{min}";
+                //string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
 
                 stopWatch?.Stop();
                 eventDistributor?.Stop();
 
                 ClearLines();
                 ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
-                if (executedRepeats < repeats && !stopped) {
-                    if (repetitionTimer != null) {
-                        repetitionTimer.Enabled = false;
-                        repetitionTimer.Stop();
-                    }
+                //if (executedRepeats < repeats && !stopped) {
+                //    if (repetitionTimer != null) {
+                //        repetitionTimer.Enabled = false;
+                //        repetitionTimer.Stop();
+                //    }
 
-                    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
-                    repetitionTimer = new Timer {
-                        Interval = repeatRest * 1000,
-                        AutoReset = false,
-                        Enabled = true
-                    };
-                    repetitionTimer.Elapsed += NextExecution;
+                //    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
+                //    repetitionTimer = new Timer {
+                //        Interval = repeatRest * 1000,
+                //        AutoReset = false,
+                //        Enabled = true
+                //    };
+                //    repetitionTimer.Elapsed += NextExecution;
 
-                    DateTime next = DateTime.Now.AddSeconds(repeatRest);
+                //    DateTime next = DateTime.Now.AddSeconds(repeatRest);
 
-                    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
-                    return;
-                }
+                //    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
+                //    return;
+                //}
 
                 //      SetButtonStatus(false, true, false);
             } catch (Exception ex) {
@@ -1082,10 +1075,6 @@ namespace LoadInjector.RunTime {
         private void SetButtonStatus(bool execute, bool prepare, bool stop) {
             this.clientHub.SetButtonStatus(this.executionNodeUuid, null, execute, prepare, stop);
         }
-
-        //       private void SetStatusLabel(string label) {
-        //           clientHub.SetStatusLabel(this.executionNodeUuid, null, label);
-        //       }
 
         private void SetTriggerLabel(string label) {
             clientHub.SetTriggerLabel(this.executionNodeUuid, null, label);
