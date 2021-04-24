@@ -23,7 +23,7 @@ namespace LoadInjector.RunTime {
     public class NgExecutionController {
         public TriggerEventDistributor eventDistributor;
 
-        private readonly XmlDocument dataModel;
+        private XmlDocument dataModel;
         private readonly Stopwatch stopWatch = new Stopwatch();
 
         public readonly Logger logger = LogManager.GetCurrentClassLogger();
@@ -47,7 +47,6 @@ namespace LoadInjector.RunTime {
         private readonly List<Tuple<int, int>> flightSets = new List<Tuple<int, int>>();
 
         private Timer timer;
-        private Timer timer2;
         private Timer repetitionTimer;
         private Timer timerStart;
 
@@ -73,15 +72,15 @@ namespace LoadInjector.RunTime {
         private int executedRepeats;
         private int repeatRest;
 
-        private readonly XmlNodeList amsEventDriven;
-        private readonly XmlNodeList csvEventDriven;
-        private readonly XmlNodeList excelEventDriven;
-        private readonly XmlNodeList xmlEventDriven;
-        private readonly XmlNodeList jsonEventDriven;
-        private readonly XmlNodeList databaseEventDriven;
-        private readonly XmlNodeList rateDriven;
-        private readonly XmlNodeList amsDirect;
-        private readonly XmlNodeList destinations;
+        private XmlNodeList amsEventDriven;
+        private XmlNodeList csvEventDriven;
+        private XmlNodeList excelEventDriven;
+        private XmlNodeList xmlEventDriven;
+        private XmlNodeList jsonEventDriven;
+        private XmlNodeList databaseEventDriven;
+        private XmlNodeList rateDriven;
+        private XmlNodeList amsDirect;
+        private XmlNodeList destinations;
 
         public ClientHub clientHub;
 
@@ -100,7 +99,8 @@ namespace LoadInjector.RunTime {
    </soapenv:Body>
 </soapenv:Envelope>";
 
-        public readonly string executionNodeUuid;
+        public string executionNodeUuid;
+        //public bool slaveMode = false;
 
         //public void SetExecutiuonUI(ExecutionUI exUI) {
         //    //this.exUI = exUI;
@@ -109,16 +109,20 @@ namespace LoadInjector.RunTime {
         //    SetStatusLabel("Load Injector Execution");
         //}
 
-        public NgExecutionController(XmlDocument model) {
-            try {
-                clientHub = new ClientHub("http://localhost:6220", this);
-            } catch (Exception ex) {
-                ConsoleMsg(ex.Message);
+        private void InitController(bool startHub = true) {
+            if (startHub) {
+                try {
+                    clientHub = new ClientHub("http://localhost:6220", this);
+                } catch (Exception ex) {
+                    ConsoleMsg(ex.Message);
+                }
             }
-
             eventDistributor = new TriggerEventDistributor(this);
-            dataModel = model;
             amsDataDrivenLines.Clear();
+        }
+
+        public void InitModel(XmlDocument model) {
+            dataModel = model;
 
             List<string> triggersInUse = TriggersInUse(dataModel);
 
@@ -195,8 +199,15 @@ namespace LoadInjector.RunTime {
                 LineExecutionController line = new LineExecutionController(node, this);
                 destLines.Add(line);
             }
+        }
 
-            PercentComplete(0, false, "00:00:00");
+        public NgExecutionController(bool startHub = true) {
+            InitController(startHub);
+        }
+
+        public NgExecutionController(XmlDocument model) {
+            InitController();
+            InitModel(model);
         }
 
         private void AddDestinationControllerType(XmlNodeList nodeList, List<DataDrivenSourceController> typeList, List<string> triggersInUse) {
@@ -445,9 +456,9 @@ namespace LoadInjector.RunTime {
                 executedRepeats = 0;
             }
 
-            ConsoleMsg("Load Injector - Preparing Environment");
-            SetButtonStatus(false, false, false);
-            PercentComplete(0, true, "00:00:00");
+            //ConsoleMsg("Load Injector - Preparing Environment");
+            //SetButtonStatus(false, false, false);
+            //PercentComplete(0, true, "00:00:00");
 
             Configure(dataModel);
             eventDistributor.Stop();
@@ -472,7 +483,7 @@ namespace LoadInjector.RunTime {
                         ConsoleMsg("== AMS Connectivity Verified ==");
                     } else {
                         ConsoleMsg("== Unable to connect to AMS. Preparation Aborted==");
-                        SetButtonStatus(false, true, false);
+                        //                      SetButtonStatus(false, true, false);
                         prepareOK = false;
                     }
 
@@ -480,7 +491,7 @@ namespace LoadInjector.RunTime {
                     bool amsOK = GetFlightsAsync().Result;
                     if (!amsOK) {
                         ConsoleMsg("== Unable to connect to AMS. Preparation Aborted==");
-                        SetButtonStatus(false, true, false);
+                        //                       SetButtonStatus(false, true, false);
                         prepareOK = false;
                     } else {
                         ConsoleMsg($"=== {flights.Count} Flights Retrieved from AMS ===");
@@ -579,19 +590,16 @@ namespace LoadInjector.RunTime {
                     }
                 }
 
-                SetStatusLabel("Load Injector - Preparation Complete");
-                SetButtonStatus(true, true, false);
+                //            SetStatusLabel("Load Injector - Preparation Complete");
                 ConsoleMsg("Preparation Phase Complete");
             } else {
-                SetStatusLabel("Load Injector - Preparation Error");
-                SetButtonStatus(false, true, false);
+                //             SetStatusLabel("Load Injector - Preparation Error");
                 ConsoleMsg("Error: Preparing Destination");
             }
 
             if (!atLeastOneActive) {
-                SetStatusLabel("Load Injector - No Active Destinations In Use");
+                //              SetStatusLabel("Load Injector - No Active Destinations In Use");
                 ConsoleMsg("Preparation Phase Complete - No Active Destinaion Lines");
-                SetButtonStatus(false, true, false);
                 return false;
             }
 
@@ -624,15 +632,15 @@ namespace LoadInjector.RunTime {
                     };
                     timerStart.Elapsed += OnStartEvent;
 
-                    SetButtonStatus(false, false, false);
+                    //SetButtonStatus(false, false, false);
                 } else {
                     ConsoleMsg("Scheduled Start is in the past - immediate execution");
                     Task.Run(() => RunInternal());
                 }
 
                 ConsoleMsg($"Scheduling start for {start}");
-                SetStatusLabel($"Scheduled Start: {start}");
-                SetCancelBtnShow();
+                //          SetStatusLabel($"Scheduled Start: {start}");
+                // SetCancelBtnShow();
             } else {
                 Task.Run(() => RunInternal());
             }
@@ -642,16 +650,16 @@ namespace LoadInjector.RunTime {
             if (executedRepeats >= repeats) {
                 executedRepeats = 0;
                 ConsoleMsg("Maximum Number of Configured Repetitions Met");
-                SetButtonStatus(false, true, false);
+                // SetButtonStatus(false, true, false);
                 return;
             }
 
             executedRepeats++;
 
             ConsoleMsg($"Execution Repetition {executedRepeats} of {repeats}");
-            SetStatusLabel("Load Injector - Pre Execution");
-            SetButtonStatus(false, false, false);
-            SetCancelBtnHidden();
+            //       SetStatusLabel("Load Injector - Pre Execution");
+            // SetButtonStatus(false, false, false);
+            //SetCancelBtnHidden();
 
             bool prepareOK = true;
 
@@ -678,9 +686,9 @@ namespace LoadInjector.RunTime {
             }
 
             ConsoleMsg($"Test Execution Start. Duration = {duration} seconds");
-            PercentComplete(0, false, "00:00:00");
-            SetButtonStatus(false, false, true);
-            SetStatusLabel($"Load Injector - Executing. Duration: {duration}s");
+            //    PercentComplete(0, false, "00:00:00");
+            //    SetButtonStatus(false, false, true);
+            //         SetStatusLabel($"Load Injector - Executing. Duration: {duration}s");
 
             Tuple<int, int, TriggerRecord> result = eventDistributor.InitTriggers(duration);
 
@@ -745,13 +753,6 @@ namespace LoadInjector.RunTime {
                 Enabled = true
             };
             timer.Elapsed += OnTimedEvent;
-
-            timer2 = new Timer {
-                Interval = 1000,
-                AutoReset = true,
-                Enabled = true
-            };
-            timer2.Elapsed += OnSecondEvent;
 
             CheckForCompletion();
         }
@@ -818,7 +819,7 @@ namespace LoadInjector.RunTime {
                 Debug.WriteLine(ex.Message);
             }
 
-            SetButtonStatus(false, true, false);
+            //   SetButtonStatus(false, true, false);
 
             try {
                 timer?.Stop();
@@ -850,7 +851,7 @@ namespace LoadInjector.RunTime {
             }
 
             eventDistributor?.Stop();
-            SetButtonStatus(false, true, false);
+            //    SetButtonStatus(false, true, false);
             ConsoleMsg("Scheduled Start Cancelled");
         }
 
@@ -998,9 +999,6 @@ namespace LoadInjector.RunTime {
                 string minStr = min < 10 ? $"0{min}" : $"{min}";
                 string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
 
-                timer2?.Stop();
-                PercentComplete(100, false, $"{hourStr}:{minStr}:{secStr}");
-
                 stopWatch?.Stop();
                 eventDistributor?.Stop();
 
@@ -1026,13 +1024,13 @@ namespace LoadInjector.RunTime {
                     return;
                 }
 
-                SetButtonStatus(false, true, false);
+                //      SetButtonStatus(false, true, false);
             } catch (Exception ex) {
                 ConsoleMsg($"Error Stopping {ex.Message}");
             }
 
             SetTriggerLabel("Available Triggers");
-            SetStatusLabel("Load Injector - Execution Complete");
+            //          SetStatusLabel("Load Injector - Execution Complete");
 
             ConsoleMsg("Test Execution Complete");
         }
@@ -1076,43 +1074,18 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        private void OnSecondEvent(Object source, ElapsedEventArgs e) {
-            double elapsed = stopWatch.Elapsed.TotalSeconds;
-            int sec = stopWatch.Elapsed.Seconds;
-
-            if (sec % Parameters.PROGRESSEPOCH != 0) {
-                return;
-            }
-
-            double percentage = 100 * (elapsed / duration);
-            int value = Convert.ToInt32(percentage);
-
-            int min = stopWatch.Elapsed.Minutes;
-            int hour = stopWatch.Elapsed.Hours;
-
-            string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-            string minStr = min < 10 ? $"0{min}" : $"{min}";
-            string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
-
-            PercentComplete(value, false, $"{hourStr}:{minStr}:{secStr}");
-        }
-
         private void OnStartEvent(Object source, ElapsedEventArgs e) {
             ConsoleMsg("--- Scheduled Start Time ---");
             Task.Run(() => RunInternal());
-        }
-
-        private void PercentComplete(int percent, bool clearConsole = false, string timestr = null) {
-            this.clientHub.PercentComplete(this.executionNodeUuid, null, percent, clearConsole, timestr);
         }
 
         private void SetButtonStatus(bool execute, bool prepare, bool stop) {
             this.clientHub.SetButtonStatus(this.executionNodeUuid, null, execute, prepare, stop);
         }
 
-        private void SetStatusLabel(string label) {
-            clientHub.SetStatusLabel(this.executionNodeUuid, null, label);
-        }
+        //       private void SetStatusLabel(string label) {
+        //           clientHub.SetStatusLabel(this.executionNodeUuid, null, label);
+        //       }
 
         private void SetTriggerLabel(string label) {
             clientHub.SetTriggerLabel(this.executionNodeUuid, null, label);
@@ -1124,14 +1097,6 @@ namespace LoadInjector.RunTime {
 
         private void ClearTriggerData() {
             clientHub.ClearTriggerData(this.executionNodeUuid, null);
-        }
-
-        private void SetCancelBtnHidden() {
-            clientHub.SetCancelBtnHidden(this.executionNodeUuid, null);
-        }
-
-        private void SetCancelBtnShow() {
-            clientHub.SetCancelBtnShow(this.executionNodeUuid, null);
         }
 
         private void LockVM(bool v) {

@@ -8,12 +8,16 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using System.Xml;
+using System.Xml.Linq;
 using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
@@ -24,6 +28,8 @@ namespace LoadInjector.RunTime {
         private const int consoleLength = 16000;
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private readonly Stopwatch stopWatch = new Stopwatch();
 
         public readonly List<LineUserControl> amsLinesUserControls = new List<LineUserControl>();
         public readonly List<LineUserControl> directLinesUserControls = new List<LineUserControl>();
@@ -48,7 +54,7 @@ namespace LoadInjector.RunTime {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
-        private ControlWriter consoleWriter;
+        public ControlWriter consoleWriter;
 
         public StackPanel GetLinePanel() => Lines;
 
@@ -130,6 +136,8 @@ namespace LoadInjector.RunTime {
         }
 
         private TreeEditorViewModel myWin;
+        private Timer percentCompleteTimer;
+        private int duration;
 
         public TreeEditorViewModel VM {
             get => myWin;
@@ -154,7 +162,20 @@ namespace LoadInjector.RunTime {
                     node.Attributes.Append(newAttribute2);
                 }
 
-                executionControl = new NgExecutionController(value);
+                XDocument doc = XDocument.Parse(dataModel.OuterXml);
+                try {
+                    duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
+                } catch (Exception) {
+                    duration = 15;
+                }
+
+                //try {
+                //    centralMessagingHub.Hub.Clients.All.InitModel(dataModel);
+                //} catch (Exception ex) {
+                //    Console.WriteLine(ex.Message);
+                //}
+
+                //executionControl = new NgExecutionController(dataModel);
 
                 // Construct the UI for all the lines of execution
                 PrepareLineUI();
@@ -164,33 +185,44 @@ namespace LoadInjector.RunTime {
         public void PrepareLineUI() {
             //Add the data driven sources
             bool hasAMDDDLines = false;
+
+            XmlNodeList amsEventDriven = dataModel.SelectNodes("//amsdatadriven");
+            XmlNodeList csvEventDriven = dataModel.SelectNodes("//csvdatadriven");
+            XmlNodeList excelEventDriven = dataModel.SelectNodes("//exceldatadriven");
+            XmlNodeList xmlEventDriven = dataModel.SelectNodes("//xmldatadriven");
+            XmlNodeList jsonEventDriven = dataModel.SelectNodes("//jsondatadriven");
+            XmlNodeList databaseEventDriven = dataModel.SelectNodes("//databasedatadriven");
+            XmlNodeList rateDriven = dataModel.SelectNodes("//ratedriven");
+            XmlNodeList amsDirect = dataModel.SelectNodes("//amsdirect");
+            XmlNodeList destinations = dataModel.SelectNodes("//destination");
+
             if (Parameters.SITAAMS) {
-                hasAMDDDLines = AddDataDrivenUI("AMS Data Driven Source", executionControl.amsDataDrivenLines, amsDataDrivenLinesUserControls);
+                hasAMDDDLines = AddDataDrivenUI("AMS Data Driven Source", amsEventDriven, amsDataDrivenLinesUserControls);
             }
-            bool hasCSV = AddDataDrivenUI("CSV Data Driven Source", executionControl.csvDataDrivenLines, csvDataDrivenLinesUserControls);
-            bool hasExcel = AddDataDrivenUI("Excel Data Driven Source", executionControl.excelDataDrivenLines, excelDataDrivenLinesUserControls);
-            bool hasXML = AddDataDrivenUI("XML Data Driven Source", executionControl.xmlDataDrivenLines, xmlDataDrivenLinesUserControls);
-            bool hasJSON = AddDataDrivenUI("JSON Data Driven Source", executionControl.jsonDataDrivenLines, jsonDataDrivenLinesUserControls);
-            bool hasDB = AddDataDrivenUI("Database Data Driven Source", executionControl.databaseDataDrivenLines, databaseDataDrivenLinesUserControls);
+            bool hasCSV = AddDataDrivenUI("CSV Data Driven Source", csvEventDriven, csvDataDrivenLinesUserControls);
+            bool hasExcel = AddDataDrivenUI("Excel Data Driven Source", excelEventDriven, excelDataDrivenLinesUserControls);
+            bool hasXML = AddDataDrivenUI("XML Data Driven Source", xmlEventDriven, xmlDataDrivenLinesUserControls);
+            bool hasJSON = AddDataDrivenUI("JSON Data Driven Source", jsonEventDriven, jsonDataDrivenLinesUserControls);
+            bool hasDB = AddDataDrivenUI("Database Data Driven Source", databaseEventDriven, databaseDataDrivenLinesUserControls);
 
             //Add the rateDataDriven lines
             if (rateDrivenLinesUserControls.Count > 0) {
                 AddSourceLabel("Rate Driven Source");
             }
-            foreach (RateDrivenSourceController source in executionControl.rateDrivenLines) {
-                if (CheckDisabled(source.node)) {
-                    Disabled d = new Disabled(source.node);
+            foreach (XmlNode node in rateDriven) {
+                if (CheckDisabled(node)) {
+                    Disabled d = new Disabled(node);
                     GetSourcePanel().Children.Add(d);
                     continue;
                 }
-                RateDrivenEventsUI lineUI = new RateDrivenEventsUI(source.node, 0);
+                RateDrivenEventsUI lineUI = new RateDrivenEventsUI(node, 0);
                 GetSourcePanel().Children.Add(lineUI);
-                sourceUIMap.Add(source.uuid, lineUI);
+                sourceUIMap.Add(node.Attributes["uuid"].Value, lineUI);
                 rateDrivenLinesUserControls.Add(lineUI);
                 //source.SetLineProgress(lineUI.controllerProgress);
 
-                foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, sourceUIMap);
+                foreach (XmlNode ch in node.SelectNodes("./chained")) {
+                    this.AddChainedUI(1, ch);
                 }
             }
 
@@ -204,60 +236,67 @@ namespace LoadInjector.RunTime {
 
             if (Parameters.SITAAMS) {
                 // Add the AMS Direct Injection Lines
-                if (executionControl.amsLines.Count > 0) {
+                if (amsDirect.Count > 0) {
                     AddLabel("AMS Direct Update Destinations");
                 }
-                foreach (AmsDirectExecutionController direct in executionControl.amsLines) {
-                    if (CheckDisabled(direct.config)) {
-                        Disabled d = new Disabled(direct.config);
+                foreach (XmlNode node in amsDirect) {
+                    if (CheckDisabled(node)) {
+                        Disabled d = new Disabled(node);
                         GetLinePanel().Children.Add(d);
                         continue;
                     }
-                    LineUserControl lineUI = new LineUserControl(direct.config);
+                    LineUserControl lineUI = new LineUserControl(node);
                     GetLinePanel().Children.Add(lineUI);
                     amsLinesUserControls.Add(lineUI);
-                    // direct.SetLineProgress(lineUI.controllerProgress);
                 }
             }
 
             // Add the Destination Lines
-            if (executionControl.destLines.Count > 0) {
+            if (destinations.Count > 0) {
                 AddLabel("Destinations");
             }
-            foreach (LineExecutionController cnt in executionControl.destLines) {
-                if (CheckDisabled(cnt.config)) {
-                    Disabled d = new Disabled(cnt.config);
+            foreach (XmlNode node in destinations) {
+                if (CheckDisabled(node)) {
+                    Disabled d = new Disabled(node);
                     GetLinePanel().Children.Add(d);
                     continue;
                 }
-                LineUserControl lineUI = new LineUserControl(cnt.config);
+                LineUserControl lineUI = new LineUserControl(node);
                 GetLinePanel().Children.Add(lineUI);
                 directLinesUserControls.Add(lineUI);
-                destUIMap.Add(cnt.uuid, lineUI);
-                // cnt.SetLineProgress(lineUI.controllerProgress);
+                destUIMap.Add(node.Attributes["uuid"].Value, lineUI);
             }
         }
 
-        private bool AddDataDrivenUI(String label, List<DataDrivenSourceController> sourceList, List<TriggeredEventsUI> uiList) {
+        public void AddChainedUI(int depth, XmlNode node) {
+            ChainedEventsUI chainUI = new ChainedEventsUI(node, depth);
+            GetSourcePanel().Children.Add(chainUI);
+            chainDrivenLinesUserControls.Add(chainUI);
+            sourceUIMap.Add(chainUI.uuid, chainUI);
+            foreach (XmlNode ch in node.SelectNodes("./chained")) {
+                this.AddChainedUI(depth + 1, ch);
+            }
+        }
+
+        private bool AddDataDrivenUI(String label, XmlNodeList sourceList, List<TriggeredEventsUI> uiList) {
             bool hasLines = false;
             if (sourceList.Count > 0) {
                 AddSourceLabel(label);
                 hasLines = true;
             }
-            foreach (DataDrivenSourceController source in sourceList) {
-                if (CheckDisabled(source.node)) {
-                    Disabled d = new Disabled(source.node);
+            foreach (XmlNode source in sourceList) {
+                if (CheckDisabled(source)) {
+                    Disabled d = new Disabled(source);
                     GetSourcePanel().Children.Add(d);
                     continue;
                 }
-                TriggeredEventsUI lineUI = new TriggeredEventsUI(source.node);
+                TriggeredEventsUI lineUI = new TriggeredEventsUI(source);
                 GetSourcePanel().Children.Add(lineUI);
-                sourceUIMap.Add(source.uuid, lineUI);
+                sourceUIMap.Add(source.Attributes["uuid"].Value, lineUI);
                 uiList.Add(lineUI);
-                //source.SetLineProgress(lineUI.controllerProgress);
 
-                foreach (RateDrivenSourceController chain in source.chainedController) {
-                    chain.AddChainedUI(1, GetSourcePanel().Children, chainDrivenLinesUserControls, sourceUIMap);
+                foreach (XmlNode ch in source.SelectNodes("./chained")) {
+                    this.AddChainedUI(1, ch);
                 }
             }
 
@@ -278,7 +317,7 @@ namespace LoadInjector.RunTime {
 
         public void ExecutionWindow_Closing(object sender, CancelEventArgs e) {
             try {
-                executionControl.Stop();
+                centralMessagingHub.Hub.Clients.All.Stop();
             } catch (Exception) {
                 // NO-OP
             }
@@ -310,7 +349,18 @@ namespace LoadInjector.RunTime {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             outputConsole.Clear();
 
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    CentralMessagingHub.executionUI.ExecuteBtn.IsEnabled = false;
+                    CentralMessagingHub.executionUI.PrepareBtn.IsEnabled = false;
+                    CentralMessagingHub.executionUI.StopBtn.IsEnabled = false;
+                } catch (Exception ex) {
+                    Console.WriteLine("Setting button status error. " + ex.Message);
+                }
+            });
+
             try {
+                centralMessagingHub.Hub.Clients.All.InitModel(dataModel.OuterXml);
                 centralMessagingHub.Hub.Clients.All.ClearAndPrepare();
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -321,12 +371,28 @@ namespace LoadInjector.RunTime {
             this.StatusLabel = null;
             CancelBtn.IsEnabled = false;
             CancelBtn.Visibility = Visibility.Hidden;
-            executionControl.Cancel();
+
+            try {
+                centralMessagingHub.Hub.Clients.All.Cancel();
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+            //executionControl.Cancel();
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e) {
             try {
                 centralMessagingHub.Hub.Clients.All.Execute();
+
+                stopWatch.Reset();
+                stopWatch.Start();
+
+                percentCompleteTimer = new Timer {
+                    Interval = 1000,
+                    AutoReset = true,
+                    Enabled = true
+                };
+                percentCompleteTimer.Elapsed += OnSecondEvent;
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -343,7 +409,35 @@ namespace LoadInjector.RunTime {
 
         private void OutputConsole_Initialized(object sender, EventArgs e) {
             consoleWriter = new ControlWriter(outputConsole);
-            Console.SetOut(consoleWriter);
+            //          Console.SetOut(consoleWriter);
+        }
+
+        private void OnSecondEvent(Object source, ElapsedEventArgs e) {
+            double elapsed = stopWatch.Elapsed.TotalSeconds;
+            int sec = stopWatch.Elapsed.Seconds;
+
+            if (sec % Parameters.PROGRESSEPOCH != 0) {
+                return;
+            }
+
+            double percentage = 100 * (elapsed / duration);
+            int value = Convert.ToInt32(percentage);
+
+            int min = stopWatch.Elapsed.Minutes;
+            int hour = stopWatch.Elapsed.Hours;
+
+            string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
+            string minStr = min < 10 ? $"0{min}" : $"{min}";
+            string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
+
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    PercentComplete = value;
+                    ElapsedString = $"{hourStr}:{minStr}:{secStr}";
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Percent Complete" + ex.Message);
+                }
+            });
         }
 
         public void ControllerStatusChanged(ControllerStatusReport e) {
@@ -388,7 +482,11 @@ namespace LoadInjector.RunTime {
 
         private void Window_Closing(object sender, CancelEventArgs e) {
             try {
-                executionControl.Stop();
+                try {
+                    centralMessagingHub.Hub.Clients.All.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
                 VM.LockExecution = false;
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);

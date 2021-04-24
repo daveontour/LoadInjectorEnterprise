@@ -212,22 +212,6 @@ namespace LoadInjector.RunTime.ViewModels {
             }
         }
 
-        public void AddChainedUI(int depth, UIElementCollection children, List<ChainedEventsUI> uiList, Dictionary<string, SourceUI> chainedUIMap) {
-            if (CheckDisabled(node)) {
-                Disabled d = new Disabled(node);
-                children.Add(d);
-                return;
-            }
-            ChainedEventsUI lineUI = new ChainedEventsUI(node, depth);
-            children.Add(lineUI);
-            chainedUIMap.Add(lineUI.uuid, lineUI);
-            uiList.Add(lineUI);
-            //SetLineProgress(lineUI.controllerProgress);
-            foreach (RateDrivenSourceController chain in chainedController) {
-                chain.AddChainedUI(depth + 1, children, uiList, chainedUIMap);
-            }
-        }
-
         private bool CheckDisabled(XmlNode node) {
             bool disabled = false;
             if (node.Attributes["disabled"] != null) {

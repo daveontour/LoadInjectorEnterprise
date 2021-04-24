@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents {
 
@@ -14,43 +15,80 @@ namespace LoadInjector.RunTime.EngineComponents {
         public ClientHub(string hostURL, NgExecutionController ngExecutionController) {
             this.ngExecutionController = ngExecutionController;
 
+            this.ConfigureHub(hostURL);
+
             Task.Run(async delegate {
-                await StartListnener(hostURL);
+                StartSignalRClientHub();
             });
         }
 
-        public async Task StartListnener(string hostURL) {
+        public void ConfigureHub(string hostURL) {
             try {
                 hubConnection = new HubConnection(hostURL);
                 hubProxy = hubConnection.CreateHubProxy("MyHub");
 
                 hubProxy.On("ClearAndPrepare", () => {
-                    Debug.WriteLine("Client Side. ClearAndPrepare");
+                    Console.WriteLine("Client Side. ClearAndPrepare");
                     try {
-                        ngExecutionController.PrepareAsync().Wait();
+                        bool readyToRun = ngExecutionController.PrepareAsync().Result;
+                        ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
                     } catch (Exception ex) {
-                        Debug.WriteLine("error in client Prepare Aync " + ex.Message);
+                        Console.WriteLine("Error in client Prepare Aync " + ex.Message);
                     }
                 });
                 hubProxy.On("Execute", () => {
-                    Debug.WriteLine("Client Side. Execute");
+                    Console.WriteLine("Client Side. Execute");
                     ngExecutionController.Run();
                 });
 
                 hubProxy.On("Stop", (mode) => {
-                    Debug.WriteLine("Client Side. Stop");
+                    Console.WriteLine("Client Side. Stop");
                     ngExecutionController.Stop(mode);
                 });
 
+                hubProxy.On("Cancel", (mode) => {
+                    Console.WriteLine("Client Side. Cancel");
+                    ngExecutionController.Cancel();
+                });
+
+                hubProxy.On("InitModel", (model) => {
+                    Console.WriteLine("Client Side. InitModel");
+                    XmlDocument doc = new XmlDocument();
+                    doc.LoadXml(model);
+                    Task.Run(() => {
+                        ngExecutionController.InitModel(doc);
+                    });
+                });
+
                 hubConnection.Start().Wait();
-                Debug.WriteLine(hubConnection.State);
+
+                Console.WriteLine(hubConnection.State);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
         }
 
-        private void PrepareReceived() {
-            ngExecutionController.PrepareAsync();
+        public async Task StartSignalRClientHub() {
+            bool started = false;
+
+            while (!started) {
+                try {
+                    hubConnection.Start().Wait();
+                    Console.WriteLine(hubConnection.State);
+                    if (hubConnection.State == ConnectionState.Connected) {
+                        started = true;
+                    }
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                    continue;
+                }
+            }
+        }
+
+        internal void ReadyToRun(string executionNodeID, bool ready) {
+            Task.Run(() => {
+                this.hubProxy.Invoke("ReadyToRun", executionNodeID, ready);
+            });
         }
 
         internal void SetMsgPerMin(string executionNodeID, string uuid, string s) {
@@ -91,7 +129,12 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void ConsoleMsg(string executionNodeID, string uuid, string s) {
             Task.Run(() => {
-                this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, s);
+                Console.WriteLine($"ConsoleMag: {uuid}, {s}");
+                try {
+                    this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, s);
+                } catch (Exception ex) {
+                    Console.WriteLine($"Console Message Error. {ex.Message}");
+                }
             });
         }
 
@@ -123,24 +166,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             });
         }
 
-        internal void PercentComplete(string executionNodeID, string uuid, int percent, bool clearConsole, string timestr) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("PercentComplete", executionNodeID, uuid, percent, clearConsole, timestr);
-            });
-        }
-
-        internal void SetCancelBtnHidden(string executionNodeID, string uuid) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("SetCancelBtnHidden", executionNodeID, uuid);
-            });
-        }
-
-        internal void SetCancelBtnShow(string executionNodeID, string uuid) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("SetCancelBtnShow", executionNodeID, uuid);
-            });
-        }
-
         internal void LockVM(string executionNodeID, string uuid, bool l) {
             Task.Run(() => {
                 this.hubProxy.Invoke("LockVM", executionNodeID, uuid, l);
@@ -148,7 +173,7 @@ namespace LoadInjector.RunTime.EngineComponents {
         }
 
         internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
-            Debug.WriteLine($"Client Side Destination report {uuid}, sent {messagesSent}, rate {rate}");
+            Console.WriteLine($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
             Task.Run(() => {
                 try {
                     this.hubProxy.Invoke("SendDestinationReport", executionNodeID, uuid, messagesSent, rate);

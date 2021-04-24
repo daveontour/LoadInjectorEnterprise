@@ -334,7 +334,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool Prepare(List<FlightNode> flights, List<FlightNode> arrflights, List<FlightNode> depflights) {
-            Report("Prepare", 0, 0, messagesPerMinute);
+            // Report("Prepare", 0, 0, messagesPerMinute);
 
             if (!lineInUse) {
                 SetSourceLineOutput("No destination lines are configured to use this source");

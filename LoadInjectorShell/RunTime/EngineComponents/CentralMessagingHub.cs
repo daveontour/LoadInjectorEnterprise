@@ -31,7 +31,11 @@ namespace LoadInjector.Runtime.EngineComponents {
             // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
             // for more information.
             string url = "http://localhost:6220";
-            WebApp.Start<StartupHub>(url);
+            try {
+                WebApp.Start<StartupHub>(url);
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 
@@ -55,7 +59,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {
-            Console.WriteLine(message);
+            CentralMessagingHub.executionUI.consoleWriter.WriteLine(message);
         }
 
         public void SetStatusLabel(string executionnodeID, string node, string message) {
@@ -63,7 +67,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                 try {
                     CentralMessagingHub.executionUI.StatusLabel = message;
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
+                    Debug.WriteLine("Setting status label error. " + ex.Message);
                 }
             });
         }
@@ -74,7 +78,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     var ui = CentralMessagingHub.executionUI.sourceUIMap[uuid];
                     ui?.SetOutput(s);
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
+                    Debug.WriteLine("Setting Source Line error. " + ex.Message);
                 }
             });
         }
@@ -87,7 +91,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     ui?.SetMessagesSent(messagesSent);
                     ui?.SetActualRate(currentRate);
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
+                    Debug.WriteLine("Setting Source Report error. " + ex.Message);
                 }
             });
         }
@@ -97,13 +101,13 @@ namespace LoadInjector.Runtime.EngineComponents {
                 try {
                     CentralMessagingHub.executionUI.TriggerLabel = message;
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
+                    Debug.WriteLine("Setting Trigger Label error. " + ex.Message);
                 }
             });
         }
 
         public void SetButtonStatus(string executionnodeID, string node, bool execute, bool prepare, bool stop) {
-            Debug.WriteLine($"Set Button Status - Host execute: {execute}, prepare:{prepare}, stop:{stop}");
+            Console.WriteLine($"Set Button Status - Host execute: {execute}, prepare:{prepare}, stop:{stop}");
 
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
@@ -116,22 +120,14 @@ namespace LoadInjector.Runtime.EngineComponents {
             });
         }
 
-        public void SetCancelBtnHidden(string executionnodeID, string node) {
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    CentralMessagingHub.executionUI.CancelBtn.IsEnabled = false;
-                    CentralMessagingHub.executionUI.CancelBtn.Visibility = Visibility.Hidden;
-                } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
-                }
-            });
-        }
+        public void ReadyToRun(string executionNodeID, bool ready) {
+            CentralMessagingHub.executionUI.consoleWriter.WriteLine($"Ready To Run = {ready}");
 
-        public void SetCancelBtnShow(string executionnodeID, string node) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    CentralMessagingHub.executionUI.CancelBtn.IsEnabled = true;
-                    CentralMessagingHub.executionUI.CancelBtn.Visibility = Visibility.Visible;
+                    CentralMessagingHub.executionUI.ExecuteBtn.IsEnabled = true;
+                    CentralMessagingHub.executionUI.PrepareBtn.IsEnabled = true;
+                    CentralMessagingHub.executionUI.StopBtn.IsEnabled = false;
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting button status error. " + ex.Message);
                 }
@@ -144,7 +140,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.VM.LockExecution = l;
                     CentralMessagingHub.executionUI.CancelBtn.Visibility = Visibility.Visible;
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
+                    Debug.WriteLine("Setting LOCKVM error. " + ex.Message);
                 }
             });
         }
@@ -158,20 +154,6 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
                 } catch (Exception ex) {
                     Debug.WriteLine("Clearing Trigger Data error. " + ex.Message);
-                }
-            });
-        }
-
-        public void PercentComplete(string executionNodeID, string uuid, int percent, bool clearConsole, string timestr) {
-
-            Debug.WriteLine("----> setting Percent Complete  ");
-
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    CentralMessagingHub.executionUI.PercentComplete = percent;
-                    CentralMessagingHub.executionUI.ElapsedString = timestr;
-                } catch (Exception ex) {
-                    Debug.WriteLine("SettingPercent Complete error. " + ex.Message);
                 }
             });
         }
@@ -238,7 +220,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     ui.Sent(messagesSent);
                     ui.SetRate(rate);
                 } catch (Exception ex) {
-                    Debug.WriteLine("Setting Dest sent error. " + ex.Message);
+                    Debug.WriteLine("Setting Dest Report error. " + ex.Message);
                 }
             });
         }
@@ -252,7 +234,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
                 });
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine("Dispatcher Distribute Error " + ex.Message);
             }
         }
 
@@ -262,7 +244,7 @@ namespace LoadInjector.Runtime.EngineComponents {
                     CentralMessagingHub.executionUI.SchedTriggers.Add(triggerRecord);
                 });
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                Debug.WriteLine("Add Sched Triggers " + ex.Message);
             }
         }
 
@@ -282,17 +264,17 @@ namespace LoadInjector.Runtime.EngineComponents {
         private static readonly NLog.Logger logger = NLog.LogManager.GetCurrentClassLogger();
 
         protected override bool OnBeforeIncoming(IHubIncomingInvokerContext context) {
-            Debug.WriteLine("=> Invoking " + context.MethodDescriptor.Name + " on hub " + context.MethodDescriptor.Hub.Name);
+            Console.WriteLine("=> Invoking " + context.MethodDescriptor.Name + " on hub " + context.MethodDescriptor.Hub.Name);
             return base.OnBeforeIncoming(context);
         }
 
         protected override bool OnBeforeOutgoing(IHubOutgoingInvokerContext context) {
-            Debug.WriteLine("<= Invoking " + context.Invocation.Method + " on client hub " + context.Invocation.Hub);
+            Console.WriteLine("<= Invoking " + context.Invocation.Method + " on client hub " + context.Invocation.Hub);
             return base.OnBeforeOutgoing(context);
         }
 
         protected override bool OnBeforeConnect(IHub hub) {
-            Debug.WriteLine("<= Before Connect ");
+            Console.WriteLine("<= Before Connect ");
             return base.OnBeforeConnect(hub);
         }
     }
