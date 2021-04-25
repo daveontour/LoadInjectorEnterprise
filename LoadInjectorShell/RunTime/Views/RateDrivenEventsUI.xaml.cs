@@ -19,6 +19,8 @@ namespace LoadInjector.RunTime {
 
         public int ChainedDepth { get; private set; }
 
+        public int SentSeqNumber { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public RateDrivenEventsUI(XmlNode node, int chaindepth) {
@@ -51,9 +53,14 @@ namespace LoadInjector.RunTime {
             OnPropertyChanged("ConfigRate");
         }
 
-        public void SetMessagesSent(double s) {
+        public void SetMessagesSent(int s) {
+            SentSeqNumber = s;
             MessagesSent = s;
             OnPropertyChanged("MessagesSent");
+        }
+
+        public int GetSentSeqNum() {
+            return SentSeqNumber;
         }
     }
 }

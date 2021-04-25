@@ -87,6 +87,8 @@ namespace LoadInjector.RunTime {
         public string DestType { get; set; }
         public string LineType { get; set; }
 
+        public int SentSeqNumber { get; set; }
+
         public string MsgPerMin {
             get {
                 if (triggerType == "trigger") {
@@ -131,6 +133,7 @@ namespace LoadInjector.RunTime {
 
         public void Sent(int num) {
             MsgSent = num;
+            SentSeqNumber = num;  // Used to protect against out of sequence Messages
             OnPropertyChanged("MsgSent");
         }
 

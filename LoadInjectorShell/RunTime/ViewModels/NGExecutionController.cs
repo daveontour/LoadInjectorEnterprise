@@ -47,7 +47,8 @@ namespace LoadInjector.RunTime {
         private readonly List<Tuple<int, int>> flightSets = new List<Tuple<int, int>>();
 
         private Timer timer;
-        private Timer repetitionTimer;
+
+        //       private Timer repetitionTimer;
         private Timer timerStart;
 
         private int duration = -1;
@@ -174,7 +175,7 @@ namespace LoadInjector.RunTime {
                 flightSets.Add(line.GetFlightSet());
                 if (!line.ConfigOK) {
                     ConsoleMsg("Error: Configuration is not valid");
-                    SetButtonStatus(false, false, false);
+                    //  SetButtonStatus(false, false, false);
                 }
             }
 
@@ -224,7 +225,7 @@ namespace LoadInjector.RunTime {
                 flightSets.Add(line.GetFlightSet());
                 if (!line.ConfigOK) {
                     ConsoleMsg("Error: Configuration is not valid");
-                    SetButtonStatus(false, false, false);
+                    //SetButtonStatus(false, false, false);
                 }
             }
         }
@@ -315,23 +316,23 @@ namespace LoadInjector.RunTime {
         public void Configure(XmlDocument xDoc = null) {
             XDocument doc = XDocument.Parse(xDoc.OuterXml);
 
-            try {
-                duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
-            } catch (Exception) {
-                duration = 15;
-            }
+            //try {
+            //    duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
+            //} catch (Exception) {
+            //    duration = 15;
+            //}
 
-            try {
-                repeats = int.Parse(doc.Descendants("repeats").FirstOrDefault().Value);
-            } catch (Exception) {
-                repeats = 1;
-            }
+            //try {
+            //    repeats = int.Parse(doc.Descendants("repeats").FirstOrDefault().Value);
+            //} catch (Exception) {
+            //    repeats = 1;
+            //}
 
-            try {
-                repeatRest = int.Parse(doc.Descendants("repeatRest").FirstOrDefault().Value);
-            } catch (Exception) {
-                repeatRest = 0;
-            }
+            //try {
+            //    repeatRest = int.Parse(doc.Descendants("repeatRest").FirstOrDefault().Value);
+            //} catch (Exception) {
+            //    repeatRest = 0;
+            //}
 
             try {
                 startAtEnabled = bool.Parse(doc.Descendants("startAt").FirstOrDefault().Attribute("enabled").Value);
@@ -647,16 +648,15 @@ namespace LoadInjector.RunTime {
         }
 
         public void RunInternal() {
-            if (executedRepeats >= repeats) {
-                executedRepeats = 0;
-                ConsoleMsg("Maximum Number of Configured Repetitions Met");
-                // SetButtonStatus(false, true, false);
-                return;
-            }
+            //if (executedRepeats >= repeats) {
+            //    executedRepeats = 0;
+            //    ConsoleMsg("Maximum Number of Configured Repetitions Met");
+            //    return;
+            //}
 
-            executedRepeats++;
+            //executedRepeats++;
 
-            ConsoleMsg($"Execution Repetition {executedRepeats} of {repeats}");
+            //ConsoleMsg($"Execution Repetition {executedRepeats} of {repeats}");
 
             bool prepareOK = true;
 
@@ -740,12 +740,12 @@ namespace LoadInjector.RunTime {
 
             SetTriggerLabel("Scheduled Triggers");
 
-            timer = new Timer {
-                Interval = duration * 1000,
-                AutoReset = false,
-                Enabled = true
-            };
-            timer.Elapsed += OnTimedEvent;
+            //timer = new Timer {
+            //    Interval = duration * 1000,
+            //    AutoReset = false,
+            //    Enabled = true
+            //};
+            //timer.Elapsed += OnTimedEvent;
 
             CheckForCompletion();
         }
@@ -799,19 +799,6 @@ namespace LoadInjector.RunTime {
         }
 
         public void Stop(bool manual = false) {
-            // Stop any further repeats
-            try {
-                if (repetitionTimer != null) {
-                    repetitionTimer.Enabled = false;
-                    repetitionTimer.Stop();
-                }
-                if (manual) {
-                    executedRepeats = repeats;
-                }
-            } catch (Exception ex) {
-                Debug.WriteLine(ex.Message);
-            }
-
             //   SetButtonStatus(false, true, false);
 
             try {
@@ -825,10 +812,13 @@ namespace LoadInjector.RunTime {
                 ConsoleMsg($"Shutdown error: {ex.Message}");
             }
             try {
-                OnTimedEvent(manual);
+                stopWatch?.Stop();
             } catch (Exception ex) {
                 ConsoleMsg($"Shutdown error: {ex.Message}");
             }
+
+            ClearLines();
+            Console.WriteLine("Test Execution Complete");
         }
 
         public void Cancel() {
@@ -837,14 +827,8 @@ namespace LoadInjector.RunTime {
             } catch (Exception) {
                 // NO-OP
             }
-            try {
-                repetitionTimer?.Stop();
-            } catch (Exception) {
-                //NO-OP
-            }
 
             eventDistributor?.Stop();
-            //    SetButtonStatus(false, true, false);
             ConsoleMsg("Scheduled Start Cancelled");
         }
 
@@ -975,58 +959,54 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        private void OnTimedEvent(Object source, ElapsedEventArgs e) {
-            OnTimedEvent(false);
-        }
+        //private void OnTimedEvent(bool stopped = false) {
+        //    // This is an Event Handler that handles the action when the timer goes off
+        //    // signalling the end of the test.
 
-        private void OnTimedEvent(bool stopped = false) {
-            // This is an Event Handler that handles the action when the timer goes off
-            // signalling the end of the test.
+        //    try {
+        //        //int sec = stopWatch.Elapsed.Seconds;
+        //        //int min = stopWatch.Elapsed.Minutes;
+        //        //int hour = stopWatch.Elapsed.Hours;
 
-            try {
-                //int sec = stopWatch.Elapsed.Seconds;
-                //int min = stopWatch.Elapsed.Minutes;
-                //int hour = stopWatch.Elapsed.Hours;
+        //        //string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
+        //        //string minStr = min < 10 ? $"0{min}" : $"{min}";
+        //        //string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
 
-                //string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-                //string minStr = min < 10 ? $"0{min}" : $"{min}";
-                //string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
+        //        stopWatch?.Stop();
+        //        eventDistributor?.Stop();
 
-                stopWatch?.Stop();
-                eventDistributor?.Stop();
+        //        ClearLines();
+        //        ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
+        //        //if (executedRepeats < repeats && !stopped) {
+        //        //    if (repetitionTimer != null) {
+        //        //        repetitionTimer.Enabled = false;
+        //        //        repetitionTimer.Stop();
+        //        //    }
 
-                ClearLines();
-                ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
-                //if (executedRepeats < repeats && !stopped) {
-                //    if (repetitionTimer != null) {
-                //        repetitionTimer.Enabled = false;
-                //        repetitionTimer.Stop();
-                //    }
+        //        //    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
+        //        //    repetitionTimer = new Timer {
+        //        //        Interval = repeatRest * 1000,
+        //        //        AutoReset = false,
+        //        //        Enabled = true
+        //        //    };
+        //        //    repetitionTimer.Elapsed += NextExecution;
 
-                //    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
-                //    repetitionTimer = new Timer {
-                //        Interval = repeatRest * 1000,
-                //        AutoReset = false,
-                //        Enabled = true
-                //    };
-                //    repetitionTimer.Elapsed += NextExecution;
+        //        //    DateTime next = DateTime.Now.AddSeconds(repeatRest);
 
-                //    DateTime next = DateTime.Now.AddSeconds(repeatRest);
+        //        //    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
+        //        //    return;
+        //        //}
 
-                //    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
-                //    return;
-                //}
+        //        //      SetButtonStatus(false, true, false);
+        //    } catch (Exception ex) {
+        //        ConsoleMsg($"Error Stopping {ex.Message}");
+        //    }
 
-                //      SetButtonStatus(false, true, false);
-            } catch (Exception ex) {
-                ConsoleMsg($"Error Stopping {ex.Message}");
-            }
+        //    SetTriggerLabel("Available Triggers");
+        //    //          SetStatusLabel("Load Injector - Execution Complete");
 
-            SetTriggerLabel("Available Triggers");
-            //          SetStatusLabel("Load Injector - Execution Complete");
-
-            ConsoleMsg("Test Execution Complete");
-        }
+        //    ConsoleMsg("Test Execution Complete");
+        //}
 
         public void NextExecution(Object source, ElapsedEventArgs e) {
             ClearLines();
@@ -1070,10 +1050,6 @@ namespace LoadInjector.RunTime {
         private void OnStartEvent(Object source, ElapsedEventArgs e) {
             ConsoleMsg("--- Scheduled Start Time ---");
             Task.Run(() => RunInternal());
-        }
-
-        private void SetButtonStatus(bool execute, bool prepare, bool stop) {
-            this.clientHub.SetButtonStatus(this.executionNodeUuid, null, execute, prepare, stop);
         }
 
         private void SetTriggerLabel(string label) {

@@ -18,7 +18,9 @@ namespace LoadInjector.RunTime {
         public string Output { get; private set; }
         public double ActualRate { get; private set; }
         public double ConfigRate { get; private set; }
-        public double MessagesSent { get; private set; }
+        public int MessagesSent { get; private set; }
+
+        public int SentSeqNumber { get; set; }
 
         public int ChainedDepth { get; private set; }
 
@@ -38,6 +40,10 @@ namespace LoadInjector.RunTime {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
+        public int GetSentSeqNum() {
+            return SentSeqNumber;
+        }
+
         public void SetOutput(string output) {
             this.Output = output;
             OnPropertyChanged("Output");
@@ -53,8 +59,9 @@ namespace LoadInjector.RunTime {
             OnPropertyChanged("ConfigRate");
         }
 
-        public void SetMessagesSent(double output) {
+        public void SetMessagesSent(int output) {
             this.MessagesSent = output;
+            SentSeqNumber = output;  // Used to protect against out of sequence Messages
             OnPropertyChanged("MessagesSent");
         }
 

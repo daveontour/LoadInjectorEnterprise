@@ -87,9 +87,11 @@ namespace LoadInjector.Runtime.EngineComponents {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     var ui = CentralMessagingHub.executionUI.sourceUIMap[uuid];
-                    ui?.SetOutput(v);
-                    ui?.SetMessagesSent(messagesSent);
-                    ui?.SetActualRate(currentRate);
+                    if (messagesSent > ui.GetSentSeqNum()) {
+                        ui?.SetOutput(v);
+                        ui?.SetMessagesSent(messagesSent);
+                        ui?.SetActualRate(currentRate);
+                    }
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Source Report error. " + ex.Message);
                 }
@@ -173,7 +175,9 @@ namespace LoadInjector.Runtime.EngineComponents {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
-                    ui.Sent(s);
+                    if (s > ui.SentSeqNumber) {
+                        ui.Sent(s);
+                    }
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Dest sent error. " + ex.Message);
                 }
@@ -217,8 +221,10 @@ namespace LoadInjector.Runtime.EngineComponents {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     var ui = CentralMessagingHub.executionUI.destUIMap[uuid];
-                    ui.Sent(messagesSent);
-                    ui.SetRate(rate);
+                    if (messagesSent > ui.SentSeqNumber) {
+                        ui.Sent(messagesSent);
+                        ui.SetRate(rate);
+                    }
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Dest Report error. " + ex.Message);
                 }

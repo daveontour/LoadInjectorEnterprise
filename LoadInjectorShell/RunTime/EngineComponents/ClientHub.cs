@@ -28,7 +28,6 @@ namespace LoadInjector.RunTime.EngineComponents {
                 hubProxy = hubConnection.CreateHubProxy("MyHub");
 
                 hubProxy.On("ClearAndPrepare", () => {
-                    Console.WriteLine("Client Side. ClearAndPrepare");
                     try {
                         bool readyToRun = ngExecutionController.PrepareAsync().Result;
                         ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
@@ -37,30 +36,31 @@ namespace LoadInjector.RunTime.EngineComponents {
                     }
                 });
                 hubProxy.On("Execute", () => {
-                    Console.WriteLine("Client Side. Execute");
+                    ngExecutionController.Run();
+                });
+
+                hubProxy.On("WaitForNextExecute", (message) => {
+                    Console.WriteLine(message);
+                });
+
+                hubProxy.On("PrepareAndExecute", () => {
+                    ngExecutionController.PrepareAsync().Wait();
                     ngExecutionController.Run();
                 });
 
                 hubProxy.On("Stop", (mode) => {
-                    Console.WriteLine("Client Side. Stop");
                     ngExecutionController.Stop(mode);
                 });
 
                 hubProxy.On("Cancel", (mode) => {
-                    Console.WriteLine("Client Side. Cancel");
                     ngExecutionController.Cancel();
                 });
 
                 hubProxy.On("InitModel", (model) => {
-                    Console.WriteLine("Client Side. InitModel");
                     XmlDocument doc = new XmlDocument();
                     doc.LoadXml(model);
                     ngExecutionController.InitModel(doc);
                 });
-
-                hubConnection.Start().Wait();
-
-                Console.WriteLine(hubConnection.State);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -77,8 +77,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                         started = true;
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine(ex.Message);
-                    continue;
+                    Console.WriteLine("Waiting..");
                 }
             }
         }
@@ -101,21 +100,9 @@ namespace LoadInjector.RunTime.EngineComponents {
             });
         }
 
-        internal void SetStatusLabel(string executionNodeID, string uuid, string s) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("SetStatusLabel", executionNodeID, uuid, s);
-            });
-        }
-
         internal void SetTriggerLabel(string executionNodeID, string uuid, string s) {
             Task.Run(() => {
                 this.hubProxy.Invoke("SetTriggerLabel", executionNodeID, uuid, s);
-            });
-        }
-
-        internal void SetOutput(string executionNodeID, string uuid, string s) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("SetOutput", executionNodeID, uuid, s);
             });
         }
 
@@ -150,12 +137,6 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SourceReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {
             // throw new NotImplementedException();
-        }
-
-        internal void SetButtonStatus(string executionNodeID, string uuid, bool execute, bool prepare, bool stop) {
-            Task.Run(() => {
-                this.hubProxy.Invoke("SetButtonStatus", executionNodeID, uuid, execute, prepare, stop);
-            });
         }
 
         internal void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {

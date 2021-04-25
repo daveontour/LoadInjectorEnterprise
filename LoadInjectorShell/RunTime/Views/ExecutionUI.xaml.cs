@@ -82,9 +82,7 @@ namespace LoadInjector.RunTime {
 
         internal void AutoStart(string[] args) {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
-#pragma warning disable CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
             executionControl.AutoStartAsync(args);
-#pragma warning restore CS4014 // Because this call is not awaited, execution of the current method continues before the call is completed
         }
 
         private string elapsedString = "00:00:00";
@@ -139,6 +137,10 @@ namespace LoadInjector.RunTime {
         private Timer percentCompleteTimer;
         private int duration;
         private Timer executionTimer;
+        private int repeats;
+        private int repeatRest;
+        private int repeatsExecuted = 0;
+        private Timer repetitionTimer;
 
         public TreeEditorViewModel VM {
             get => myWin;
@@ -170,15 +172,18 @@ namespace LoadInjector.RunTime {
                     duration = 15;
                 }
 
-                //try {
-                //    centralMessagingHub.Hub.Clients.All.InitModel(dataModel);
-                //} catch (Exception ex) {
-                //    Console.WriteLine(ex.Message);
-                //}
+                try {
+                    repeats = int.Parse(doc.Descendants("repeats").FirstOrDefault().Value);
+                } catch (Exception) {
+                    repeats = 1;
+                }
 
-                //executionControl = new NgExecutionController(dataModel);
+                try {
+                    repeatRest = int.Parse(doc.Descendants("repeatRest").FirstOrDefault().Value);
+                } catch (Exception) {
+                    repeatRest = 0;
+                }
 
-                // Construct the UI for all the lines of execution
                 PrepareLineUI();
             }
         }
@@ -350,15 +355,21 @@ namespace LoadInjector.RunTime {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             outputConsole.Clear();
 
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    CentralMessagingHub.executionUI.ExecuteBtn.IsEnabled = false;
-                    CentralMessagingHub.executionUI.PrepareBtn.IsEnabled = false;
-                    CentralMessagingHub.executionUI.StopBtn.IsEnabled = false;
-                } catch (Exception ex) {
-                    Console.WriteLine("Setting button status error. " + ex.Message);
-                }
-            });
+            // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
+            foreach (LineUserControl li in this.directLinesUserControls) {
+                li.SentSeqNumber = 0;
+            }
+            foreach (LineUserControl li in this.amsLinesUserControls) {
+                li.SentSeqNumber = 0;
+            }
+
+            foreach (SourceUI src in this.sourceUIMap.Values) {
+                src.SentSeqNumber = 0;
+            }
+
+            ExecuteBtn.IsEnabled = false;
+            PrepareBtn.IsEnabled = false;
+            StopBtn.IsEnabled = false;
 
             try {
                 centralMessagingHub.Hub.Clients.All.InitModel(dataModel.OuterXml);
@@ -378,7 +389,9 @@ namespace LoadInjector.RunTime {
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
-            //executionControl.Cancel();
+            ExecuteBtn.IsEnabled = false;
+            PrepareBtn.IsEnabled = true;
+            StopBtn.IsEnabled = false;
         }
 
         private void Execute_Click(object sender, RoutedEventArgs e) {
@@ -412,10 +425,12 @@ namespace LoadInjector.RunTime {
 
         public void Stop_Click(object sender, RoutedEventArgs e) {
             try {
-                centralMessagingHub.Hub.Clients.All.Stop(true);
-                StopBtn.IsEnabled = false;
-                PrepareBtn.IsEnabled = true;
-                ExecuteBtn.IsEnabled = false;
+                //centralMessagingHub.Hub.Clients.All.Stop(true);
+                //StopBtn.IsEnabled = false;
+                //PrepareBtn.IsEnabled = true;
+                //ExecuteBtn.IsEnabled = false;
+
+                OnExecutionCompleteEvent(true);
 
                 percentCompleteTimer.Enabled = false;
                 PercentComplete = 100;
@@ -441,17 +456,10 @@ namespace LoadInjector.RunTime {
             double percentage = 100 * (elapsed / duration);
             int value = Convert.ToInt32(percentage);
 
-            int min = stopWatch.Elapsed.Minutes;
-            int hour = stopWatch.Elapsed.Hours;
-
-            string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-            string minStr = min < 10 ? $"0{min}" : $"{min}";
-            string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
-
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     PercentComplete = value;
-                    ElapsedString = $"{hourStr}:{minStr}:{secStr}";
+                    ElapsedString = GetElapsedString(stopWatch);
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Percent Complete" + ex.Message);
                 }
@@ -461,7 +469,12 @@ namespace LoadInjector.RunTime {
         private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
             percentCompleteTimer.Enabled = false;
             PercentComplete = 100;
-            double elapsed = stopWatch.Elapsed.TotalSeconds;
+            ElapsedString = GetElapsedString(stopWatch);
+
+            OnExecutionCompleteEvent(false);
+        }
+
+        private string GetElapsedString(Stopwatch stopWatch) {
             int sec = stopWatch.Elapsed.Seconds;
             int min = stopWatch.Elapsed.Minutes;
             int hour = stopWatch.Elapsed.Hours;
@@ -469,36 +482,41 @@ namespace LoadInjector.RunTime {
             string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
             string minStr = min < 10 ? $"0{min}" : $"{min}";
             string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
-            ElapsedString = $"{hourStr}:{minStr}:{secStr}";
-
-            OnExecutionCompleteEvent(false);
+            return $"{hourStr}:{minStr}:{secStr}";
         }
 
         private void OnExecutionCompleteEvent(bool stopped = false) {
             // This is an Event Handler that handles the action when the timer goes off
             // signalling the end of the test.
+            repeatsExecuted++;
+            centralMessagingHub.Hub.Clients.All.Stop(false);
 
-            try {
-                centralMessagingHub.Hub.Clients.All.Stop(false);
-                StopBtn.IsEnabled = false;
-                PrepareBtn.IsEnabled = true;
-                ExecuteBtn.IsEnabled = false;
-            } catch (Exception ex) {
-                Console.WriteLine($"Test Execution Completed Stopped Error {ex.Message}");
+            consoleWriter.WriteLine($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete");
+
+            if (repeatsExecuted >= repeats || stopped) {
+                try {
+                    Dispatcher.BeginInvoke((Action)(() => {
+                        StopBtn.IsEnabled = false;
+                        PrepareBtn.IsEnabled = true;
+                        ExecuteBtn.IsEnabled = false;
+                    }));
+                } catch (Exception ex) {
+                    Console.WriteLine($"Test Execution Completed Stopped Error {ex.Message}");
+                }
+
+                return;
             }
 
+            centralMessagingHub.Hub.Clients.All.WaitForNextExecute($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete. Waiting {repeatRest} seconds for next repitiion");
+
+            repetitionTimer = new Timer {
+                Interval = repeatRest * 1000,
+                AutoReset = false,
+                Enabled = true
+            };
+            repetitionTimer.Elapsed += NextExecution;
+
             //try {
-            //    int sec = stopWatch.Elapsed.Seconds;
-            //    int min = stopWatch.Elapsed.Minutes;
-            //    int hour = stopWatch.Elapsed.Hours;
-
-            //    string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-            //    string minStr = min < 10 ? $"0{min}" : $"{min}";
-            //    string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
-
-            //    stopWatch?.Stop();
-            //    eventDistributor?.Stop();
-
             //    ClearLines();
             //    ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
             //    if (executedRepeats < repeats && !stopped) {
@@ -532,43 +550,43 @@ namespace LoadInjector.RunTime {
             //ConsoleMsg("Test Execution Complete");
         }
 
-        public void ControllerStatusChanged(ControllerStatusReport e) {
-            Operation op = e.Type;
-
-            if ((op & Operation.ExecuteBtn) == Operation.ExecuteBtn) {
-                ExecuteBtn.IsEnabled = e.Execute;
-            }
-            if ((op & Operation.PrepareBtn) == Operation.PrepareBtn) {
-                PrepareBtn.IsEnabled = e.Prepare;
-            }
-            if ((op & Operation.StopBtn) == Operation.StopBtn) {
-                StopBtn.IsEnabled = e.Stop;
-            }
-            if ((op & Operation.Percent) == Operation.Percent) {
-                PercentComplete = e.PercentComplete;
-            }
-            if ((op & Operation.ClearConsole) == Operation.ClearConsole && e.ClearConsole) {
-                // NO-OP
-            }
-            if ((op & Operation.TimeStr) == Operation.TimeStr) {
-                ElapsedString = e.Timestr;
-            }
-            if ((op & Operation.SchedStart) == Operation.SchedStart) {
-                StatusLabel = e.SchedStart;
-            }
-            if ((op & Operation.Console) == Operation.Console && outputConsole != null) {
-                outputConsole.Text += e.OutputString;
-                if (outputConsole.Text.Length > consoleLength) {
-                    int len = outputConsole.Text.Length - consoleLength;
-                    outputConsole.Text = outputConsole.Text.Substring(len, outputConsole.Text.Length - len);
+        private void NextExecution(object sender, ElapsedEventArgs e) {
+            try {
+                // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
+                foreach (LineUserControl li in this.directLinesUserControls) {
+                    li.SentSeqNumber = 0;
+                    li.Sent(0);
                 }
-                outputConsole.ScrollToEnd();
-            }
-            if ((op & Operation.AddUILineElement) == Operation.AddUILineElement && e.UiElement != null) {
-                GetLinePanel().Children.Add(e.UiElement);
-            }
-            if ((op & Operation.AddUILabel) == Operation.AddUILabel) {
-                AddLabel(e.Label);
+                foreach (LineUserControl li in this.amsLinesUserControls) {
+                    li.SentSeqNumber = 0;
+                    li.Sent(0);
+                }
+
+                foreach (SourceUI src in this.sourceUIMap.Values) {
+                    src.SentSeqNumber = 0;
+                    src.SetMessagesSent(0);
+                }
+
+                centralMessagingHub.Hub.Clients.All.PrepareAndExecute();
+
+                stopWatch.Reset();
+                stopWatch.Start();
+
+                percentCompleteTimer = new Timer {
+                    Interval = 1000,
+                    AutoReset = true,
+                    Enabled = true
+                };
+                percentCompleteTimer.Elapsed += OnSecondEvent;
+
+                executionTimer = new Timer {
+                    Interval = duration * 1000,
+                    AutoReset = false,
+                    Enabled = true
+                };
+                executionTimer.Elapsed += OnExecutionCompleteEvent;
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
             }
         }
 

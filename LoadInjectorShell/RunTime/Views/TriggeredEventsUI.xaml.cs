@@ -15,7 +15,11 @@ namespace LoadInjector.RunTime {
 
         void SeConfigRate(double s);
 
-        void SetMessagesSent(double s);
+        void SetMessagesSent(int s);
+
+        int GetSentSeqNum();
+
+        int SentSeqNumber { get; set; }
     }
 
     public partial class TriggeredEventsUI : UserControl, SourceUI, INotifyPropertyChanged {
@@ -28,8 +32,13 @@ namespace LoadInjector.RunTime {
         public double ActualRate { get; private set; }
         public double ConfigRate { get; private set; }
         public double MessagesSent { get; private set; }
+        public int SentSeqNumber { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        public int GetSentSeqNum() {
+            return SentSeqNumber;
+        }
 
         protected void OnPropertyChanged(string propName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
@@ -59,8 +68,9 @@ namespace LoadInjector.RunTime {
             OnPropertyChanged("ConfigRate");
         }
 
-        public void SetMessagesSent(double s) {
+        public void SetMessagesSent(int s) {
             MessagesSent = s;
+            SentSeqNumber = s;
             OnPropertyChanged("MessagesSent");
         }
     }
