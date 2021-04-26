@@ -113,18 +113,6 @@ namespace LoadInjector.RunTime.ViewModels {
 
         public void DistributeMessage(TriggerRecord rec) {
             //Used by event driven sources
-            this.executionController.clientHub.DispatcherDistributeMessage(executionController.executionNodeUuid, rec);
-            //try {
-            //    Application.Current.Dispatcher.Invoke(delegate // <--- HERE
-            //    {
-            //        exUI.SchedTriggers.Remove(rec);
-            //        exUI.OnPropertyChanged("lvTriggers");
-            //        exUI.FiredTriggers.Add(rec);
-            //        exUI.OnPropertyChanged("lvFiredTriggers");
-            //    });
-            //} catch (Exception ex) {
-            //    Console.WriteLine(ex.Message);
-            //}
 
             if (rec.refreshFlight && rec.record.Item2 != null) {
                 try {
@@ -158,6 +146,8 @@ namespace LoadInjector.RunTime.ViewModels {
             foreach (RateDrivenSourceController chain in rec.chain) {
                 chain.ParentFired(rec.record);
             }
+
+            this.executionController.clientHub.DispatcherDistributeMessage(executionController.executionNodeUuid, rec);
         }
 
         internal bool ScheduleEvent(TriggerRecord triggerRecord) {
@@ -167,15 +157,8 @@ namespace LoadInjector.RunTime.ViewModels {
             }
             triggerRecords.Add(triggerRecord);
 
-            // Add the trigger to list in the the tabbed table
             this.executionController.clientHub.AddSchedTrigger(executionController.executionNodeUuid, triggerRecord);
-            //try {
-            //    Application.Current.Dispatcher.Invoke(delegate {
-            //        exUI.SchedTriggers.Add(triggerRecord);
-            //    });
-            //} catch (Exception ex) {
-            //    Console.WriteLine(ex.Message);
-            //}
+
             return true;
         }
 
@@ -216,14 +199,6 @@ namespace LoadInjector.RunTime.ViewModels {
             sortedTriggers.Sort((x, y) => { return x.TIME.CompareTo(y.TIME); });
 
             this.executionController.clientHub.SetSchedTrigger(executionController.executionNodeUuid, sortedTriggers);
-            //Application.Current.Dispatcher.Invoke(delegate {
-            //    exUI.SchedTriggers.Clear();
-
-            //    foreach (TriggerRecord t in sortedTriggers) {
-            //        exUI.SchedTriggers.Add(t);
-            //    }
-            //    exUI.OnPropertyChanged("lvTriggers");
-            //});
 
             triggerQueue = new Queue<TriggerRecord>(sortedTriggers);
 

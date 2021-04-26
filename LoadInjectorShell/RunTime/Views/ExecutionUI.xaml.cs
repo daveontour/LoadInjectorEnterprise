@@ -354,6 +354,7 @@ namespace LoadInjector.RunTime {
         private void Prepare_Click(object sender, RoutedEventArgs e) {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             outputConsole.Clear();
+            SchedTriggers.Clear();
 
             // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
             foreach (LineUserControl li in this.directLinesUserControls) {
@@ -515,39 +516,6 @@ namespace LoadInjector.RunTime {
                 Enabled = true
             };
             repetitionTimer.Elapsed += NextExecution;
-
-            //try {
-            //    ClearLines();
-            //    ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
-            //    if (executedRepeats < repeats && !stopped) {
-            //        if (repetitionTimer != null) {
-            //            repetitionTimer.Enabled = false;
-            //            repetitionTimer.Stop();
-            //        }
-
-            //        ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
-            //        repetitionTimer = new Timer {
-            //            Interval = repeatRest * 1000,
-            //            AutoReset = false,
-            //            Enabled = true
-            //        };
-            //        repetitionTimer.Elapsed += NextExecution;
-
-            //        DateTime next = DateTime.Now.AddSeconds(repeatRest);
-
-            //        ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
-            //        return;
-            //    }
-
-            //    //      SetButtonStatus(false, true, false);
-            //} catch (Exception ex) {
-            //    ConsoleMsg($"Error Stopping {ex.Message}");
-            //}
-
-            //SetTriggerLabel("Available Triggers");
-            ////          SetStatusLabel("Load Injector - Execution Complete");
-
-            //ConsoleMsg("Test Execution Complete");
         }
 
         private void NextExecution(object sender, ElapsedEventArgs e) {
@@ -565,6 +533,18 @@ namespace LoadInjector.RunTime {
                 foreach (SourceUI src in this.sourceUIMap.Values) {
                     src.SentSeqNumber = 0;
                     src.SetMessagesSent(0);
+                }
+                try {
+                    Dispatcher.BeginInvoke((Action)(() => {
+                        try {
+                            SchedTriggers.Clear();
+                            FiredTriggers.Clear();
+                        } catch (Exception ex) {
+                            Console.WriteLine("Clear exception " + ex.Message);
+                        }
+                    }));
+                } catch (Exception ex) {
+                    Console.WriteLine($"Test Execution Completed Stopped Error {ex.Message}");
                 }
 
                 centralMessagingHub.Hub.Clients.All.PrepareAndExecute();
