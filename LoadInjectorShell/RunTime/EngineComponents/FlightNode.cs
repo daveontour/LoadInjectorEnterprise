@@ -10,7 +10,6 @@ using System.Xml;
 
 namespace LoadInjector.RunTime {
 
-    // Class for holding the flight information that is contained in the Towing message
     public class FlightNode {
         public string nature;
         public string airlineCode;

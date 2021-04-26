@@ -11,6 +11,7 @@ namespace LoadInjector.RunTime {
         public Expression expression;
         public string baseTime;
         public Tuple<Dictionary<string, string>, FlightNode> record;
+        public string uuid = Guid.NewGuid().ToString();
 
         public string ID { get; set; }
 

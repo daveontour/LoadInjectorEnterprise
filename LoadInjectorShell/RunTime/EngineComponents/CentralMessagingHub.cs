@@ -9,6 +9,7 @@ using Microsoft.Owin.Cors;
 using LoadInjector.RunTime;
 using System.Windows;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 [assembly: OwinStartup(typeof(LoadInjector.Runtime.EngineComponents.StartupHub))]
 
@@ -232,16 +233,37 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
-            try {
-                Application.Current.Dispatcher.Invoke(delegate {
-                    CentralMessagingHub.executionUI.SchedTriggers.Remove(rec);
-                    CentralMessagingHub.executionUI.OnPropertyChanged("lvTriggers");
-                    CentralMessagingHub.executionUI.FiredTriggers.Add(rec);
-                    CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
-                });
-            } catch (Exception ex) {
-                Debug.WriteLine("Dispatcher Distribute Error " + ex.Message);
-            }
+            Task.Run(() => {
+                TriggerRecord remove = null;
+
+                foreach (TriggerRecord r in CentralMessagingHub.executionUI.SchedTriggers) {
+                    if (r.uuid == rec.uuid) {
+                        remove = r;
+                        break;
+                    }
+                }
+                if (remove != null) {
+                    try {
+                        Application.Current.Dispatcher.Invoke(delegate {
+                            CentralMessagingHub.executionUI.SchedTriggers.Remove(remove);
+                            CentralMessagingHub.executionUI.OnPropertyChanged("lvTriggers");
+                            CentralMessagingHub.executionUI.FiredTriggers.Add(rec);
+                            CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
+                        });
+                    } catch (Exception ex) {
+                        Debug.WriteLine("Dispatcher Distribute Error " + ex.Message);
+                    }
+                } else {
+                    try {
+                        Application.Current.Dispatcher.Invoke(delegate {
+                            CentralMessagingHub.executionUI.FiredTriggers.Add(rec);
+                            CentralMessagingHub.executionUI.OnPropertyChanged("lvFiredTriggers");
+                        });
+                    } catch (Exception ex) {
+                        Debug.WriteLine("Dispatcher Distribute Error " + ex.Message);
+                    }
+                }
+            });
         }
 
         public void AddSchedTrigger(string executionNodeUuid, TriggerRecord triggerRecord) {

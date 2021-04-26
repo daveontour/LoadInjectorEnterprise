@@ -86,7 +86,7 @@ namespace LoadInjectorRuntime {
             try {
                 clientHub = new ClientHub("http://localhost:6220", controller);
                 controller.clientHub = clientHub;
-                //controller.slaveMode = true;
+                controller.slaveMode = true;
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }

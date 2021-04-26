@@ -101,14 +101,7 @@ namespace LoadInjector.RunTime {
 </soapenv:Envelope>";
 
         public string executionNodeUuid;
-        //public bool slaveMode = false;
-
-        //public void SetExecutiuonUI(ExecutionUI exUI) {
-        //    //this.exUI = exUI;
-        //    eventDistributor.exUI = exUI;
-        //    //exUI.StatusLabel = "Load Injector Execution";
-        //    SetStatusLabel("Load Injector Execution");
-        //}
+        public bool slaveMode = false;
 
         private void InitController(bool startHub = true) {
             if (startHub) {
@@ -316,23 +309,23 @@ namespace LoadInjector.RunTime {
         public void Configure(XmlDocument xDoc = null) {
             XDocument doc = XDocument.Parse(xDoc.OuterXml);
 
-            //try {
-            //    duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
-            //} catch (Exception) {
-            //    duration = 15;
-            //}
+            try {
+                duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
+            } catch (Exception) {
+                duration = 15;
+            }
 
-            //try {
-            //    repeats = int.Parse(doc.Descendants("repeats").FirstOrDefault().Value);
-            //} catch (Exception) {
-            //    repeats = 1;
-            //}
+            try {
+                repeats = int.Parse(doc.Descendants("repeats").FirstOrDefault().Value);
+            } catch (Exception) {
+                repeats = 1;
+            }
 
-            //try {
-            //    repeatRest = int.Parse(doc.Descendants("repeatRest").FirstOrDefault().Value);
-            //} catch (Exception) {
-            //    repeatRest = 0;
-            //}
+            try {
+                repeatRest = int.Parse(doc.Descendants("repeatRest").FirstOrDefault().Value);
+            } catch (Exception) {
+                repeatRest = 0;
+            }
 
             try {
                 startAtEnabled = bool.Parse(doc.Descendants("startAt").FirstOrDefault().Attribute("enabled").Value);
@@ -432,7 +425,7 @@ namespace LoadInjector.RunTime {
         }
 
         public async Task AutoStartAsync(string[] args) {
-            LockVM(true);
+            //          LockVM(true);
 
             if (args == null) {
                 return;
@@ -1008,11 +1001,11 @@ namespace LoadInjector.RunTime {
         //    ConsoleMsg("Test Execution Complete");
         //}
 
-        public void NextExecution(Object source, ElapsedEventArgs e) {
-            ClearLines();
-            Task.Run(() => PrepareAsync()).Wait();
-            Task.Run(() => RunInternal());
-        }
+        //public void NextExecution(Object source, ElapsedEventArgs e) {
+        //    ClearLines();
+        //    Task.Run(() => PrepareAsync()).Wait();
+        //    Task.Run(() => RunInternal());
+        //}
 
         public void ClearLines() {
             foreach (LineExecutionController line in destLines) {
@@ -1064,8 +1057,8 @@ namespace LoadInjector.RunTime {
             clientHub.ClearTriggerData(this.executionNodeUuid, null);
         }
 
-        private void LockVM(bool v) {
-            clientHub.LockVM(this.executionNodeUuid, null, v);
-        }
+        //private void LockVM(bool v) {
+        //    clientHub.LockVM(this.executionNodeUuid, null, v);
+        //}
     }
 }
