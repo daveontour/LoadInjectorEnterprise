@@ -22,8 +22,8 @@ namespace LoadInjector.Destinations {
         private readonly object sendLock = new object();
         public static MQQueueManager queueManager;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
             try {
                 try {
                     queueName = defn.Attributes["queue"].Value;
@@ -141,18 +141,18 @@ namespace LoadInjector.Destinations {
 
             if (useSendLocking) {
                 lock (sendLock) {
-                    Console.WriteLine($"MQ Begin sendinng with locking enabled: {qMgr}, {queueName}");
+                    Console.WriteLine($"MQ Begin sending with locking enabled: {qMgr}, {queueName}");
                     logger.Trace($"MQ Begin sendinng with locking enabled: {qMgr}, {queueName}");
                     SendInternal(messageXML);
                 }
             } else {
-                Console.WriteLine($"MQ Begin sendinng with locking NOT enabled: {qMgr}, {queueName}");
+                Console.WriteLine($"MQ Begin sending with locking NOT enabled: {qMgr}, {queueName}");
                 logger.Trace($"MQ Begin sendinng with locking NOT enabled: {qMgr}, {queueName}");
                 SendInternal(messageXML);
             }
         }
 
-        public void SendInternal(String mess) {
+        public void SendInternal(string mess) {
             string messageXML = mess;
             bool sent = false;
 

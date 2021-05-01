@@ -12,8 +12,8 @@ namespace LoadInjector.Destinations {
         private string ftpUser;
         private string ftpPass;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 ftpURL = defn.Attributes["ftpURL"].Value;

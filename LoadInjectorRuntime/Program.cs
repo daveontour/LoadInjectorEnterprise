@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Topshelf;
@@ -14,9 +13,12 @@ namespace LoadInjectorRuntime {
 
             try {
                 var exitCode = HostFactory.Run(x => {
+                    string executeFile = null;
+                    x.AddCommandLineDefinition("execute", f => { executeFile = f; });
+                    x.ApplyCommandLine();
                     try {
                         x.Service<LoadInjectorRuntimeClient>(s => {
-                            s.ConstructUsing(core => new LoadInjectorRuntimeClient());
+                            s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile));
                             s.WhenStarted(core => core.OnStart());
                             s.WhenStopped(core => core.OnStop());
                         });

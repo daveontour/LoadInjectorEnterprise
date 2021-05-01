@@ -17,7 +17,6 @@ namespace LoadInjector.RunTime {
             this.logger = logger;
 
             string protocol = defn.Attributes["protocol"].Value;
-            //endPointDestination = Parameters.protocolDictionary[protocol].GetDestinationSender();
             endPointDestination = new DestinationFactory().GetSender(protocol);
 
             OK_TO_RUN = endPointDestination.Configure(defn, this, logger);

@@ -22,8 +22,8 @@ namespace LoadInjector.Destinations {
         private int timeout;
         public HttpMethod httpVerb = HttpMethod.Put;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
             USE_ASYNC_SEND = true;
             name = defn.Attributes["name"].Value;
 

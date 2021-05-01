@@ -17,8 +17,8 @@ namespace LoadInjector.Destinations {
         private string vhost;
         private int port;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 connection = defn.Attributes["connection"].Value;

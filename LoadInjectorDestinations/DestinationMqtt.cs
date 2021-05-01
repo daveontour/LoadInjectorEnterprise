@@ -21,10 +21,10 @@ namespace LoadInjector.Destinations {
         private IMqttClientOptions options;
         private IMqttClient mqttClient;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
-            var factory = new MqttFactory();
+            MqttFactory factory = new MqttFactory();
             mqttClient = factory.CreateMqttClient();
             try {
                 mqttServer = defn.Attributes["mqttServer"].Value;
@@ -56,7 +56,7 @@ namespace LoadInjector.Destinations {
         }
 
         public override void Send(string val, List<Variable> vars) {
-            var msg = new MqttApplicationMessageBuilder()
+            MqttApplicationMessage msg = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
             .WithPayload(val)
             .WithExactlyOnceQoS()

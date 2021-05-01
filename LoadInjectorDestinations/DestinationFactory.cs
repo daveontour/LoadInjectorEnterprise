@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualBasic.FileIO;
+using System.Diagnostics;
 
 namespace LoadInjectorDestinations {
 
@@ -45,8 +46,8 @@ namespace LoadInjectorDestinations {
 
                     return null;
                 }
-            } catch (Exception) {
-                Console.WriteLine($"Error reading CSV Lookup File destination.mapping");
+            } catch (Exception ex) {
+                Debug.WriteLine("Error reading CSV Lookup File destination.mapping " + ex.Message);
                 return null;
             }
         }

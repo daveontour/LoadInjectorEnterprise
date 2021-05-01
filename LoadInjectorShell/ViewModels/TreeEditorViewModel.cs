@@ -9,6 +9,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -1239,7 +1241,8 @@ namespace LoadInjector.ViewModels {
 
         private void ExecuteLoadInjectorRuntime() {
             if (centralMessagingHub == null) {
-                centralMessagingHub = new CentralMessagingHub();
+                int port = GetAvailablePort(49152);
+                centralMessagingHub = new CentralMessagingHub(port);
                 centralMessagingHub.StartHub();
             }
 
@@ -1264,6 +1267,20 @@ namespace LoadInjector.ViewModels {
         private void AboutLoadInjector() {
             LIAbout dlg = new LIAbout();
             dlg.ShowDialog();
+        }
+
+        public static int GetAvailablePort(int startingPort) {
+            if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
+            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+            var connectionsEndpoints = ipGlobalProperties.GetActiveTcpConnections().Select(c => c.LocalEndPoint);
+            var tcpListenersEndpoints = ipGlobalProperties.GetActiveTcpListeners();
+            var udpListenersEndpoints = ipGlobalProperties.GetActiveUdpListeners();
+            var portsInUse = connectionsEndpoints.Concat(tcpListenersEndpoints)
+                .Concat(udpListenersEndpoints)
+                .Select(e => e.Port);
+
+            return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
     }
 }

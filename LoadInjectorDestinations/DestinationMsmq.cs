@@ -13,8 +13,8 @@ namespace LoadInjector.Destinations {
         public string queueName;
         private readonly int getTimeout = 2000;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 queueName = defn.Attributes["queue"].Value;
@@ -26,7 +26,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(String val, List<Variable> vars) {
+        public override void Send(string val, List<Variable> vars) {
             try {
                 using (MessageQueue msgQueue = new MessageQueue(queueName)) {
                     try {
@@ -68,7 +68,7 @@ namespace LoadInjector.Destinations {
 
         public void ClearQueue(MessageQueue msgQueue) {
             try {
-                long count = 0;
+                long count;
                 try {
                     count = GetMSMessaegCount(queueName);
                 } catch (Exception e) {
@@ -88,7 +88,7 @@ namespace LoadInjector.Destinations {
             logger.Info($"Maintenance for monitor {defn.Attributes["name"].Value} complete");
         }
 
-        private long GetMSMessaegCount(String msmqName) {
+        private long GetMSMessaegCount(string msmqName) {
             msmqName = msmqName.Split('\\')[2].ToLower();
             ManagementObjectCollection wmiCollection = null;
             using (ManagementObjectSearcher wmiSearch = new ManagementObjectSearcher("SELECT Name,MessagesinQueue FROM Win32_PerfRawdata_MSMQ_MSMQQueue")) {

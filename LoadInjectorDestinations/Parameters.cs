@@ -1,5 +1,4 @@
-﻿using LoadInjector.Destinations;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -58,10 +57,18 @@ namespace LoadInjector.Destinations {
         }
 
         public static string ReadResource(string name) {
-            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
-            using (StreamReader reader = new StreamReader(stream)) {
-                return reader.ReadToEnd();
+            using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name)) {
+                try {
+                    if (stream != null) {
+                        using (StreamReader reader = new StreamReader(stream)) {
+                            return reader.ReadToEnd();
+                        }
+                    }
+                } catch (Exception) {
+                    return null;
+                }
             }
+            return null;
         }
 
         private static int InitMaxReportRate() {

@@ -12,8 +12,8 @@ namespace LoadInjector.Destinations {
         private string connStr;
         public bool showResults;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 showResults = bool.Parse(defn.Attributes["showResults"].Value);
@@ -64,12 +64,8 @@ namespace LoadInjector.Destinations {
                 return bld.ToString();
             } catch (Exception ex) {
                 Console.WriteLine($"Send Data Error: {ex.Message}");
-                return ($"Send Data Error: {ex.Message}");
+                return $"Send Data Error: {ex.Message}";
             }
-        }
-
-        public override void Prepare() {
-            base.Prepare();
         }
     }
 }

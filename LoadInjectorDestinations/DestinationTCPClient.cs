@@ -11,8 +11,8 @@ namespace LoadInjector.Destinations {
         private string tcpServerIP;
         private int tcpServerPort;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 tcpServerIP = defn.Attributes["tcpServerIP"].Value;
@@ -31,12 +31,12 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(String message, List<Variable> vars) {
+        public override void Send(string message, List<Variable> vars) {
             try {
                 TcpClient client = new TcpClient(tcpServerIP, tcpServerPort);
 
                 // Translate the passed message into ASCII and store it as a Byte array.
-                Byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
+                byte[] data = System.Text.Encoding.ASCII.GetBytes(message);
 
                 // Get a client stream for reading and writing.
 

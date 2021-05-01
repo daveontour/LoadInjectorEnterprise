@@ -9,8 +9,8 @@ namespace LoadInjector.Destinations {
     internal class DestinationText : SenderAbstract {
         private string title;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
             title = defn.Attributes["name"]?.Value;
             return true;
         }
@@ -19,14 +19,6 @@ namespace LoadInjector.Destinations {
             Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss.ffff}] Output Message=======>\n\n");
             Console.WriteLine(val);
             Console.WriteLine("\n<======= Output Message\n");
-        }
-
-        public override void Prepare() {
-            base.Prepare();
-        }
-
-        public override void Stop() {
-            base.Stop();
         }
     }
 }

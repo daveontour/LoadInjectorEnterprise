@@ -17,6 +17,7 @@ namespace LoadInjector.Runtime.EngineComponents {
 
     internal class CentralMessagingHub {
         public static ExecutionUI executionUI;
+        public int port = 6220;
 
         public IHubContext Hub {
             get => GlobalHost.ConnectionManager.GetHubContext<MyHub>();
@@ -26,7 +27,8 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.executionUI = executionUI;
         }
 
-        public CentralMessagingHub() {
+        public CentralMessagingHub(int port) {
+            // this.port = port;
         }
 
         public void SetExecutionUI(ExecutionUI executionUI) {
@@ -38,7 +40,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             // use http://*:8080 to bind to all addresses.
             // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
             // for more information.
-            string url = "http://localhost:6220";
+            string url = $"http://localhost:{port}";
             try {
                 WebApp.Start<StartupHub>(url);
             } catch (Exception ex) {

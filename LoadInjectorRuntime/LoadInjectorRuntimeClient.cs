@@ -1,29 +1,51 @@
 ﻿using LoadInjector.RunTime;
 using LoadInjector.RunTime.EngineComponents;
 using System;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading;
 
 namespace LoadInjectorRuntime {
 
     internal class LoadInjectorRuntimeClient {
-        private Thread mainThread;
-        private ClientHub clientHub;
-        private NgExecutionController controller;
         private readonly NLog.Logger logger = NLog.LogManager.GetLogger("LoadInjectorClient");
+        public string executeFile = null;
 
-        public LoadInjectorRuntimeClient() {
+        public string ExecuteFile {
+            get => executeFile;
+            set => executeFile = value;
+        }
+
+        public LoadInjectorRuntimeClient(string executeFile) {
+            ExecuteFile = executeFile;
         }
 
         public void OnStart() {
-            mainThread = new Thread(this.OnStartAsync) {
-                IsBackground = false
-            };
+            if (ExecuteFile == null) {
+                Thread mainThread = new Thread(this.OnStartAsync) {
+                    IsBackground = false
+                };
 
-            try {
-                mainThread.Start();
-            } catch (Exception ex) {
-                logger.Info($"Thread start error {ex.Message}");
+                try {
+                    mainThread.Start();
+                } catch (Exception ex) {
+                    logger.Info($"Thread start error {ex.Message}");
+                }
+            } else {
+                Thread mainThread = new Thread(this.ExecuteLocal) {
+                    IsBackground = false
+                };
+
+                try {
+                    mainThread.Start();
+                } catch (Exception ex) {
+                    logger.Info($"Thread start error {ex.Message}");
+                }
             }
+        }
+
+        private void ExecuteLocal() {
+            NgExecutionController cnt = new NgExecutionController(ExecuteFile);
         }
 
         public void OnStop() {
@@ -81,15 +103,34 @@ namespace LoadInjectorRuntime {
         }
 
         private void StartSignalRClient() {
-            this.controller = new NgExecutionController(false);
+            NgExecutionController controller = new NgExecutionController(6220, false);
+
+            int port = GetAvailablePort(49152);
+
+            port = 6220;
 
             try {
-                clientHub = new ClientHub("http://localhost:6220", controller);
+                ClientHub clientHub = new ClientHub($"http://localhost:{port}", controller);
+                Console.WriteLine($"Starting clintHub on port  {port}");
                 controller.clientHub = clientHub;
                 controller.slaveMode = true;
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        public static int GetAvailablePort(int startingPort) {
+            if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
+            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+            var connectionsEndpoints = ipGlobalProperties.GetActiveTcpConnections().Select(c => c.LocalEndPoint);
+            var tcpListenersEndpoints = ipGlobalProperties.GetActiveTcpListeners();
+            var udpListenersEndpoints = ipGlobalProperties.GetActiveUdpListeners();
+            var portsInUse = connectionsEndpoints.Concat(tcpListenersEndpoints)
+                .Concat(udpListenersEndpoints)
+                .Select(e => e.Port);
+
+            return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
     }
 }

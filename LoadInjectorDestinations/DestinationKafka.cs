@@ -13,8 +13,8 @@ namespace LoadInjector.Destinations {
         public string Topic { get; set; }
         public string Key { get; set; }
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 bootStrapServers = defn.Attributes["connection"].Value;

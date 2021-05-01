@@ -18,8 +18,8 @@ namespace LoadInjector.Destinations {
         private CancellationTokenSource source;
         private string name;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controlller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             name = defn.Attributes["name"]?.Value;
             try {
@@ -78,7 +78,7 @@ namespace LoadInjector.Destinations {
                     Console.WriteLine($"Could not start HTTP Listener {ex.Message}");
                 }
 
-                // Recieved messages are written to a buffer queue
+                // Received messages are written to a buffer queue
                 // The written records are read in the main Listen method and returned
                 while (true) {
                     HttpListenerContext context = null;

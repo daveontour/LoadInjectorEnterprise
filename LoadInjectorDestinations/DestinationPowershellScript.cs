@@ -6,7 +6,6 @@ using System.Collections.ObjectModel;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
-using System.Windows;
 using System.Xml;
 
 namespace LoadInjector.Destinations {
@@ -14,8 +13,8 @@ namespace LoadInjector.Destinations {
     public class DestinationPowershellScript : SenderAbstract {
         private bool showResults;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 showResults = bool.Parse(defn.Attributes["showResults"].Value);
@@ -27,7 +26,7 @@ namespace LoadInjector.Destinations {
         }
 
         public override void Send(string val, List<Variable> vars) {
-            string result = RunScript(val);
+            var result = RunScript(val);
             if (showResults) {
                 Console.WriteLine(result);
             }
@@ -62,10 +61,6 @@ namespace LoadInjector.Destinations {
             }
 
             return stringBuilder.ToString();
-        }
-
-        public override void Prepare() {
-            base.Prepare();
         }
     }
 }

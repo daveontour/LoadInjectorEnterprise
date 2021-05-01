@@ -4,7 +4,6 @@ using Oracle.ManagedDataAccess.Client;
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows;
 using System.Xml;
 
 namespace LoadInjector.Destinations {
@@ -13,8 +12,8 @@ namespace LoadInjector.Destinations {
         private string connStr;
         public bool showResults;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 showResults = bool.Parse(defn.Attributes["showResults"].Value);
@@ -40,7 +39,7 @@ namespace LoadInjector.Destinations {
                 }
             }
 
-            string result = SendData(val);
+            var result = SendData(val);
 
             if (showResults) {
                 Console.WriteLine($"{result}\n");
@@ -65,12 +64,8 @@ namespace LoadInjector.Destinations {
                 return sbld.ToString();
             } catch (Exception ex) {
                 Console.WriteLine($"Send Data Error: {ex.Message}");
-                return ($"Send Data Error: {ex.Message}");
+                return $"Send Data Error: {ex.Message}";
             }
-        }
-
-        public override void Prepare() {
-            base.Prepare();
         }
     }
 }

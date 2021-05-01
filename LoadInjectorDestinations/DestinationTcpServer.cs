@@ -1,4 +1,5 @@
 ﻿using LoadInjectorBase;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -16,8 +17,8 @@ namespace LoadInjector.Destinations {
         private bool closeConnection;
         private AsynchronousSocketListener sockListner;
 
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, NLog.Logger logger) {
-            base.Configure(defn, controller, logger);
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            base.Configure(node, cont, log);
 
             try {
                 tcpServerPort = int.Parse(defn.Attributes["tcpServerPort"].Value);
@@ -193,7 +194,7 @@ namespace LoadInjector.Destinations {
             }
             // Begin sending the data to the remote device.
             try {
-                int bytesSent = serverSocket.Send(byteData, SocketFlags.None);
+                var bytesSent = serverSocket.Send(byteData, SocketFlags.None);
                 Console.WriteLine($"TCP Server Sent {bytesSent} bytes to client.");
             } catch (Exception) {
                 Console.WriteLine("Connection No Longer Available");

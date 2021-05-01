@@ -44,6 +44,8 @@ namespace LoadInjector.RunTime {
         public readonly Dictionary<string, LineUserControl> destUIMap = new Dictionary<string, LineUserControl>();
         public readonly Dictionary<string, SourceUI> sourceUIMap = new Dictionary<string, SourceUI>();
 
+        private NgExecutionController cnt;
+
         public ObservableCollection<TriggerRecord> SchedTriggers { get; set; }
         public ObservableCollection<TriggerRecord> FiredTriggers { get; set; }
 
@@ -127,6 +129,8 @@ namespace LoadInjector.RunTime {
             lvFiredTriggers.ItemsSource = FiredTriggers;
             CollectionView view2 = (CollectionView)CollectionViewSource.GetDefaultView(lvFiredTriggers.ItemsSource);
             view2.SortDescriptions.Add(new SortDescription("TIME", ListSortDirection.Descending));
+
+            //cnt = new NgExecutionController(this.centralMessagingHub.port);
 
             //centralMessagingHub = new CentralMessagingHub(this);
             //centralMessagingHub.StartHub();
@@ -584,6 +588,7 @@ namespace LoadInjector.RunTime {
 
         internal void SetCentralMessagingHub(CentralMessagingHub centralMessagingHub) {
             this.centralMessagingHub = centralMessagingHub;
+            cnt = new NgExecutionController(this.centralMessagingHub.port);
         }
     }
 }

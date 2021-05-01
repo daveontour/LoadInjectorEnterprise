@@ -12,10 +12,10 @@ namespace LoadInjectorBase {
         public XmlNode defn;
         public IDestinationEndPointController controller;
 
-        public virtual bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            this.defn = defn;
-            this.logger = logger;
-            this.controller = controller;
+        public virtual bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+            this.defn = node;
+            this.logger = log;
+            this.controller = cont;
 
             return true;
         }

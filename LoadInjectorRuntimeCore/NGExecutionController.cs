@@ -9,7 +9,6 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using System.Windows;
 using System.Xml;
 using System.Xml.Linq;
 using LoadInjector.RunTime.EngineComponents;
@@ -96,11 +95,15 @@ namespace LoadInjector.RunTime {
 
         public string executionNodeUuid;
         public bool slaveMode = false;
+        private int centralHubPort;
+        private Timer executionTimer;
+        private int repeatsExecuted = 0;
+        private Timer repetitionTimer;
 
         private void InitController(bool startHub = true) {
             if (startHub) {
                 try {
-                    clientHub = new ClientHub("http://localhost:6220", this);
+                    clientHub = new ClientHub($"http://localhost:{centralHubPort}", this);
                 } catch (Exception ex) {
                     ConsoleMsg(ex.Message);
                 }
@@ -188,13 +191,78 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        public NgExecutionController(bool startHub = true) {
+        public NgExecutionController(int hubPort, bool startHub = true) {
+            this.centralHubPort = hubPort;
             InitController(startHub);
         }
 
         public NgExecutionController(XmlDocument model) {
             InitController();
             InitModel(model);
+        }
+
+        // Called for standalone Execution.
+        public NgExecutionController(string executeFile) {
+            clientHub = new ClientHub(this);
+            XmlDocument doc = new XmlDocument();
+            doc.Load(executeFile);
+
+            eventDistributor = new TriggerEventDistributor(this);
+            amsDataDrivenLines.Clear();
+            InitModel(doc);
+            RunLocal();
+        }
+
+        public void RunLocal() {
+            PrepareAsync().Wait();
+            Run();
+
+            stopWatch.Reset();
+            stopWatch.Start();
+
+            executionTimer = new Timer {
+                Interval = duration * 1000,
+                AutoReset = false,
+                Enabled = true
+            };
+            executionTimer.Elapsed += OnExecutionCompleteEvent;
+        }
+
+        private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
+            // This is an Event Handler that handles the action when the timer goes off
+            // signalling the end of the test.
+            repeatsExecuted++;
+
+            Console.WriteLine($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete");
+            if (repeatsExecuted < repeats) {
+                repetitionTimer = new Timer {
+                    Interval = repeatRest * 1000,
+                    AutoReset = false,
+                    Enabled = true
+                };
+                repetitionTimer.Elapsed += NextExecution;
+            }
+        }
+
+        private void NextExecution(object sender, ElapsedEventArgs e) {
+            try {
+                // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
+
+                PrepareAsync().Wait();
+                Run();
+
+                stopWatch.Reset();
+                stopWatch.Start();
+
+                executionTimer = new Timer {
+                    Interval = duration * 1000,
+                    AutoReset = false,
+                    Enabled = true
+                };
+                executionTimer.Elapsed += OnExecutionCompleteEvent;
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         private void AddDestinationControllerType(XmlNodeList nodeList, List<DataDrivenSourceController> typeList, List<string> triggersInUse) {
