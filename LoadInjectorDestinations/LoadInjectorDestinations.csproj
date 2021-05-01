@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\librdkafka.redist.1.6.1\build\librdkafka.redist.props" Condition="Exists('..\packages\librdkafka.redist.1.6.1\build\librdkafka.redist.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -9,9 +10,12 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LoadInjectorDestinations</RootNamespace>
     <AssemblyName>LoadInjectorDestinations</AssemblyName>
-    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -31,18 +35,206 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="amqmdmsg, Version=8.0.0.7, Culture=neutral, PublicKeyToken=ab28406a0e0bb022, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\amqmdmsg.dll</HintPath>
+    </Reference>
+    <Reference Include="amqmdnet, Version=8.0.0.7, Culture=neutral, PublicKeyToken=dd3cb1c9aae9ec97, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\amqmdnet.dll</HintPath>
+    </Reference>
+    <Reference Include="amqmdnm, Version=8.0.0.7, Culture=neutral, PublicKeyToken=ba95863d803c00a4, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\amqmdnm.dll</HintPath>
+    </Reference>
+    <Reference Include="amqmdnsp, Version=8.0.0.7, Culture=neutral, PublicKeyToken=4ec3909022c7abcc, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\amqmdnsp.dll</HintPath>
+    </Reference>
+    <Reference Include="amqmdxcs, Version=8.0.0.7, Culture=neutral, PublicKeyToken=7a58d55a51981a15, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\amqmdxcs.dll</HintPath>
+    </Reference>
+    <Reference Include="BouncyCastle.Crypto, Version=1.8.5.0, Culture=neutral, PublicKeyToken=0e99375e54769942">
+      <HintPath>..\packages\BouncyCastle.1.8.5\lib\BouncyCastle.Crypto.dll</HintPath>
+    </Reference>
+    <Reference Include="Confluent.Kafka, Version=1.6.3.0, Culture=neutral, PublicKeyToken=12c514ca49093d1e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Confluent.Kafka.1.6.3\lib\net46\Confluent.Kafka.dll</HintPath>
+    </Reference>
+    <Reference Include="Google.Protobuf, Version=3.14.0.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
+      <HintPath>..\packages\Google.Protobuf.3.14.0\lib\net45\Google.Protobuf.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Admin, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Admin.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Admin.Objects, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Admin.Objects.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Client.Impl, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Client.Impl.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Client.WMQ, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Client.WMQ.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Comms, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Comms.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Comms.RMM, Version=1.0.3035.28838, Culture=neutral, PublicKeyToken=81279b988bfae9f8, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Comms.RMM.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Comms.SSL, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Comms.SSL.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Core, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Formats.JMF, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Formats.JMF.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Formats.MFP, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Formats.MFP.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Impl, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Impl.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Match, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Match.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.NLS, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.NLS.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Provider, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Provider.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.SIB, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.SIB.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.Util, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.Util.dll</HintPath>
+    </Reference>
+    <Reference Include="IBM.XMS.WMQI, Version=8.0.0.7, Culture=neutral, PublicKeyToken=d2666ab12fca862b, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSphereMqClient.8.0.0.7\lib\net20\IBM.XMS.WMQI.dll</HintPath>
+    </Reference>
+    <Reference Include="K4os.Compression.LZ4, Version=1.1.11.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
+      <HintPath>..\packages\K4os.Compression.LZ4.1.1.11\lib\net46\K4os.Compression.LZ4.dll</HintPath>
+    </Reference>
+    <Reference Include="K4os.Compression.LZ4.Streams, Version=1.1.11.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
+      <HintPath>..\packages\K4os.Compression.LZ4.Streams.1.1.11\lib\net46\K4os.Compression.LZ4.Streams.dll</HintPath>
+    </Reference>
+    <Reference Include="K4os.Hash.xxHash, Version=1.0.6.0, Culture=neutral, PublicKeyToken=32cd54395057cec3, processorArchitecture=MSIL">
+      <HintPath>..\packages\K4os.Hash.xxHash.1.0.6\lib\net46\K4os.Hash.xxHash.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="MQTTnet, Version=3.0.15.0, Culture=neutral, PublicKeyToken=b69712f52770c0a7, processorArchitecture=MSIL">
+      <HintPath>..\packages\MQTTnet.3.0.15\lib\net461\MQTTnet.dll</HintPath>
+    </Reference>
+    <Reference Include="MySql.Data, Version=8.0.24.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.8.0.24\lib\net452\MySql.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
+      <HintPath>..\packages\NLog.4.7.9\lib\net45\NLog.dll</HintPath>
+    </Reference>
+    <Reference Include="Oracle.ManagedDataAccess, Version=4.122.19.1, Culture=neutral, PublicKeyToken=89b483f429c47342, processorArchitecture=MSIL">
+      <HintPath>..\packages\Oracle.ManagedDataAccess.19.11.0\lib\net40\Oracle.ManagedDataAccess.dll</HintPath>
+    </Reference>
+    <Reference Include="RabbitMQ.Client, Version=6.0.0.0, Culture=neutral, PublicKeyToken=89e7d7c5feba84ce, processorArchitecture=MSIL">
+      <HintPath>..\packages\RabbitMQ.Client.6.2.1\lib\net461\RabbitMQ.Client.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Management.Automation, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.PowerShell.5.ReferenceAssemblies.1.1.0\lib\net4\System.Management.Automation.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.4\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Messaging" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.1, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.3\lib\net461\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Threading.Channels, Version=4.0.2.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Channels.4.7.1\lib\net461\System.Threading.Channels.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.1, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.4\lib\net461\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="Ubiety.Dns.Core, Version=2.2.1.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.8.0.24\lib\net452\Ubiety.Dns.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Zstandard.Net, Version=1.1.7.0, Culture=neutral, PublicKeyToken=c5687fc88969c44d, processorArchitecture=MSIL">
+      <HintPath>..\packages\MySql.Data.8.0.24\lib\net452\Zstandard.Net.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="DestinationFactory.cs" />
+    <Compile Include="DestinationFile.cs" />
+    <Compile Include="DestinationFtp.cs" />
+    <Compile Include="DestinationHttpGet.cs" />
+    <Compile Include="DestinationHttpDelete.cs" />
+    <Compile Include="DestinationHttpPatch.cs" />
+    <Compile Include="DestinationHttpPost.cs" />
+    <Compile Include="DestinationHttpPut.cs" />
+    <Compile Include="DestinationHttpServer.cs" />
+    <Compile Include="DestinationKafka.cs" />
+    <Compile Include="DestinationMQ.cs" />
+    <Compile Include="DestinationMqtt.cs" />
+    <Compile Include="DestinationMsmq.cs" />
+    <Compile Include="DestinationMsSql.cs" />
+    <Compile Include="DestinationMySql.cs" />
+    <Compile Include="DestinationOracle.cs" />
+    <Compile Include="DestinationPowershellScript.cs" />
+    <Compile Include="DestinationRabbit.cs" />
+    <Compile Include="DestinationSink.cs" />
+    <Compile Include="DestinationTCPClient.cs" />
+    <Compile Include="DestinationTcpServer.cs" />
+    <Compile Include="DestinationText.cs" />
+    <Compile Include="Parameters.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\LoadInjectorBase\LoadInjectorBase.csproj">
+      <Project>{37db7b6c-b40e-4f08-ae46-d2a46ff9d951}</Project>
+      <Name>LoadInjectorBase</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="destination.mapping">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\librdkafka.redist.1.6.1\build\librdkafka.redist.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\librdkafka.redist.1.6.1\build\librdkafka.redist.props'))" />
+  </Target>
 </Project>

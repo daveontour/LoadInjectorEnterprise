@@ -198,32 +198,32 @@ namespace LoadInjector.Common {
     [CategoryOrder("Test Execution", 1)]
     [CategoryOrder("Execution", 10)]
     [RefreshProperties(RefreshProperties.All)]
-    public class LoadInjectorGridBase {
+    public class LoadInjectorGridBase : ILoadInjectorGridBase {
         public string type = "MSMQ";
         public XmlNode _node;
         public IView view;
 
-        protected void Show(string[] fields) {
+        public void Show(string[] fields) {
             foreach (string field in fields) {
                 ShowHide(field, true);
             }
         }
 
-        protected void Show(string field) {
+        public void Show(string field) {
             ShowHide(field, true);
         }
 
-        protected void Hide(string[] fields) {
+        public void Hide(string[] fields) {
             foreach (string field in fields) {
                 ShowHide(field, false);
             }
         }
 
-        protected void Hide(string field) {
+        public void Hide(string field) {
             ShowHide(field, false);
         }
 
-        protected void ShowHide(string field, bool value) {
+        public void ShowHide(string field, bool value) {
             try {
                 PropertyDescriptor descriptor = TypeDescriptor.GetProperties(GetType())[field];
                 BrowsableAttribute theDescriptorBrowsableAttribute = (BrowsableAttribute)descriptor?.Attributes[typeof(BrowsableAttribute)];
@@ -288,7 +288,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected string GetAttribute(string attribName) {
+        public string GetAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 return _node.Attributes[attribName].Value;
             } else {
@@ -296,7 +296,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected bool GetBoolAttribute(string attribName) {
+        public bool GetBoolAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 return bool.Parse(_node.Attributes[attribName].Value);
             } else {
@@ -304,7 +304,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected bool GetBoolDefaultTrueAttribute(string attribName) {
+        public bool GetBoolDefaultTrueAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 return bool.Parse(_node.Attributes[attribName].Value);
             } else {
@@ -320,7 +320,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected bool GetBoolDefaultFalseAttribute(XmlNode _node, string attribName) {
+        public bool GetBoolDefaultFalseAttribute(XmlNode _node, string attribName) {
             if (_node.Attributes[attribName] != null) {
                 return bool.Parse(_node.Attributes[attribName].Value);
             } else {
@@ -336,7 +336,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected int GetIntDefaultZeroAttribute(string attribName) {
+        public int GetIntDefaultZeroAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 int value;
                 try {
@@ -351,7 +351,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected double GetDoubleAttribute(string attribName) {
+        public double GetDoubleAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 double value;
                 try {
@@ -366,7 +366,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected double GetDoubleAttributeDefaultZero(string attribName) {
+        public double GetDoubleAttributeDefaultZero(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 double value;
                 try {
@@ -381,7 +381,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected double GetDoubleAttributeZeroDefault(string attribName) {
+        public double GetDoubleAttributeZeroDefault(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 double value;
                 try {
@@ -396,7 +396,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected int GetIntAttribute(string attribName) {
+        public int GetIntAttribute(string attribName) {
             if (_node.Attributes[attribName] != null) {
                 int value;
                 try {
@@ -411,7 +411,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected int GetIntAttribute(string attribName, int def) {
+        public int GetIntAttribute(string attribName, int def) {
             if (_node.Attributes[attribName] != null) {
                 return int.Parse(_node.Attributes[attribName].Value);
             } else {
@@ -419,12 +419,12 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected void ClearAttributes() {
+        public void ClearAttributes() {
             _node.Attributes.RemoveAll();
             view.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttribute(string attribName, string value) {
+        public void SetAttribute(string attribName, string value) {
             if (string.IsNullOrEmpty(value)) {
                 try {
                     _node.Attributes.Remove(_node.Attributes[attribName]);
@@ -444,7 +444,7 @@ namespace LoadInjector.Common {
             view?.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttribute(string attribName, string value, XmlNode node) {
+        public void SetAttribute(string attribName, string value, XmlNode node) {
             if (string.IsNullOrEmpty(value)) {
                 try {
                     node.Attributes.Remove(_node.Attributes[attribName]);
@@ -464,7 +464,7 @@ namespace LoadInjector.Common {
             view?.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttribute(string attribName, double value) {
+        public void SetAttribute(string attribName, double value) {
             if ((value == -1) && _node.Attributes[attribName] != null) {
                 _node.Attributes.Remove(_node.Attributes[attribName]);
             } else {
@@ -480,7 +480,7 @@ namespace LoadInjector.Common {
             view.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAbsoluteAttribute(string attribName, bool value) {
+        public void SetAbsoluteAttribute(string attribName, bool value) {
             if (_node.Attributes[attribName] != null) {
                 _node.Attributes[attribName].Value = value.ToString();
             } else {
@@ -496,7 +496,7 @@ namespace LoadInjector.Common {
             view.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttribute(string attribName, bool value) {
+        public void SetAttribute(string attribName, bool value) {
             if ((!value) && _node.Attributes[attribName] != null) {
                 _node.Attributes.Remove(_node.Attributes[attribName]);
             } else {
@@ -512,7 +512,7 @@ namespace LoadInjector.Common {
             view.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttributeAbs(string attribName, bool value) {
+        public void SetAttributeAbs(string attribName, bool value) {
             if (_node.Attributes[attribName] != null) {
                 _node.Attributes[attribName].Value = value.ToString();
             } else {
@@ -528,7 +528,7 @@ namespace LoadInjector.Common {
             view.UpdateParamBindings("XMLText");
         }
 
-        protected void SetAttribute(string attribName, int value) {
+        public void SetAttribute(string attribName, int value) {
             if ((value == -1) && _node.Attributes[attribName] != null) {
                 _node.Attributes.Remove(_node.Attributes[attribName]);
             } else {
@@ -544,7 +544,7 @@ namespace LoadInjector.Common {
             view?.UpdateParamBindings("XMLText");
         }
 
-        protected XmlNode GetNode(string name) {
+        public XmlNode GetNode(string name) {
             foreach (XmlNode node in _node.ChildNodes) {
                 if (node.Name == name) {
                     return node;
@@ -554,7 +554,7 @@ namespace LoadInjector.Common {
             return null;
         }
 
-        protected string GetFlightType() {
+        public string GetFlightType() {
             switch (GetAttribute("flttype")) {
                 case "":
                 case "none":
@@ -588,7 +588,7 @@ namespace LoadInjector.Common {
             }
         }
 
-        protected void SetFlightType(string value) {
+        public void SetFlightType(string value) {
             switch (value) {
                 case "None":
                     SetAttribute("flttype", "none");

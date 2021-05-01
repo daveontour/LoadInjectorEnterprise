@@ -1,11 +1,9 @@
-﻿using LoadInjector.RunTime.Models;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml;
-using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
 
@@ -30,12 +28,10 @@ namespace LoadInjector.RunTime {
             Color = Colors.Black
         };
 
-        public IProgress<ControllerStatusReport> controllerProgress;
         public XmlNode node;
 
-        public LineUserControl(XmlNode node, IProgress<ControllerStatusReport> controllerProgress) {
+        public LineUserControl(XmlNode node) {
             this.node = node;
-            this.controllerProgress = controllerProgress;
 
             DestType = node.Name;
             LineName = node.Attributes["name"].Value;
@@ -47,34 +43,6 @@ namespace LoadInjector.RunTime {
 
             InitializeComponent();
             DataContext = this;
-        }
-
-        public LineUserControl(XmlNode node) : this(node, null) {
-            controllerProgress = new Progress<ControllerStatusReport>(ControllerStatusChanged);
-        }
-
-        private void ControllerStatusChanged(ControllerStatusReport e) {
-            Operation op = e.Type;
-
-            if (op == Operation.DestinataionSendReport) {
-                MsgSent = Convert.ToInt32(e.Sent);
-                OnPropertyChanged("MsgSent");
-                Rate = e.Actual.ToString(CultureInfo.CurrentCulture);
-                OnPropertyChanged("Rate");
-
-                return;
-            }
-
-            if ((op & Operation.Console) == Operation.Console) {
-                SetOutput(e.OutputString);
-            }
-
-            if ((op & Operation.LineSent) == Operation.LineSent) {
-                Sent(e.OutputInt);
-            }
-            if ((op & Operation.LineRate) == Operation.LineRate) {
-                SetRate(e.OutputDouble);
-            }
         }
 
         public event PropertyChangedEventHandler PropertyChanged;

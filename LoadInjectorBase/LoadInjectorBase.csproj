@@ -61,14 +61,31 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Filters\Expression.cs" />
+    <Compile Include="Filters\FilterBool.cs" />
+    <Compile Include="Filters\FilterContains.cs" />
+    <Compile Include="Filters\FilterDateRange.cs" />
+    <Compile Include="Filters\FilterEquals.cs" />
+    <Compile Include="Filters\FilterLength.cs" />
+    <Compile Include="Filters\FilterMatches.cs" />
+    <Compile Include="Filters\FilterXPathEquals.cs" />
+    <Compile Include="Filters\FilterXPathExists.cs" />
+    <Compile Include="Interfaces\IDestinationEndPointController.cs" />
     <Compile Include="FlightNode.cs" />
-    <Compile Include="IDestinationType.cs" />
+    <Compile Include="Interfaces\IDestinationType.cs" />
+    <Compile Include="Interfaces\IExcelProcessor.cs" />
+    <Compile Include="Interfaces\IChainedSourceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SenderAbstract.cs" />
+    <Compile Include="Abstracts\SenderAbstract.cs" />
+    <Compile Include="TriggerRecord.cs" />
     <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

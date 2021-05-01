@@ -1,0 +1,517 @@
+﻿using LoadInjector.RunTime.EngineComponents;
+
+using System;
+using System.Collections.Generic;
+
+using System.Xml;
+using IBM.XMS.Util;
+using LoadInjector.Filters;
+using LoadInjectorBase;
+using LoadInjectorBase.Interfaces;
+
+namespace LoadInjector.RunTime.ViewModels {
+
+    public abstract class SourceControllerAbstract {
+        public XmlNode node;
+        public NgExecutionController executionController;
+
+        //public IProgress<ControllerStatusReport> lineProgress;
+        //public IProgress<ControllerStatusReport> controllerProgress;
+        public NLog.Logger logger;
+
+        public TriggerEventDistributor eventDistributor;
+        public string name;
+
+        public int serverOffset;
+        public double messagesPerMinute;
+
+        public string dataFile;
+        public string dataSourceFileOrURL;
+        public string dataRestURL;
+        public string repeatingElement;
+
+        public bool xmlToString;
+
+        public string connStr;
+        public string sql;
+        public string dbType;
+
+        public string excelSheet;
+        public string excelRowStart;
+        public string excelRowEnd;
+
+        public int flightSetFrom;
+        public int flightSetTo;
+        public FlightType flttype = FlightType.None;
+        public string flightSourceType;
+        public string dataSourceType;
+
+        public List<string> triggersInUse;
+        public bool lineInUse = false;
+
+        public List<Dictionary<string, string>> dataRecords = new List<Dictionary<string, string>>();
+        public List<FlightNode> fltRecords = new List<FlightNode>();
+
+        public IQueueFilter topLevelFilter;
+        public Expression expression;
+        public string filterTime;
+
+        public string id;
+        public bool refreshFlight;
+        public List<IChainedSourceController> chainedController = new List<IChainedSourceController>();
+
+        public ClientHub clientHub;
+
+        public string executionNodeID;
+
+        public string uuid;
+
+        protected SourceControllerAbstract(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) {
+            this.node = node;
+            this.triggersInUse = triggersInUse;
+            this.clientHub = executionController?.clientHub;
+            eventDistributor = executionController?.eventDistributor;
+            this.executionController = executionController;
+            logger = executionController?.logger;
+            this.serverOffset = serverOffset;
+            name = node.Attributes["name"]?.Value;
+            id = node.Attributes["ID"]?.Value;
+
+            dataSourceType = node.Attributes["dataSource"]?.Value;
+            flightSourceType = node.Attributes["flttype"]?.Value;
+
+            executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
+            uuid = node.Attributes["uuid"]?.Value;
+
+            if ((flightSourceType != null && flightSourceType != "none") || node.Name == "amsdatadriven") {
+                if (flightSourceType == "arr") {
+                    flttype = FlightType.Arrival;
+                } else if (flightSourceType == "dep") {
+                    flttype = FlightType.Departure;
+                } else {
+                    flttype = FlightType.Both;
+                }
+
+                try {
+                    if (node.Attributes["flightSetFrom"] != null) {
+                        flightSetFrom = int.Parse(node.Attributes["flightSetFrom"]?.Value);
+                    } else {
+                        flightSetFrom = -180;
+                    }
+                } catch (Exception) {
+                    flightSetFrom = -180;
+                }
+                try {
+                    if (node.Attributes["flightSetTo"] != null) {
+                        flightSetTo = int.Parse(node.Attributes["flightSetTo"]?.Value);
+                    } else {
+                        flightSetTo = 180;
+                    }
+                } catch (Exception) {
+                    flightSetTo = 180;
+                }
+                try {
+                    if (node.Attributes["refreshFlight"] != null) {
+                        refreshFlight = bool.Parse(node.Attributes["refreshFlight"]?.Value);
+                    } else {
+                        refreshFlight = false;
+                    }
+                } catch (Exception) {
+                    refreshFlight = false;
+                }
+            } else {
+                flttype = FlightType.None;
+            }
+
+            switch (dataSourceType) {
+                case "CSV":
+                    dataFile = node.Attributes["dataFile"]?.Value;
+                    dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
+                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    break;
+
+                case "Excel":
+                    dataFile = node.Attributes["dataFile"]?.Value;
+                    excelSheet = node.Attributes["excelSheet"]?.Value;
+                    excelRowStart = node.Attributes["excelRowStart"]?.Value;
+                    excelRowEnd = node.Attributes["excelRowEnd"]?.Value;
+                    break;
+
+                case "XML":
+                    dataFile = node.Attributes["dataFile"]?.Value;
+                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    repeatingElement = node.Attributes["repeatingElement"]?.Value;
+                    dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
+                    try {
+                        xmlToString = bool.Parse(node.Attributes["xmlToString"]?.Value);
+                    } catch (Exception) {
+                        xmlToString = false;
+                    }
+                    break;
+
+                case "JSON":
+                    dataFile = node.Attributes["dataFile"]?.Value;
+                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
+                    repeatingElement = node.Attributes["repeatingElement"]?.Value;
+                    break;
+
+                case "DATABASE":
+                case "MSSQL":
+                case "MySQL":
+                case "ORACLE":
+                    connStr = node.Attributes["connStr"]?.Value;
+                    sql = node.Attributes["sql"]?.Value;
+                    dbType = node.Attributes["sourceType"]?.Value;
+                    break;
+            }
+
+            dataSourceFileOrURL = dataSourceFileOrURL ?? "file";
+
+            XmlNode filtersDefn = node.SelectSingleNode("./filter");
+
+            if (filtersDefn != null) {
+                /*
+                 * At the top level, there is only one Expresssion, which it self can be a compound
+                 * expression or a single data filter
+                 *
+                 * When the Expression itself is constucted, it recurssive creates all the Expression o
+                 * filters configured under it
+                 */
+
+                // Cycle through the expressions types (and, or, not, xor) to see if any exist
+                foreach (string eType in Expression.expressionTypes) {
+                    XmlNode exprDefn = filtersDefn.SelectSingleNode($"./{eType}");
+                    if (exprDefn != null) {
+                        expression = new Expression(exprDefn);
+                    }
+                }
+
+                FilterFactory fact = new FilterFactory();
+                // Cycle through the data filter types (and, or, not, xor) to see if any exist
+                foreach (string fType in Expression.filterTypes) {
+                    XmlNode filtDefn = filtersDefn.SelectSingleNode($"./{fType}");
+                    if (filtDefn != null) {
+                        topLevelFilter = fact.GetFilter(filtDefn);
+                    }
+                }
+
+                try {
+                    filterTime = filtersDefn.Attributes["filterTime"]?.Value;
+                } catch (Exception) {
+                    filterTime = "post";
+                }
+
+                if (filterTime == null) {
+                    filterTime = "post";
+                }
+            }
+
+            // Add the chained controllers
+            foreach (XmlNode chained in node.SelectNodes("./chained")) {
+                chainedController.Add(new RateDrivenSourceController(chained, chainDepth++, triggersInUse, serverOffset, executionController));
+            }
+        }
+
+        private bool CheckDisabled(XmlNode node) {
+            bool disabled = false;
+            if (node.Attributes["disabled"] != null) {
+                try {
+                    disabled = bool.Parse(node.Attributes["disabled"].Value);
+                } catch (Exception) {
+                    disabled = false;
+                }
+            }
+            return disabled;
+        }
+
+        //Provide the min and max flight offsets
+        public Tuple<int, int> GetFlightSet() {
+            if (node.Attributes["disabled"]?.Value == "true") {
+                return null;
+            }
+            if (flttype != FlightType.None) {
+                return new Tuple<int, int>(flightSetFrom, flightSetTo);
+            } else {
+                return null;
+            }
+        }
+
+        public bool HasFlights() {
+            return (flttype != FlightType.None && InUse());
+        }
+
+        public bool InUse() {
+            if (node.Attributes["disabled"]?.Value == "true") {
+                return false;
+            }
+
+            if (id != null && triggersInUse.Contains(id)) {
+                return true;
+            }
+
+            return lineInUse;
+        }
+
+        public List<string> GetDataPointsInUse(string triggerType, string attToAdd) {
+            List<string> inUse = new List<string>();
+            List<string> triggerIDS = new List<string> {
+                id
+            };
+            foreach (XmlNode chain in node.SelectNodes("./chained")) {
+                if (chain.Attributes["useParentData"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
+                    triggerIDS.Add(chain.Attributes["ID"].Value);
+                }
+            }
+
+            foreach (string tID in triggerIDS) {
+                foreach (XmlNode sub in node.SelectNodes($"//subscribed[text() = '{tID}']")) {
+                    XmlNode destNode = sub.ParentNode;       // The destination nodes that use this triggering event
+                    XmlNodeList vars = destNode.SelectNodes($".//variable[@type = '{triggerType}']");  //The variables of the required type
+                    foreach (XmlNode v in vars) {
+                        string dataPoint = v.Attributes[attToAdd]?.Value;
+                        if (dataPoint != null && !inUse.Contains(dataPoint)) {
+                            inUse.Add(dataPoint);
+                        }
+                    }
+                }
+            }
+
+            return inUse;
+        }
+
+        public List<string> GetDataPointsInUse(List<string> inUse, string triggerType, string attToAdd) {
+            try {
+                List<string> triggerIDS = new List<string> {
+                    id
+                };
+                foreach (XmlNode chain in node.SelectNodes("./chained")) {
+                    if (chain.Attributes["useParentData"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase)) {
+                        triggerIDS.Add(chain.Attributes["ID"].Value);
+                    }
+                }
+                foreach (XmlNode trigger in node.SelectNodes("trigger")) {
+                    triggerIDS.Add(trigger.Attributes["id"].Value);
+                }
+                foreach (string triggerID in triggerIDS) {
+                    foreach (XmlNode sub in node.SelectNodes($"//subscribed[text() = '{triggerID}']")) {
+                        XmlNode destNode = sub.ParentNode;       // The destination nodes that use this triggering event
+                        XmlNodeList vars = destNode.SelectNodes($".//variable[@type = '{triggerType}']");  //The variables of the required type
+                        foreach (XmlNode v in vars) {
+                            string dataPoint = v.Attributes[attToAdd]?.Value;
+                            if (dataPoint != null && !inUse.Contains(dataPoint)) {
+                                inUse.Add(dataPoint);
+                            }
+                        }
+                    }
+                }
+            } catch (Exception ex) {
+                Console.WriteLine($"Error determining data requirements for trigger: {ex.Message} ");
+                return null;
+            }
+
+            return inUse;
+        }
+
+        public bool PrepareXML(string timeInUse = null) {
+            List<string> dataPointsInUse;
+            if (timeInUse != null) {
+                dataPointsInUse = new List<string> {
+                    timeInUse
+                };
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "xmlElement", "xmlXPath");
+            } else {
+                dataPointsInUse = GetDataPointsInUse("xmlElement", "xmlXPath");
+            }
+
+            if (dataPointsInUse.Count == 0) {
+                return true;
+            }
+
+            XmlProcessor xmlProcessor = new XmlProcessor();
+
+            try {
+                dataRecords = xmlProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, xmlToString, node);
+            } catch (Exception ex) {
+                Console.WriteLine($"Error retrieving XML data: {ex.Message} ");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool PrepareJSON(string timeInUse = null) {
+            List<string> dataPointsInUse;
+            if (timeInUse != null) {
+                dataPointsInUse = new List<string> {
+                    timeInUse
+                };
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "jsonElement", "field");
+            } else {
+                dataPointsInUse = GetDataPointsInUse("jsonElement", "field");
+            }
+            if (dataPointsInUse.Count == 0) {
+                return true;
+            }
+            JsonProcessor jsonProcessor = new JsonProcessor();
+
+            try {
+                dataRecords = jsonProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, node);
+            } catch (Exception ex) {
+                Console.WriteLine($"Error retrieving JSON data: {ex.Message} ");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool PrepareDB(string timeInUse = null) {
+            List<string> dataPointsInUse;
+            if (timeInUse != null) {
+                dataPointsInUse = new List<string> {
+                    timeInUse
+                };
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "dbField", "field");
+            } else {
+                dataPointsInUse = GetDataPointsInUse("dbField", "field");
+            }
+            if (dataPointsInUse.Count == 0) {
+                return true;
+            }
+            DBProcessor dbProcessor = new DBProcessor();
+
+            try {
+                dataRecords = dbProcessor.GetRecords(connStr, sql, dbType, dataPointsInUse);
+            } catch (Exception ex) {
+                Console.WriteLine($"Error retrieving Database data: {ex.Message} ");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool PrepareExcel(string timeInUse = null) {
+            List<string> dataPointsInUse;
+            if (timeInUse != null) {
+                dataPointsInUse = new List<string> {
+                    timeInUse
+                };
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "excelCol", "excelCol");
+            } else {
+                dataPointsInUse = GetDataPointsInUse("excelCol", "excelCol");
+            }
+            if (dataPointsInUse.Count == 0) {
+                return true;
+            }
+            ExcelProcessor excelProcessor = new ExcelProcessor();
+
+            try {
+                dataRecords = excelProcessor.GetRecords(dataFile, excelSheet, dataPointsInUse, "Text", null, int.Parse(excelRowStart), int.Parse(excelRowEnd), true);
+            } catch (Exception ex) {
+                Console.WriteLine($"Error retrieving Excel data: {ex.Message} ");
+                return false;
+            }
+
+            return true;
+        }
+
+        public bool PrepareCSV(string timeInUse = null) {
+            List<string> dataPointsInUse;
+            if (timeInUse != null) {
+                dataPointsInUse = new List<string> {
+                    timeInUse
+                };
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "csvfield", "field");
+            } else {
+                dataPointsInUse = GetDataPointsInUse("csvfield", "field");
+            }
+            if (dataPointsInUse.Count == 0) {
+                return true;
+            }
+            CsvProcessor csvProcessor = new CsvProcessor(dataFile, dataRestURL, dataSourceFileOrURL, dataPointsInUse, node);
+
+            try {
+                dataRecords = csvProcessor.GetRecords();
+            } catch (Exception ex) {
+                Console.WriteLine($"Error retrieving CSV data: {ex.Message} ");
+                return false;
+            }
+
+            return true;
+        }
+
+        public void PrepareFlights(List<FlightNode> flights, List<FlightNode> arrflights, List<FlightNode> depflights) {
+            // Flights for AMS data driven lines are set in the superclass
+            if (node.Name == "amsdatadriven" || flttype == FlightType.None || dataSourceType == "PULSAR") {
+                return;
+            }
+
+            List<FlightNode> poolSource = new List<FlightNode>();
+            switch (flttype) {
+                case FlightType.Arrival:
+                    poolSource = arrflights;
+                    break;
+
+                case FlightType.Departure:
+                    poolSource = depflights;
+                    break;
+
+                case FlightType.Both:
+                    poolSource = flights;
+                    break;
+            }
+
+            //Filter according to STO requirements
+            try {
+                DateTime now = DateTime.Now;
+                DateTime earliest = now.AddMinutes(flightSetFrom);
+                DateTime latest = now.AddMinutes(flightSetTo);
+
+                foreach (FlightNode fl in poolSource) {
+                    if (earliest < fl.dateTime && fl.dateTime < latest) {
+                        //Apply any pre filtering
+
+                        if (filterTime == "pre" && expression != null) {
+                            bool pass = expression.Pass(fl.FightXML);
+                            if (!pass) {
+                                Console.WriteLine("Pre Filtering: Flight did not pass filter");
+                                continue;
+                            }
+                        }
+                        if (filterTime == "pre" && topLevelFilter != null) {
+                            bool pass = topLevelFilter.Pass(fl.FightXML);
+                            if (!pass) {
+                                Console.WriteLine("Pre Filtering: Flight did not pass filter");
+                                continue;
+                            }
+                        }
+
+                        fltRecords.Add(fl);
+                    }
+                }
+            } catch (Exception ex) {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
+        }
+
+        public void SetMsgPerMin(String s) {
+            clientHub.SetMsgPerMin(this.executionNodeID, this.uuid, s);
+        }
+
+        public void SetConfiguredMsgPerMin(String s) {
+            clientHub.SetConfiguredMsgPerMin(this.executionNodeID, this.uuid, s);
+        }
+
+        public void SetSourceLineOutput(String s) {
+            clientHub.SetSourceLineOutput(this.executionNodeID, this.uuid, s);
+        }
+
+        public void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
+            clientHub.SourceReport(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
+        }
+
+        public void ReportChain(string v, int messagesSent) {
+            clientHub.SourceReportChain(this.executionNodeID, this.uuid, v, messagesSent, v, messagesSent);
+        }
+    }
+}

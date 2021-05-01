@@ -1,14 +1,5 @@
 ﻿using LoadInjector.Common;
-using LoadInjector.RunTime;
-using MQTTnet;
-using MQTTnet.Client;
-using MQTTnet.Client.Options;
-using MQTTnet.Client.Publishing;
-using NLog;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Threading;
 using System.Xml;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
@@ -20,12 +11,12 @@ namespace LoadInjector.Destinations {
         public string ProtocolName => name;
         public string ProtocolDescription => description;
 
-        public SenderAbstract GetDestinationSender() {
-            return new DestinationMqtt();
-        }
-
         public LoadInjectorGridBase GetConfigGrid(XmlNode dataModel, IView view) {
             return new MqttPropertyGrid(dataModel, view);
+        }
+
+        public object GetConfigGrid(object dataModel, object view) {
+            return new MqttPropertyGrid((XmlNode)dataModel, (IView)view);
         }
     }
 
@@ -98,79 +89,6 @@ namespace LoadInjector.Destinations {
         public string MQTTTopic {
             get => GetAttribute("mqttTopic");
             set => SetAttribute("mqttTopic", value);
-        }
-    }
-
-    public class DestinationMqtt : SenderAbstract {
-        private string topic;
-        private string mqttServer;
-        private string mqttServerURL;
-        private string serverType;
-        private int mqttServerPort;
-
-        private IMqttClientOptions options;
-        private IMqttClient mqttClient;
-
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
-
-            var factory = new MqttFactory();
-            mqttClient = factory.CreateMqttClient();
-            try {
-                mqttServer = defn.Attributes["mqttServer"].Value;
-            } catch (Exception) {
-                mqttServer = null;
-            }
-            try {
-                mqttServerURL = defn.Attributes["mqttServerURL"].Value;
-            } catch (Exception) {
-                mqttServerURL = null;
-            }
-            try {
-                mqttServerPort = int.Parse(defn.Attributes["mqttPort"].Value);
-            } catch (Exception) {
-                mqttServerPort = -1;
-            }
-            try {
-                topic = defn.Attributes["mqttTopic"].Value;
-            } catch (Exception) {
-                topic = null;
-            }
-            try {
-                serverType = defn.Attributes["mqttServerType"].Value;
-            } catch (Exception) {
-                topic = null;
-            }
-
-            return true;
-        }
-
-        public override void Send(string val, List<Variable> vars) {
-            var msg = new MqttApplicationMessageBuilder()
-            .WithTopic(topic)
-            .WithPayload(val)
-            .WithExactlyOnceQoS()
-            .WithRetainFlag()
-            .Build();
-
-            //"broker.hivemq.com", 1883)
-            if (serverType == "tcp") {
-                options = new MqttClientOptionsBuilder().WithTcpServer(mqttServer, mqttServerPort).Build();
-            }
-
-            //"broker.hivemq.com:8000/mqtt"
-            if (serverType == "ws") {
-                options = new MqttClientOptionsBuilder().WithWebSocketServer(mqttServerURL).Build();
-            }
-            if (!mqttClient.IsConnected) {
-                mqttClient.ConnectAsync(options).Wait();
-            }
-
-            MqttClientPublishResult result = mqttClient.PublishAsync(msg, CancellationToken.None).Result;
-
-            if (result.ReasonCode != MqttClientPublishReasonCode.Success) {
-                Console.WriteLine($"MQTT Send Failure {result.ReasonString}");
-            }
         }
     }
 }

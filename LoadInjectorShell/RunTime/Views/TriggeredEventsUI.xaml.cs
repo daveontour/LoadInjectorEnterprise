@@ -1,9 +1,7 @@
-﻿using LoadInjector.RunTime.Models;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows.Controls;
 using System.Xml;
-using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
 

@@ -1,0 +1,75 @@
+﻿using LoadInjectorBase;
+using NLog;
+using System;
+using System.Collections.Generic;
+using System.Data.SqlClient;
+using System.Text;
+using System.Xml;
+
+namespace LoadInjector.Destinations {
+
+    public class DestinationMsSql : SenderAbstract {
+        private string connStr;
+        public bool showResults;
+
+        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
+            base.Configure(defn, controller, logger);
+
+            try {
+                showResults = bool.Parse(defn.Attributes["showResults"].Value);
+            } catch (Exception) {
+                showResults = false;
+            }
+            try {
+                connStr = defn.Attributes["connStr"].Value;
+            } catch (Exception) {
+                Console.WriteLine($"No Connection String defined for { defn.Attributes["name"].Value}");
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void Send(string val, List<Variable> vars) {
+            foreach (Variable v in vars) {
+                try {
+                    connStr = connStr.Replace(v.token, v.value);
+                } catch (Exception) {
+                    //NO-OP
+                }
+            }
+
+            string result = SendData(val);
+            if (showResults) {
+                Console.WriteLine(result);
+            }
+        }
+
+        public string SendData(string sql) {
+            SqlConnection cnn = new SqlConnection(connStr);
+
+            try {
+                cnn.Open();
+                SqlCommand command = new SqlCommand(sql, cnn);
+                SqlDataReader dataReader = command.ExecuteReader();
+
+                StringBuilder bld = new StringBuilder();
+
+                while (dataReader.Read()) {
+                    bld.Append(dataReader.GetValue(0) + " - " + dataReader.GetValue(1) + "\n");
+                }
+
+                cnn.Close();
+
+                return bld.ToString();
+            } catch (Exception ex) {
+                Console.WriteLine($"Send Data Error: {ex.Message}");
+                return ($"Send Data Error: {ex.Message}");
+            }
+        }
+
+        public override void Prepare() {
+            base.Prepare();
+        }
+    }
+}

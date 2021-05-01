@@ -26,6 +26,13 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.executionUI = executionUI;
         }
 
+        public CentralMessagingHub() {
+        }
+
+        public void SetExecutionUI(ExecutionUI executionUI) {
+            CentralMessagingHub.executionUI = executionUI;
+        }
+
         public void StartHub() {
             // This will *ONLY* bind to localhost, if you want to bind to all addresses
             // use http://*:8080 to bind to all addresses.

@@ -1,10 +1,7 @@
 ﻿using LoadInjector.Common;
-using LoadInjector.RunTime;
-using NLog;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
+using System.Linq;
 using System.Xml;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
@@ -17,12 +14,10 @@ namespace LoadInjector.Destinations {
         public string ProtocolName => name;
         public string ProtocolDescription => description;
 
-        public SenderAbstract GetDestinationSender() {
-            return new DestinationFile();
-        }
+        public string SenderClassName => throw new NotImplementedException();
 
-        public LoadInjectorGridBase GetConfigGrid(XmlNode dataModel, IView view) {
-            return new FilePropertyGrid(dataModel, view);
+        public object GetConfigGrid(object dataModel, object view) {
+            return new FilePropertyGrid((XmlNode)dataModel, (IView)view);
         }
     }
 
@@ -45,62 +40,6 @@ namespace LoadInjector.Destinations {
         public bool AppendFile {
             get => GetBoolDefaultFalseAttribute(_node, "appendFile");
             set => SetAttribute("appendFile", value);
-        }
-    }
-
-    public class DestinationFile : SenderAbstract {
-        private string destinationFile;
-        private bool appendFile;
-
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, Logger logger) {
-            base.Configure(defn, controller, logger);
-
-            try {
-                destinationFile = defn.Attributes["destinationFile"].Value;
-            } catch (Exception) {
-                Console.WriteLine($"No Destination Filename defined for {defn.Attributes["name"].Value}");
-                return false;
-            }
-
-            try {
-                appendFile = bool.Parse(defn.Attributes["appendFile"].Value);
-            } catch (Exception) {
-                appendFile = false;
-            }
-
-            return true;
-        }
-
-        public override void Send(string val, List<Variable> vars) {
-            /*
-             *  Check behaviour if directory does not exist. Create it if it does not exist.
-             */
-            string fullPath = string.Copy(destinationFile);
-
-            try {
-                if (appendFile) {
-                    val += Environment.NewLine;
-                    File.AppendAllText(fullPath, val);
-                } else {
-                    foreach (Variable v in vars) {
-                        try {
-                            fullPath = fullPath.Replace(v.token, v.value);
-                        } catch (Exception) {
-                            // NO-OP
-                        }
-                    }
-
-                    try {
-                        Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
-                        File.WriteAllText(fullPath, val);
-                    } catch (DirectoryNotFoundException ex) {
-                        Console.WriteLine($"Directory not found  {ex.Message}");
-                    }
-                }
-            } catch (Exception ex) {
-                logger.Error($"Unable to write file to {fullPath}");
-                logger.Error(ex.Message);
-            }
         }
     }
 }

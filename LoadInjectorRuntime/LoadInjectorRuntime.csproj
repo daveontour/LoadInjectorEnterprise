@@ -64,12 +64,19 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LoadInjectorShell\LoadInjectorShell.csproj">
-      <Project>{73290b85-dc4a-4d44-913f-d08a308cced1}</Project>
-      <Name>LoadInjectorShell</Name>
+    <ProjectReference Include="..\LoadInjectorBase\LoadInjectorBase.csproj">
+      <Project>{37db7b6c-b40e-4f08-ae46-d2a46ff9d951}</Project>
+      <Name>LoadInjectorBase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorRuntimeCore\LoadInjectorRuntimeCore.csproj">
+      <Project>{13f3f3b0-0861-436b-ba84-deb709a3d33f}</Project>
+      <Name>LoadInjectorRuntimeCore</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

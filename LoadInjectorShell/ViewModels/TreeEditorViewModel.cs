@@ -1,5 +1,6 @@
 ﻿using LoadInjector.Common;
 using LoadInjector.GridDefinitions;
+using LoadInjector.Runtime.EngineComponents;
 using LoadInjector.RunTime;
 using LoadInjector.Views;
 using Microsoft.Win32;
@@ -243,6 +244,7 @@ namespace LoadInjector.ViewModels {
         }
 
         private ExecutionUI win;
+        private CentralMessagingHub centralMessagingHub;
 
         public LoadInjectorGridBase ProfilePropertyGrid { get; set; }
 
@@ -674,7 +676,7 @@ namespace LoadInjector.ViewModels {
         private LoadInjectorGridBase UpdateProtocolGrid(string proto, XmlNode selectedItem) {
             ProtocolLabel = $"Protocol: {Parameters.protocolToDescription[proto]}";
             OnPropertyChanged("ProtocolLabel");
-            return Parameters.protocolDictionary[proto].GetConfigGrid(selectedItem, View);
+            return (LoadInjectorGridBase)Parameters.protocolDictionary[proto].GetConfigGrid(selectedItem, View);
         }
 
         // Called by changes in the UI.
@@ -1236,6 +1238,11 @@ namespace LoadInjector.ViewModels {
         }
 
         private void ExecuteLoadInjectorRuntime() {
+            if (centralMessagingHub == null) {
+                centralMessagingHub = new CentralMessagingHub();
+                centralMessagingHub.StartHub();
+            }
+
             if (!LockExecution) {
                 win = new ExecutionUI {
                     DataModel = DataModel.CloneNode(true) as XmlDocument
@@ -1243,6 +1250,8 @@ namespace LoadInjector.ViewModels {
                 win.VM = this;
                 LockExecution = true;
                 win.Show();
+                centralMessagingHub.SetExecutionUI(win);
+                win.SetCentralMessagingHub(centralMessagingHub);
             } else {
                 MessageBox.Show("Only ONE Execution window at a time can be opened", "Execution Window", MessageBoxButton.OK, MessageBoxImage.Warning);
             }

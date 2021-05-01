@@ -1,4 +1,4 @@
-﻿using LoadInjector.RunTime.EngineComponents;
+﻿using LoadInjectorBase.Interfaces;
 using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
@@ -556,8 +556,24 @@ namespace LoadInjectorBase {
         }
 
         private string LookupExcel(string value) {
+            IExcelProcessor xlProcessor = null;
+
             try {
-                ExcelProcessor xlProcessor = new ExcelProcessor();
+                var type = typeof(IExcelProcessor);
+
+                IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies()
+                                .SelectMany(s => s.GetTypes())
+                                .Where(p => type.IsAssignableFrom(p));
+                foreach (Type t in types) {
+                    if (!t.IsAbstract && !t.IsInterface) {
+                        xlProcessor = (IExcelProcessor)Activator.CreateInstance(t);
+                    }
+                }
+
+                if (xlProcessor == null) {
+                    return value;
+                }
+
                 return xlProcessor.Lookup(value, dataFile, excelLookupSheet, excelKeyColumn, excelValueColumn);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);

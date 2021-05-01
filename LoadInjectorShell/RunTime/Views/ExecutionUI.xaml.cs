@@ -1,6 +1,5 @@
 ﻿using LoadInjector.Common;
 using LoadInjector.Runtime.EngineComponents;
-using LoadInjector.RunTime.Models;
 using LoadInjector.RunTime.Views;
 using LoadInjector.ViewModels;
 using Microsoft.AspNet.SignalR;
@@ -18,13 +17,13 @@ using System.Windows.Data;
 using System.Windows.Media;
 using System.Xml;
 using System.Xml.Linq;
-using static LoadInjector.RunTime.Models.ControllerStatusReport;
 
 namespace LoadInjector.RunTime {
 
     public partial class ExecutionUI : Window, INotifyPropertyChanged {
         public XmlDocument dataModel;
-        public NgExecutionController executionControl;
+
+        //public NgExecutionController executionControl;
         private const int consoleLength = 16000;
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -48,7 +47,7 @@ namespace LoadInjector.RunTime {
         public ObservableCollection<TriggerRecord> SchedTriggers { get; set; }
         public ObservableCollection<TriggerRecord> FiredTriggers { get; set; }
 
-        private readonly CentralMessagingHub centralMessagingHub;
+        private CentralMessagingHub centralMessagingHub;
 
         public void OnPropertyChanged(string propName) {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
@@ -82,7 +81,7 @@ namespace LoadInjector.RunTime {
 
         internal void AutoStart(string[] args) {
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
-            executionControl.AutoStartAsync(args);
+            // executionControl.AutoStartAsync(args);
         }
 
         private string elapsedString = "00:00:00";
@@ -129,8 +128,8 @@ namespace LoadInjector.RunTime {
             CollectionView view2 = (CollectionView)CollectionViewSource.GetDefaultView(lvFiredTriggers.ItemsSource);
             view2.SortDescriptions.Add(new SortDescription("TIME", ListSortDirection.Descending));
 
-            centralMessagingHub = new CentralMessagingHub(this);
-            centralMessagingHub.StartHub();
+            //centralMessagingHub = new CentralMessagingHub(this);
+            //centralMessagingHub.StartHub();
         }
 
         private TreeEditorViewModel myWin;
@@ -581,6 +580,10 @@ namespace LoadInjector.RunTime {
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        internal void SetCentralMessagingHub(CentralMessagingHub centralMessagingHub) {
+            this.centralMessagingHub = centralMessagingHub;
         }
     }
 }

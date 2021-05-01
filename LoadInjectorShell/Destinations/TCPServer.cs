@@ -1,5 +1,4 @@
 ﻿using LoadInjector.Common;
-using LoadInjector.RunTime;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,7 +6,6 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Xml;
 using Xceed.Wpf.Toolkit.PropertyGrid.Attributes;
 
@@ -23,8 +21,8 @@ namespace LoadInjector.Destinations {
             return new TcpServerPropertyGrid(dataModel, view);
         }
 
-        public SenderAbstract GetDestinationSender() {
-            return new DestinationTcpServer();
+        public object GetConfigGrid(object dataModel, object view) {
+            return new TcpServerPropertyGrid((XmlNode)dataModel, (IView)view);
         }
     }
 
@@ -58,70 +56,6 @@ namespace LoadInjector.Destinations {
         public bool CloseConnection {
             get => GetBoolDefaultFalseAttribute(_node, "closeConnection");
             set => SetAttribute("closeConnection", value);
-        }
-    }
-
-    public class DestinationTcpServer : SenderAbstract {
-        private int tcpServerPort;
-        private string tcpServerIP;
-        private bool closeConnection;
-        private AsynchronousSocketListener sockListner;
-
-        public override bool Configure(XmlNode defn, IDestinationEndPointController controller, NLog.Logger logger) {
-            base.Configure(defn, controller, logger);
-
-            try {
-                tcpServerPort = int.Parse(defn.Attributes["tcpServerPort"].Value);
-            } catch (Exception) {
-                Console.WriteLine($"No TCP Server Port correctly defined for {defn.Attributes["name"].Value}");
-                return false;
-            }
-
-            try {
-                tcpServerIP = defn.Attributes["tcpServerIP"].Value;
-                if (tcpServerIP == "localhost") {
-                    tcpServerIP = "127.0.0.1";
-                }
-            } catch (Exception) {
-                Console.WriteLine("Using '127.0.0.1' for TCP Server IP");
-                tcpServerIP = "127.0.0.1";
-            }
-
-            try {
-                closeConnection = bool.Parse(defn.Attributes["closeConnection"].Value);
-            } catch (Exception) {
-                closeConnection = false;
-            }
-
-            return true;
-        }
-
-        public override void Prepare() {
-            if (sockListner != null) {
-                try {
-                    Stop();
-                } catch (Exception) {
-                    // Do Nothing
-                }
-            }
-        }
-
-        public override string Listen() {
-            sockListner = new AsynchronousSocketListener();
-            Task.Run(() => sockListner.StartListening(tcpServerIP, tcpServerPort, closeConnection));
-            return "OK";
-        }
-
-        public override void Stop() {
-            sockListner.Stop();
-        }
-
-        public override void Send(string val, List<Variable> vars) {
-            try {
-                sockListner.SendTCPServer(val, closeConnection);
-            } catch (Exception e) {
-                logger.Error($"Error Sending TCP Message to Clients. {e.Message}");
-            }
         }
     }
 
