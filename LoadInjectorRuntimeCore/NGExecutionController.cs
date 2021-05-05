@@ -23,7 +23,9 @@ namespace LoadInjector.RunTime {
         private XmlDocument dataModel;
         private readonly Stopwatch stopWatch = new Stopwatch();
 
-        public readonly Logger logger = LogManager.GetCurrentClassLogger();
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
+        public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+        public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
 
         public readonly List<FlightNode> flights = new List<FlightNode>();
         public readonly List<FlightNode> arrflights = new List<FlightNode>();
@@ -232,8 +234,8 @@ namespace LoadInjector.RunTime {
             // This is an Event Handler that handles the action when the timer goes off
             // signalling the end of the test.
             repeatsExecuted++;
-
-            Console.WriteLine($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete");
+            Stop();
+            logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
             if (repeatsExecuted < repeats) {
                 repetitionTimer = new Timer {
                     Interval = repeatRest * 1000,
@@ -247,7 +249,8 @@ namespace LoadInjector.RunTime {
         private void NextExecution(object sender, ElapsedEventArgs e) {
             try {
                 // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
-
+                ConsoleMsg("Start of NextExecution() called");
+                Stop();
                 PrepareAsync().Wait();
                 Run();
 
@@ -261,7 +264,7 @@ namespace LoadInjector.RunTime {
                 };
                 executionTimer.Elapsed += OnExecutionCompleteEvent;
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                logger.Error(ex.Message);
             }
         }
 
@@ -296,7 +299,7 @@ namespace LoadInjector.RunTime {
             if (Parameters.SITAAMS) {
                 ConsoleMsg($"AMS Direct Update Lines =  {amsDirect.Count}");
             }
-            ConsoleMsg($"Destinaton Lines =  {destinations.Count}");
+            ConsoleMsg($"Destination Lines =  {destinations.Count}");
 
             if ((amsDirect.Count + destinations.Count) == 0) {
                 ConsoleMsg("====> Config Error. No Output Lines Defined <====");
@@ -622,7 +625,7 @@ namespace LoadInjector.RunTime {
                 try {
                     foreach (RateDrivenSourceController line in rateDrivenLines) {
                         bool result = line.Prepare(flights, arrflights, depflights);
-                        Console.WriteLine($"Ratre Source Prepare  = {result}");
+                        logger.Info($"Rate Source Prepare  = {result}");
 
                         if (!line.InUse()) {
                             line.SetSourceLineOutput("No Destinations Using this Source");
@@ -631,7 +634,7 @@ namespace LoadInjector.RunTime {
                         }
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine($"Rate Source Error  = {ex.Message}");
+                    logger.Error($"Rate Source Error  = {ex.Message}");
                 }
 
                 foreach (LineExecutionController line in destLines) {
@@ -827,8 +830,6 @@ namespace LoadInjector.RunTime {
         }
 
         public void Stop(bool manual = false) {
-            //   SetButtonStatus(false, true, false);
-
             try {
                 timer?.Stop();
             } catch (Exception ex) {
@@ -845,8 +846,9 @@ namespace LoadInjector.RunTime {
                 ConsoleMsg($"Shutdown error: {ex.Message}");
             }
 
-            ClearLines();
-            Console.WriteLine("Test Execution Complete");
+            ConsoleMsg("Shutting down lines");
+            StopLines();
+            logger.Info("Test Execution Complete");
         }
 
         public void Cancel() {
@@ -983,66 +985,10 @@ namespace LoadInjector.RunTime {
                 }
             } catch (Exception ex) {
                 ConsoleMsg($"Error determining min/max flight offset: {ex.Message}");
-                Debug.WriteLine($"Error determining min/max flight offset: {ex.Message}");
             }
         }
 
-        //private void OnTimedEvent(bool stopped = false) {
-        //    // This is an Event Handler that handles the action when the timer goes off
-        //    // signalling the end of the test.
-
-        //    try {
-        //        //int sec = stopWatch.Elapsed.Seconds;
-        //        //int min = stopWatch.Elapsed.Minutes;
-        //        //int hour = stopWatch.Elapsed.Hours;
-
-        //        //string secStr = sec < 10 ? $"0{sec}" : $"{sec}";
-        //        //string minStr = min < 10 ? $"0{min}" : $"{min}";
-        //        //string hourStr = hour < 10 ? $"0{hour}" : $"{hour}";
-
-        //        stopWatch?.Stop();
-        //        eventDistributor?.Stop();
-
-        //        ClearLines();
-        //        ConsoleMsg($"Executed repeats = {executedRepeats}. repeats = {repeats}, stopped = {stopped}");
-        //        //if (executedRepeats < repeats && !stopped) {
-        //        //    if (repetitionTimer != null) {
-        //        //        repetitionTimer.Enabled = false;
-        //        //        repetitionTimer.Stop();
-        //        //    }
-
-        //        //    ConsoleMsg($"Test Execution Reptition {executedRepeats} of {repeats} Complete");
-        //        //    repetitionTimer = new Timer {
-        //        //        Interval = repeatRest * 1000,
-        //        //        AutoReset = false,
-        //        //        Enabled = true
-        //        //    };
-        //        //    repetitionTimer.Elapsed += NextExecution;
-
-        //        //    DateTime next = DateTime.Now.AddSeconds(repeatRest);
-
-        //        //    ConsoleMsg($"Waiting {repeatRest} seconds before next execution  ({next:HH:mm:ss})");
-        //        //    return;
-        //        //}
-
-        //        //      SetButtonStatus(false, true, false);
-        //    } catch (Exception ex) {
-        //        ConsoleMsg($"Error Stopping {ex.Message}");
-        //    }
-
-        //    SetTriggerLabel("Available Triggers");
-        //    //          SetStatusLabel("Load Injector - Execution Complete");
-
-        //    ConsoleMsg("Test Execution Complete");
-        //}
-
-        //public void NextExecution(Object source, ElapsedEventArgs e) {
-        //    ClearLines();
-        //    Task.Run(() => PrepareAsync()).Wait();
-        //    Task.Run(() => RunInternal());
-        //}
-
-        public void ClearLines() {
+        public void StopLines() {
             foreach (LineExecutionController line in destLines) {
                 try {
                     line.Stop();
@@ -1067,6 +1013,41 @@ namespace LoadInjector.RunTime {
             }
 
             foreach (DataDrivenSourceController line in amsDataDrivenLines) {
+                try {
+                    line.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
+            }
+            foreach (DataDrivenSourceController line in csvDataDrivenLines) {
+                try {
+                    line.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
+            }
+            foreach (DataDrivenSourceController line in jsonDataDrivenLines) {
+                try {
+                    line.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
+            }
+            foreach (DataDrivenSourceController line in excelDataDrivenLines) {
+                try {
+                    line.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
+            }
+            foreach (DataDrivenSourceController line in xmlDataDrivenLines) {
+                try {
+                    line.Stop();
+                } catch (Exception) {
+                    // NO-OP
+                }
+            }
+            foreach (DataDrivenSourceController line in databaseDataDrivenLines) {
                 try {
                     line.Stop();
                 } catch (Exception) {

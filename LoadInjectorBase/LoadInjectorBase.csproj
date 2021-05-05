@@ -60,7 +60,7 @@
     <Compile Include="Interfaces\IExcelProcessor.cs" />
     <Compile Include="Interfaces\IChainedSourceController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Abstracts\SenderAbstract.cs" />
+    <Compile Include="Abstracts\DestinationAbstract.cs" />
     <Compile Include="TriggerRecord.cs" />
     <Compile Include="Variable.cs" />
   </ItemGroup>

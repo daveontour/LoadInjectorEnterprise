@@ -4,7 +4,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationSink : SenderAbstract {
+    internal class DestinationSink : DestinationAbstract {
 
         public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
             base.Configure(node, cont, log);

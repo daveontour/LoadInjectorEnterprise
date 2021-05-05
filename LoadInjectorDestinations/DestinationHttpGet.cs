@@ -11,7 +11,7 @@ using System.Xml.Linq;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationHttpGet : SenderAbstract {
+    internal class DestinationHttpGet : DestinationAbstract {
         private readonly Dictionary<string, string> headers = new Dictionary<string, string>();
         private string httpLogPath;
         private int maxRetry = 2;

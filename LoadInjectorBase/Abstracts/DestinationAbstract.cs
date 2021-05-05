@@ -5,16 +5,17 @@ using System.Xml;
 
 namespace LoadInjectorBase {
 
-    public abstract class SenderAbstract {
+    public abstract class DestinationAbstract {
         public bool OK_TO_RUN = false;
         public bool USE_ASYNC_SEND = false;
-        public Logger logger;
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
+        public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+
         public XmlNode defn;
         public IDestinationEndPointController controller;
 
         public virtual bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
             this.defn = node;
-            this.logger = log;
             this.controller = cont;
 
             return true;

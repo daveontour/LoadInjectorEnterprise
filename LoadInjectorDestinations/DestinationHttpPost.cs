@@ -12,7 +12,7 @@ using System.Xml.Linq;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationHttpPost : SenderAbstract {
+    internal class DestinationHttpPost : DestinationAbstract {
         private readonly Dictionary<string, string> headers = new Dictionary<string, string>();
         private string httpLogPath;
         private string postURL;

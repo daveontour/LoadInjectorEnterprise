@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationMsmq : SenderAbstract {
+    public class DestinationMsmq : DestinationAbstract {
         public string queueName;
         private readonly int getTimeout = 2000;
 

@@ -145,7 +145,7 @@ namespace LoadInjector.RunTime {
                             try {
                                 triggerTime = DateTime.ParseExact(timeStr, timeFormat, provider);
                             } catch (Exception ex) {
-                                Debug.WriteLine($"Error parsing triggerTime. {ex.Message}. Unparsed string: {timeStr}");
+                                sourceLogger.Error(ex,$"Error parsing triggerTime. Unparsed string: {timeStr}");
                                 break;
                             }
                         }
@@ -179,7 +179,7 @@ namespace LoadInjector.RunTime {
                         }
 
                         if (offset < 5) {
-                            Console.WriteLine("Triggering Event Rejected. Time Relative to start must be > 5 seconds");
+                            sourceLogger.Warn("Triggering Event Rejected. Time Relative to start must be > 5 seconds");
                             continue;
                         }
 
@@ -293,7 +293,7 @@ namespace LoadInjector.RunTime {
             }
 
             if (!prepOK) {
-                Console.WriteLine("Preparation of iteration data for AMS Data Driven line was not successful");
+               sourceLogger.Error("Preparation of iteration data for AMS Data Driven line was not successful");
                 return false;
             }
 
@@ -315,22 +315,22 @@ namespace LoadInjector.RunTime {
             int notSetEvents = 0;
             int setEvents = 0;
 
-            Console.WriteLine($"\nPreparing Flights and Triggers for Line: {name}. Flight Set From = {flightSetFrom}, Flight Set To = {flightSetTo}, Server Offset = {serverOffset}  ");
-            Console.WriteLine($"Preparing Flights and Triggers for Line: {name}. Will be using flights with STO between {lowerTimeLimit} and {upperTimeLimit}");
+            sourceLogger.Info($"Preparing Flights and Triggers for Line: {name}. Flight Set From = {flightSetFrom}, Flight Set To = {flightSetTo}, Server Offset = {serverOffset}  ");
+            sourceLogger.Info($"Preparing Flights and Triggers for Line: {name}. Will be using flights with STO between {lowerTimeLimit} and {upperTimeLimit}");
 
             try {
                 foreach (FlightNode flt in poolSource) {
                     // Skip any flight whose STO is outside the bounds specified
                     if (flt.dateTime < lowerTimeLimit || flt.dateTime > upperTimeLimit) {
-                        Console.WriteLine($"Line:{name}. Flight STO Outside Line Range. {flt}");
+                        sourceLogger.Warn($"Line:{name}. Flight STO Outside Line Range. {flt}");
                         continue;
                     }
-                    Console.WriteLine($"Line:{name}. Flight STO In Range. {flt}");
+                    sourceLogger.Trace($"Line:{name}. Flight STO In Range. {flt}");
 
                     if (expression != null && flt != null && filterTime == "pre") {
                         bool pass = expression.Pass(flt.FightXML);
                         if (!pass) {
-                            Console.WriteLine("Pre Filter. Flight does not meet filter conditions");
+                            sourceLogger.Trace("Pre Filter. Flight does not meet filter conditions");
                             continue;
                         }
                     }
@@ -338,7 +338,7 @@ namespace LoadInjector.RunTime {
                     if (topLevelFilter != null && flt != null && filterTime == "pre") {
                         bool pass = topLevelFilter.Pass(flt.FightXML);
                         if (!pass) {
-                            Console.WriteLine("Pre Filter. Flight does not meet filter conditions");
+                            sourceLogger.Trace("Pre Filter. Flight does not meet filter conditions");
                             continue;
                         }
                     }
@@ -365,7 +365,7 @@ namespace LoadInjector.RunTime {
                                 triggerTime = DateTime.Parse(flt.externals[trigger.Attributes["externalName"].Value]);
                             }
                         } catch (Exception ex) {
-                            Console.WriteLine($"Error parsing trigger time for external name {flt.externals[trigger.Attributes["externalName"].Value]}: {ex.Message}");
+                            sourceLogger.Error(ex,$"Error parsing trigger time for external name {flt.externals[trigger.Attributes["externalName"].Value]}");
                             break;
                         }
 
@@ -401,7 +401,7 @@ namespace LoadInjector.RunTime {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error preparing triggers for AMS {ex.Message}");
+                sourceLogger.Error(ex,"Error preparing triggers for AMS");
             }
 
             foreach (XmlNode trigger in node.SelectNodes("trigger")) {
@@ -415,7 +415,7 @@ namespace LoadInjector.RunTime {
 
             SetSourceLineOutput($"{setEvents} events set for triggering.");
 
-            Console.WriteLine($"Complete Preparing Flights and Triggers for Line: {name}.\n");
+            sourceLogger.Info($"Complete Preparing Flights and Triggers for Line: {name}.\n");
 
             return true;
         }

@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationFtp : SenderAbstract {
+    public class DestinationFtp : DestinationAbstract {
         private string ftpURL;
         private string ftpUser;
         private string ftpPass;

@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationTcpServer : SenderAbstract {
+    public class DestinationTcpServer : DestinationAbstract {
         private int tcpServerPort;
         private string tcpServerIP;
         private bool closeConnection;

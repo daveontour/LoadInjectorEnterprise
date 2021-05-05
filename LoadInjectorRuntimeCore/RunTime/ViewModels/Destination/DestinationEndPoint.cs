@@ -8,7 +8,7 @@ using System.Xml;
 namespace LoadInjector.RunTime {
 
     public class DestinationEndPoint : IDestinationEndPointController {
-        private readonly SenderAbstract endPointDestination;
+        private readonly DestinationAbstract endPointDestination;
         private readonly NLog.Logger logger;
 
         public bool OK_TO_RUN;

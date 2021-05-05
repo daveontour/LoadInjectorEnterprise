@@ -16,8 +16,16 @@ namespace LoadInjectorRuntime {
             set => executeFile = value;
         }
 
-        public LoadInjectorRuntimeClient(string executeFile) {
+        public string server = null;
+
+        public string Server {
+            get => server;
+            set => server = value;
+        }
+
+        public LoadInjectorRuntimeClient(string executeFile, string server) {
             ExecuteFile = executeFile;
+            Server = server;
         }
 
         public void OnStart() {
@@ -105,13 +113,17 @@ namespace LoadInjectorRuntime {
         private void StartSignalRClient() {
             NgExecutionController controller = new NgExecutionController(6220, false);
 
-            int port = GetAvailablePort(49152);
+            //   int port = GetAvailablePort(49152);
+            //   port = 6220;
 
-            port = 6220;
+            string serverURL = "http://localhost:6220";
+            if (Server != null) {
+                serverURL = Server;
+            }
 
             try {
-                ClientHub clientHub = new ClientHub($"http://localhost:{port}", controller);
-                Console.WriteLine($"Starting clintHub on port  {port}");
+                ClientHub clientHub = new ClientHub(serverURL, controller);
+                Console.WriteLine($"Starting clientHub to connect to {serverURL}");
                 controller.clientHub = clientHub;
                 controller.slaveMode = true;
             } catch (Exception ex) {

@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationFile : SenderAbstract {
+    public class DestinationFile : DestinationAbstract {
         private string destinationFile;
         private bool appendFile;
 

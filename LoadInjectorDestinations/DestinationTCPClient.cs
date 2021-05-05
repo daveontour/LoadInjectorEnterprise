@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationTCPClient : SenderAbstract {
+    public class DestinationTCPClient : DestinationAbstract {
         private string tcpServerIP;
         private int tcpServerPort;
 

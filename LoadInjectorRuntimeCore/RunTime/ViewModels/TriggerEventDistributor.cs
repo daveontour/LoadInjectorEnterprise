@@ -1,5 +1,6 @@
 ﻿using LoadInjectorBase;
 using LoadInjectorBase.Interfaces;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -48,6 +49,8 @@ namespace LoadInjector.RunTime.ViewModels {
         //internal ExecutionUI exUI;
         private readonly NgExecutionController executionController;
 
+        public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
+
         public DateTime NextTrigger { get; set; }
 
         public static TriggerEventDistributor Instance => instance;
@@ -69,12 +72,12 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 timers.Clear();
             } catch (Exception ex) {
-                Console.WriteLine($"Timers Clear Error {ex.Message}");
+                sourceLogger.Error(ex, $"Timers Clear Error");
             }
             try {
                 ClearHandlers();
             } catch (Exception ex) {
-                Console.WriteLine($"Clear Handler Error {ex.Message}");
+                sourceLogger.Error(ex, "Clear Handler Error");
             }
         }
 
@@ -101,14 +104,14 @@ namespace LoadInjector.RunTime.ViewModels {
                     try {
                         dispatcher.Fire(new TriggerFiredEventArgs(triggerID, record));
                     } catch (Exception e) {
-                        Console.WriteLine($"Error Firing trigger {e.Message}");
+                        sourceLogger.Error(e, "Error Firing trigger");
                         throw;
                     }
                 } else {
                     throw new DispatcherNullException();
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error Firing trigger {ex.Message}");
+                sourceLogger.Error(ex, "Error Firing trigger");
                 throw;
             }
         }
@@ -121,8 +124,8 @@ namespace LoadInjector.RunTime.ViewModels {
                     FlightNode update = rec.record.Item2.RefeshFlight(executionController.amshost, executionController.token, executionController.apt_code).Result;
                     if (update != null)
                         rec.record.Item2.UpdateFlight(update);
-                } catch (Exception) {
-                    Console.WriteLine("Failed to update flight. Using original data");
+                } catch (Exception e) {
+                    sourceLogger.Warn(e, "Failed to update flight. Using original data");
                 }
             }
 
@@ -130,14 +133,14 @@ namespace LoadInjector.RunTime.ViewModels {
                 if (rec.expression != null) {
                     bool pass = rec.expression.Pass(rec.record.Item2.FightXML);
                     if (!pass) {
-                        Console.WriteLine("Post Filtering: Flight did not pass filter");
+                        sourceLogger.Trace("Post Filtering: Flight did not pass filter");
                         return;
                     }
                 }
                 if (rec.topLevelFilter != null) {
                     bool pass = rec.topLevelFilter.Pass(rec.record.Item2.FightXML);
                     if (!pass) {
-                        Console.WriteLine("Post Filtering: Flight did not pass filter");
+                        sourceLogger.Trace("Post Filtering: Flight did not pass filter");
                         return;
                     }
                 }
@@ -229,7 +232,7 @@ namespace LoadInjector.RunTime.ViewModels {
             DateTime triggerTime = triggerRecord.TIME;
             double tickTime = (triggerTime - DateTime.Now).TotalMilliseconds;
             if (tickTime < 0) {
-                Console.WriteLine($"Firing Trigger: {triggerRecord}");
+                sourceLogger.Info($"Firing Trigger: {triggerRecord}");
                 DistributeMessage(triggerRecord);
                 try {
                     if (triggerQueue.Count == 0) {
@@ -237,7 +240,7 @@ namespace LoadInjector.RunTime.ViewModels {
                     }
                     ScheduleNext(triggerQueue.Dequeue());
                 } catch (Exception ex) {
-                    Console.WriteLine($"Error dequeuing next event {ex.Message}");
+                    sourceLogger.Error(ex, "Error dequeuing next event");
                 }
                 return;
             }
@@ -249,7 +252,7 @@ namespace LoadInjector.RunTime.ViewModels {
             timer.Start();
             timers.Add(timer);
             NextTrigger = triggerRecord.TIME;
-            Console.WriteLine($"Started Event Timer for: {triggerRecord}");
+            sourceLogger.Trace($"Started Event Timer for: {triggerRecord}");
         }
 
         public void Timer_Elapsed(TriggerRecord rec) {
@@ -257,7 +260,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 ScheduleNext(triggerQueue.Dequeue());
             } catch (Exception ex) {
-                Console.WriteLine($"Error dequeuing next event {ex.Message}");
+                sourceLogger.Error(ex, "Error dequeuing next event");
             }
         }
 
@@ -267,12 +270,12 @@ namespace LoadInjector.RunTime.ViewModels {
                     rateCntlMap.Add(rateSourceController, rateSourceController);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Could not be added handler to map. {ID}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Could not be added handler to map. {ID}.");
             }
             try {
                 map[ID].TriggerFire += rateSourceController.TriggerHandler;
             } catch (Exception ex) {
-                Console.WriteLine($"Monitor Handler could not be added for trigger {ID}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Monitor Handler could not be added for trigger {ID}.");
             }
         }
 
@@ -282,12 +285,12 @@ namespace LoadInjector.RunTime.ViewModels {
                     execCntlMap.Add(execCntl, execCntl);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Could not be added handler to map. {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Could not be added handler to map. {trigger}.");
             }
             try {
                 map[trigger].TriggerFire += execCntl.TriggerHandler;
             } catch (Exception ex) {
-                Console.WriteLine($"Monitor Handler could not be added for trigger {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Monitor Handler could not be added for trigger {trigger}.");
             }
         }
 
@@ -297,12 +300,12 @@ namespace LoadInjector.RunTime.ViewModels {
                     amsDirectCntlMap.Add(cntl, cntl);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Could not be added handler to map. {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Could not be added handler to map. {trigger}.");
             }
             try {
                 map[trigger].TriggerFire += cntl.TriggerHandler;
             } catch (Exception ex) {
-                Console.WriteLine($"Listenter could not be added for trigger {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Listener could not be added for trigger {trigger}.");
             }
         }
 
@@ -312,12 +315,12 @@ namespace LoadInjector.RunTime.ViewModels {
                     lineCntlMap.Add(cntl, cntl);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Could not be added handler to map. {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Could not be added handler to map. {trigger}.");
             }
             try {
                 map[trigger].TriggerFire += cntl.TriggerHandler;
             } catch (Exception ex) {
-                Console.WriteLine($"Listenter could not be added for trigger {trigger}. Error = {ex.Message}");
+                sourceLogger.Error(ex, $"Listener could not be added for trigger {trigger}.");
             }
         }
 

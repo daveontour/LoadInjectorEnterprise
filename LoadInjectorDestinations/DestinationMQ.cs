@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationMQ : SenderAbstract {
+    internal class DestinationMQ : DestinationAbstract {
         private string qMgr;
         private string qSvrChan;
         private string qHost;

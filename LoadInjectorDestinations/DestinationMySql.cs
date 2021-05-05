@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationMySql : SenderAbstract {
+    public class DestinationMySql : DestinationAbstract {
         private string connStr;
         private bool showResults;
 

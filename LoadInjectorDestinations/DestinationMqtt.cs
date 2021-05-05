@@ -11,7 +11,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationMqtt : SenderAbstract {
+    public class DestinationMqtt : DestinationAbstract {
         private string topic;
         private string mqttServer;
         private string mqttServerURL;

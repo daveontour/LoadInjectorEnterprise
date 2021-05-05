@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNet.SignalR.Client;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +13,9 @@ namespace LoadInjector.RunTime.EngineComponents {
         public HubConnection hubConnection;
         private readonly NgExecutionController ngExecutionController;
         private bool localOnly = false;
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
+        public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+        public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
 
         public ClientHub(string hostURL, NgExecutionController ngExecutionController) {
             this.ngExecutionController = ngExecutionController;
@@ -38,7 +42,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                         bool readyToRun = ngExecutionController.PrepareAsync().Result;
                         ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
                     } catch (Exception ex) {
-                        Console.WriteLine("Error in client Prepare Aync " + ex.Message);
+                        logger.Info("Error in client Prepare Aync " + ex.Message);
                     }
                 });
                 hubProxy.On("Execute", () => {
@@ -46,7 +50,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 });
 
                 hubProxy.On("WaitForNextExecute", (message) => {
-                    Console.WriteLine(message);
+                    logger.Info(message);
                 });
 
                 hubProxy.On("PrepareAndExecute", () => {
@@ -72,7 +76,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     ngExecutionController.InitModel(doc);
                 });
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                logger.Info(ex.Message);
             }
         }
 
@@ -82,19 +86,19 @@ namespace LoadInjector.RunTime.EngineComponents {
             while (!started) {
                 try {
                     hubConnection.Start().Wait();
-                    Console.WriteLine(hubConnection.State);
+                    logger.Info(hubConnection.State);
                     if (hubConnection.State == ConnectionState.Connected) {
                         started = true;
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine("Waiting..");
+                    logger.Info("Waiting..");
                 }
             }
         }
 
         internal void ReadyToRun(string executionNodeID, bool ready) {
             if (localOnly) {
-                Console.WriteLine("Ready To  Run");
+                logger.Info("Ready To Run");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("ReadyToRun", executionNodeID, ready); });
             }
@@ -102,7 +106,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetMsgPerMin(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                logger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("MessagesPerMinute", executionNodeID, uuid, s); });
             }
@@ -110,7 +114,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetConfiguredMsgPerMin(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                logger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("ConfiguredMessagesPerMinute", executionNodeID, uuid, s); });
             }
@@ -118,7 +122,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetTriggerLabel(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                logger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetTriggerLabel", executionNodeID, uuid, s); });
             }
@@ -126,7 +130,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetSourceLineOutput(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                sourceLogger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetSourceLineOutput", executionNodeID, uuid, s); });
             }
@@ -134,14 +138,14 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void ConsoleMsg(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                logger.Info(s);
             } else {
                 Task.Run(() => {
-                    Console.WriteLine($"ConsoleMag: {uuid}, {s}");
+                    logger.Info($"ConsoleMag: {uuid}, {s}");
                     try {
                         this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, s);
                     } catch (Exception ex) {
-                        Console.WriteLine($"Console Message Error. {ex.Message}");
+                        logger.Info($"Console Message Error. {ex.Message}");
                     }
                 });
             }
@@ -149,7 +153,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void ClearTriggerData(string executionNodeID, string uuid) {
             if (localOnly) {
-                Console.WriteLine("Clear Data Triggers");
+                sourceLogger.Info("Clear Data Triggers");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("ClearTriggerData", executionNodeID, uuid); });
             }
@@ -157,7 +161,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
             if (localOnly) {
-                Console.WriteLine($"{v} Messages Sent: {messagesSent}, CurrentRate: {currentRate}, Messages Per Minute: {messagesPerMinute}");
+                sourceLogger.Info($"{v} Messages Sent: {messagesSent}, Current Rate: {currentRate}, Messages Per Minute: {messagesPerMinute}");
             } else {
                 Task.Run(() => {
                     this.hubProxy.Invoke("SourceReport", executionNodeID, uuid, v, messagesSent, currentRate,
@@ -172,7 +176,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
             if (localOnly) {
-                Console.WriteLine("Dispatcher Message Distribute");
+                logger.Info("Dispatcher Message Distribute");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("DispatcherDistributeMessage", executionNodeID, rec); });
             }
@@ -180,16 +184,15 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void LockVM(string executionNodeID, string uuid, bool l) {
             if (localOnly) {
-                Console.WriteLine("Ready To  Run");
+                logger.Info("Lock VM");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("LockVM", executionNodeID, uuid, l); });
             }
         }
 
         internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
-            Console.WriteLine($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
             if (localOnly) {
-                Console.WriteLine("Ready To  Run");
+                destLogger.Info($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
             } else {
                 Task.Run(() => {
                     try {
@@ -203,7 +206,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetDestinationOutput(string executionNodeID, string uuid, string s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                destLogger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetDestinationOutput", executionNodeID, uuid, s); });
             }
@@ -211,7 +214,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetDestinationRate(string executionNodeID, string uuid, double s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                destLogger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetDestinationRate", executionNodeID, uuid, s); });
             }
@@ -219,7 +222,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetDestinationSent(string executionNodeID, string uuid, int s) {
             if (localOnly) {
-                Console.WriteLine(s);
+                destLogger.Info(s);
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetDestinationSent", executionNodeID, uuid, s); });
             }
@@ -227,7 +230,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void AddSchedTrigger(string executionNodeUuid, TriggerRecord triggerRecord) {
             if (localOnly) {
-                Console.WriteLine("Add trigger Record");
+                logger.Info("Add trigger Record");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("AddSchedTrigger", executionNodeUuid, triggerRecord); });
             }
@@ -235,7 +238,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
         internal void SetSchedTrigger(string executionNodeUuid, List<TriggerRecord> sortedTriggers) {
             if (localOnly) {
-                Console.WriteLine("Set Sched Trigger");
+                logger.Info("Set Sched Trigger");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("SetSchedTrigger", executionNodeUuid, sortedTriggers); });
             }

@@ -7,6 +7,7 @@ using System.Xml;
 using LoadInjector.Filters;
 using LoadInjectorBase;
 using LoadInjectorBase.Interfaces;
+using NLog;
 
 namespace LoadInjector.RunTime.ViewModels {
 
@@ -16,7 +17,6 @@ namespace LoadInjector.RunTime.ViewModels {
 
         //public IProgress<ControllerStatusReport> lineProgress;
         //public IProgress<ControllerStatusReport> controllerProgress;
-        public NLog.Logger logger;
 
         public TriggerEventDistributor eventDistributor;
         public string name;
@@ -65,13 +65,16 @@ namespace LoadInjector.RunTime.ViewModels {
 
         public string uuid;
 
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
+        public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+        public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
+
         protected SourceControllerAbstract(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) {
             this.node = node;
             this.triggersInUse = triggersInUse;
             this.clientHub = executionController?.clientHub;
             eventDistributor = executionController?.eventDistributor;
             this.executionController = executionController;
-            logger = executionController?.logger;
             this.serverOffset = serverOffset;
             name = node.Attributes["name"]?.Value;
             id = node.Attributes["ID"]?.Value;
@@ -305,8 +308,7 @@ namespace LoadInjector.RunTime.ViewModels {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error determining data requirements for trigger: {ex.Message} ");
-                return null;
+                sourceLogger.Error(ex, "Error determining data requirements for trigger.");
             }
 
             return inUse;
@@ -332,7 +334,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 dataRecords = xmlProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, xmlToString, node);
             } catch (Exception ex) {
-                Console.WriteLine($"Error retrieving XML data: {ex.Message} ");
+                sourceLogger.Error(ex, "Error retrieving XML data ");
                 return false;
             }
 
@@ -357,7 +359,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 dataRecords = jsonProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, node);
             } catch (Exception ex) {
-                Console.WriteLine($"Error retrieving JSON data: {ex.Message} ");
+                sourceLogger.Error(ex, "Error retrieving JSON data");
                 return false;
             }
 
@@ -382,7 +384,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 dataRecords = dbProcessor.GetRecords(connStr, sql, dbType, dataPointsInUse);
             } catch (Exception ex) {
-                Console.WriteLine($"Error retrieving Database data: {ex.Message} ");
+                sourceLogger.Error(ex, $"Error retrieving Database data: ");
                 return false;
             }
 
@@ -407,7 +409,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 dataRecords = excelProcessor.GetRecords(dataFile, excelSheet, dataPointsInUse, "Text", null, int.Parse(excelRowStart), int.Parse(excelRowEnd), true);
             } catch (Exception ex) {
-                Console.WriteLine($"Error retrieving Excel data: {ex.Message} ");
+                sourceLogger.Error(ex, "Error retrieving Excel data.");
                 return false;
             }
 
@@ -432,7 +434,7 @@ namespace LoadInjector.RunTime.ViewModels {
             try {
                 dataRecords = csvProcessor.GetRecords();
             } catch (Exception ex) {
-                Console.WriteLine($"Error retrieving CSV data: {ex.Message} ");
+                sourceLogger.Error(ex, "Error retrieving CSV data.");
                 return false;
             }
 
@@ -473,14 +475,14 @@ namespace LoadInjector.RunTime.ViewModels {
                         if (filterTime == "pre" && expression != null) {
                             bool pass = expression.Pass(fl.FightXML);
                             if (!pass) {
-                                Console.WriteLine("Pre Filtering: Flight did not pass filter");
+                                sourceLogger.Warn("Pre Filtering: Flight did not pass filter");
                                 continue;
                             }
                         }
                         if (filterTime == "pre" && topLevelFilter != null) {
                             bool pass = topLevelFilter.Pass(fl.FightXML);
                             if (!pass) {
-                                Console.WriteLine("Pre Filtering: Flight did not pass filter");
+                                sourceLogger.Warn("Pre Filtering: Flight did not pass filter");
                                 continue;
                             }
                         }
@@ -489,7 +491,7 @@ namespace LoadInjector.RunTime.ViewModels {
                     }
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"Error: {ex.Message}");
+                sourceLogger.Error(ex);
             }
         }
 

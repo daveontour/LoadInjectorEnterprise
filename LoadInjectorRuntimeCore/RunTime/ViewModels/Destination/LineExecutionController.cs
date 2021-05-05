@@ -22,12 +22,12 @@ namespace LoadInjector.RunTime {
             try {
                 destinationEndPoint = new DestinationEndPoint(config, logger);
                 if (!destinationEndPoint.OK_TO_RUN) {
-                    Console.WriteLine($"Error: End Point Configuration Problem for {name}");
+                    destLogger.Error($"Error: End Point Configuration Problem for {name}");
                     ConfigOK = false;
                     return;
                 }
-            } catch (Exception) {
-                Console.WriteLine($"Error: No End Point defined for {name}");
+            } catch (Exception ex) {
+                destLogger.Error(ex, $"Error: No End Point defined for {name}");
                 SetOutput("Error: No End Point Defined");
                 ConfigOK = false;
                 return;
@@ -35,9 +35,9 @@ namespace LoadInjector.RunTime {
 
             try {
                 templateFile = config.Attributes["templateFile"].Value;
-            } catch (Exception) {
+            } catch (Exception ex) {
                 if (LineType != "HTTPGET") {
-                    Console.WriteLine($"Template File not defined for {name}");
+                    destLogger.Error(ex, $"Template File not defined for {name}");
                     SetOutput("Error: No Template File Defined");
                     ConfigOK = false;
                     return;
@@ -47,14 +47,14 @@ namespace LoadInjector.RunTime {
                 template = File.ReadAllText(templateFile);
             } catch (Exception ex) {
                 if (LineType != "HTTPGET") {
-                    Console.WriteLine($"Template File {templateFile} cannot be read for {name}. {ex.Message}");
+                    destLogger.Error(ex, $"Template File {templateFile} cannot be read for {name}.");
                     SetOutput("Error: Template File Could Not Be Read");
                     return;
                 } else {
                     template = "";
                 }
             }
-            Console.WriteLine($"Controller and View Created for {LineName}");
+            destLogger.Info($"Controller and View Created for {LineName}");
         }
 
         public new bool PrePrepare() {
@@ -103,8 +103,7 @@ namespace LoadInjector.RunTime {
                 } catch (ArgumentException) {
                     break;
                 } catch (Exception ex) {
-                    logger.Warn($"Token Substitution Exception  {ex.Message}");
-                    Console.WriteLine("Token Substitution Exception");
+                    destLogger.Error(ex, $"Token Substitution Exception");
                 }
             }
 
@@ -124,7 +123,7 @@ namespace LoadInjector.RunTime {
                 try {
                     File.WriteAllText(fullPath, message);
                 } catch (Exception ex) {
-                    Console.WriteLine($"Unable to record message to file ${fullPath}. {ex.Message}");
+                    destLogger.Warn($"Unable to record message to file ${fullPath}. {ex.Message}");
                 }
             }
 

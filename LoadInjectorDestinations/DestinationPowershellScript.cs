@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationPowershellScript : SenderAbstract {
+    public class DestinationPowershellScript : DestinationAbstract {
         private bool showResults;
 
         public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {

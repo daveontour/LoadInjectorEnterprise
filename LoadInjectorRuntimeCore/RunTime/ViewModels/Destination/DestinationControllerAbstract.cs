@@ -2,6 +2,7 @@
 using LoadInjector.RunTime.ViewModels;
 using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
+using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -49,7 +50,9 @@ namespace LoadInjector.RunTime {
         public Random rand = new Random();
         public int messagesSent;
         public double avg;
-        public NLog.Logger logger;
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
+        public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+        public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
 
         public bool ConfigOK;
         public bool EXECUTE_TEST;
@@ -77,7 +80,7 @@ namespace LoadInjector.RunTime {
         protected DestinationControllerAbstract(XmlNode node, NgExecutionController executionController) {
             this.config = node;
             this.executionController = executionController;
-            this.logger = executionController.logger;
+
             this.eventDistributor = executionController.eventDistributor;
             this.clientHub = executionController.clientHub;
 

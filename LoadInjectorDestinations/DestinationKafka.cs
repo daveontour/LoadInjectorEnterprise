@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationKafka : SenderAbstract {
+    public class DestinationKafka : DestinationAbstract {
         private string bootStrapServers = "localhost:9092";
 
         public string Topic { get; set; }

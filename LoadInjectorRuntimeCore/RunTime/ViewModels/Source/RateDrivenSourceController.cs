@@ -146,20 +146,20 @@ namespace LoadInjector.RunTime {
             Report("Execute", 0, 0, messagesPerMinute);
             intervalStopWatch?.Reset();
             executionStopWatch?.Reset();
-            Console.WriteLine($"Scheduling Start of Rate Source Controller: {name}");
+            sourceLogger.Info($"Scheduling Start of Rate Source Controller: {name}");
             CancellationTokenSource source = new CancellationTokenSource();
 
             if (lineInUse) {
                 Task.Run(async delegate {
                     await Task.Delay(TimeSpan.FromSeconds(deferredStart), source.Token);
-                    Console.WriteLine($"Starting Rate Source Controller: {name}");
+                    logger.Info($"Starting Rate Source Controller: {name}");
                     messagesSent = 0;
                     intervalCount = 0;
                     PrepareProfileThreads();  //Set up the threads which modify the rate profile/interval
                     executionStopWatch.Start();
                     intervalStopWatch.Start();
 
-                    Console.WriteLine($"Starting timer with interval {interval}");
+                    sourceLogger.Info($"Starting timer with interval {interval}");
                     sendTimer = new System.Timers.Timer(interval) {
                         Enabled = true,
                         AutoReset = false
@@ -167,7 +167,7 @@ namespace LoadInjector.RunTime {
                     sendTimer.Elapsed += FireEvent;
                 });
             } else {
-                Console.WriteLine($"No Destination configured to use Rate Source Controller: {name}");
+                sourceLogger.Warn($"No Destination configured to use Rate Source Controller: {name}");
             }
         }
 
@@ -197,26 +197,25 @@ namespace LoadInjector.RunTime {
                     child.ParentFired(data);
                 }
             } catch (Exception ex) {
-                Console.WriteLine($"On Parent Fire error: {ex.Message}");
+                sourceLogger.Error(ex, "On Parent Fire error");
             }
 
             messagesSent++;
 
             try {
-                ReportChain("Message Sent", messagesSent);
+                ReportChain(name, messagesSent);
             } catch (Exception ex) {
-                Console.WriteLine($"Set Output problem. {ex.Message}");
+                sourceLogger.Error(ex, "Set Output problem.");
             }
         }
 
         // The sendTimer calls this function each time the timer goes off
         private void FireEvent(object sender, ElapsedEventArgs e) {
-            SetSourceLineOutput("Event Fired");
             //Unset it if run parameters exceeded
             if (maxRunTime > 0 && executionStopWatch.ElapsedMilliseconds / 1000 >= maxRunTime) {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
-                Console.WriteLine($"Rate Source {name}. Maximum Run Time Reached {messagesSent} Messages Sent");
+                sourceLogger.Info($"Rate Source {name}. Maximum Run Time Reached {messagesSent} Messages Sent");
                 SetSourceLineOutput($"Maximum Run Time Reached {messagesSent} Messages Sent");
                 return;
             }
@@ -224,7 +223,7 @@ namespace LoadInjector.RunTime {
             if (maxNumMessages > 0 && messagesSent >= maxNumMessages) {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
-                Console.WriteLine($"Rate Source {name}. Maximum Number of Messages Reached. {messagesSent} Messages Sent");
+                sourceLogger.Info($"Rate Source {name}. Maximum Number of Messages Reached. {messagesSent} Messages Sent");
                 SetSourceLineOutput($"Maximum Number of Messages Reached. {messagesSent} Messages Sent");
                 return;
             }
@@ -233,10 +232,10 @@ namespace LoadInjector.RunTime {
             double avg = intervalStopWatch.Elapsed.TotalMilliseconds / intervalCount;
             double currentRate = RoundToSignificantDigits(60000 / avg, 2);
             if (currentRate < intervalMessagesPerMinute) {
-                Console.WriteLine($"Re scheduling timer with interval {interval / 4}");
+                sourceLogger.Trace($"Re scheduling timer with interval {interval / 4}");
                 sendTimer.Interval = interval / 4;
             } else {
-                Console.WriteLine($"Re scheduling timer with interval {interval * 1.1}");
+                sourceLogger.Trace($"Re scheduling timer with interval {interval * 1.1}");
                 sendTimer.Interval = interval * 1.1;
             }
 
@@ -268,28 +267,28 @@ namespace LoadInjector.RunTime {
                 try {
                     eventDistributor.DistributeMessage(id, data);
                 } catch (Exception ex) {
-                    Console.WriteLine($"Distributor error: {ex.Message}");
+                    sourceLogger.Error(ex, "Distributor Error");
                 }
                 try {
                     foreach (RateDrivenSourceController child in chainedController) {
                         child.ParentFired(data);
                     }
                 } catch (Exception ex) {
-                    Console.WriteLine($"Firing Child Error: {ex.Message}");
+                    sourceLogger.Error(ex, "Firing Child Error");
                 }
                 try {
-                    Report("Message Sent", messagesSent, currentRate, messagesPerMinute);
+                    Report(name, messagesSent, currentRate, messagesPerMinute);
                 } catch (Exception ex) {
-                    Console.WriteLine($"Set Output problem. {ex.Message}");
+                    sourceLogger.Error(ex, "Set Output Problem.");
                 }
-            } catch (DispatcherNullException) {
-                Console.WriteLine($"Source:{name}. NULL DISPATCHER");
+            } catch (DispatcherNullException ex) {
+                sourceLogger.Error(ex, $"Source:{name}. NULL DISPATCHER");
                 SetSourceLineOutput("NULL DISPATCHER");
             } catch (FilterFailException) {
-                Console.WriteLine($"Source:{name}. Post Filtering. Iteration Flight did not pass the configured filter");
+                sourceLogger.Error($"Source:{name}. Post Filtering. Iteration Flight did not pass the configured filter");
                 SetSourceLineOutput("Iteration Flight did not pass the configured filter");
             } catch (Exception ex) {
-                Console.WriteLine($"Error Distributing Rate Message: {ex.Message} ");
+                sourceLogger.Error(ex, "Error Distributing Rate Message");
             }
 
             if (immediateSent && !STOP) {
@@ -415,12 +414,12 @@ namespace LoadInjector.RunTime {
                     }
                 }
                 if (refreshFlight && flt != null) {
-                    Console.WriteLine($"Refreshing flight {flt.ToString()} from AMS");
+                    logger.Info($"Refreshing flight {flt.ToString()} from AMS");
                     flt = flt.RefeshFlight(executionController.amshost, executionController.token, executionController.apt_code).Result;
                 }
                 index++;
             } catch (Exception ex) {
-                Console.WriteLine($"Error getting next piece of data {ex.Message}");
+                logger.Error($"Error getting next piece of data {ex.Message}");
             }
 
             if (expression != null && flt != null && filterTime == "post") {
@@ -444,12 +443,12 @@ namespace LoadInjector.RunTime {
         // Called when one of the messages is sent
         public void TriggerHandler(object sender, TriggerFiredEventArgs e) {
             if (intervalMessagesPerMinute < 1500) {
-                Console.WriteLine($"Rate Event Fired. Source: {name}");
+                sourceLogger.Info($"Rate Event Fired. Source: {name}");
                 return;
             }
 
             if (intervalCount % Parameters.REPORTEPOCH == 0) {
-                Console.WriteLine($"Rate Event Fired. Source: {name}. {Parameters.REPORTEPOCH} instances");
+                sourceLogger.Info($"Rate Event Fired. Source: {name}. {Parameters.REPORTEPOCH} instances");
             }
         }
 
@@ -492,11 +491,11 @@ namespace LoadInjector.RunTime {
                     resetTimers.Add(resetTimer);
                 }
             } catch (Exception e) {
-                logger.Error("**********************************");
-                logger.Error("* Message Throttle Profile Error *");
-                logger.Error("**********************************");
-                Console.WriteLine("* Message Throttle Profile Error *");
-                Console.WriteLine(e.Message);
+                sourceLogger.Error("**********************************");
+                sourceLogger.Error("* Message Throttle Profile Error *");
+                sourceLogger.Error("**********************************");
+                sourceLogger.Error(e);
+                sourceLogger.Error(e.Message);
             }
         }
 
@@ -507,7 +506,7 @@ namespace LoadInjector.RunTime {
             intervalMessagesPerMinute = configuredMaxMess;
             SetConfiguredMsgPerMin(configuredMaxMess.ToString(CultureInfo.CurrentCulture));
             SetMsgPerMin(maxMess.ToString(CultureInfo.CurrentCulture));
-            Console.WriteLine($"Rate Source: {name}. Setting interval to {interval}, interval count to {intervalCount}, messages per minute to {configuredMaxMess}");
+            sourceLogger.Error($"Rate Source: {name}. Setting interval to {interval}, interval count to {intervalCount}, messages per minute to {configuredMaxMess}");
         }
 
         internal void Stop() {

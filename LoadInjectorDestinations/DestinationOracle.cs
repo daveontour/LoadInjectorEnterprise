@@ -8,7 +8,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    public class DestinationOracle : SenderAbstract {
+    public class DestinationOracle : DestinationAbstract {
         private string connStr;
         public bool showResults;
 

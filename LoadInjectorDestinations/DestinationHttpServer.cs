@@ -10,7 +10,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationHttpServer : SenderAbstract {
+    internal class DestinationHttpServer : DestinationAbstract {
         private HttpListener listener;
         private string serverURL;
         private readonly Queue<string> messageQueue = new Queue<string>();

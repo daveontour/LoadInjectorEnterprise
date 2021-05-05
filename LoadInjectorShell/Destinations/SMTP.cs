@@ -21,7 +21,7 @@ namespace LoadInjector.Destinations {
     //        return new SmtpPropertyGrid(dataModel, view);
     //    }
 
-    //    public SenderAbstract GetDestinationSender() {
+    //    public DestinationAbstract GetDestinationSender() {
     //        return new DestinationSmtp();
     //    }
     //}
@@ -98,7 +98,7 @@ namespace LoadInjector.Destinations {
     //    }
     //}
 
-    //class DestinationSmtp : SenderAbstract {
+    //class DestinationSmtp : DestinationAbstract {
     //    private string smtphost;
     //    private int smtpport;
     //    private string smtpuser;

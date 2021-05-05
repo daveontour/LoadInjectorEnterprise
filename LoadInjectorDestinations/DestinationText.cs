@@ -6,7 +6,7 @@ using System.Xml;
 
 namespace LoadInjector.Destinations {
 
-    internal class DestinationText : SenderAbstract {
+    internal class DestinationText : DestinationAbstract {
         private string title;
 
         public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
@@ -16,9 +16,7 @@ namespace LoadInjector.Destinations {
         }
 
         public override void Send(String val, List<Variable> vars) {
-            Console.WriteLine($"\n[{DateTime.Now:HH:mm:ss.ffff}] Output Message=======>\n\n");
-            Console.WriteLine(val);
-            Console.WriteLine("\n<======= Output Message\n");
+            destLogger.Info($"\nOutput Message=======>\n{val}\n<=======Output Message");
         }
     }
 }

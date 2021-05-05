@@ -9,7 +9,7 @@ using System.Xml;
 namespace LoadInjector.Destinations {
 
     //Class that implements the sending of the message
-    public class DestinationRabbit : SenderAbstract {
+    public class DestinationRabbit : DestinationAbstract {
         private string queueName;
         private string connection;
         private string user;
