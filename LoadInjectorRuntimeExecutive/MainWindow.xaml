@@ -1,91 +1,20 @@
-﻿<Window x:Class="LoadInjector.RunTime.ExecutionUI"
+﻿<Window x:Class="LoadInjectorRuntimeExecutive.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LoadInjector.RunTime"
+        xmlns:views="clr-namespace:LoadInjector.Views" xmlns:runtime="clr-namespace:LoadInjector.RunTime"
         mc:Ignorable="d"
-        Closing="Window_Closing"
-        Title="Load Injector - Load Executuion" Height="800" Width="1200" Background="#FF394D4D">
-
-    <Window.Resources>
-    </Window.Resources>
+        Title="Load Injector Execution" Height="800" Width="1200" Background="#FF394D4D">
 
     <Grid Margin="10,0"  VerticalAlignment="Stretch">
         <Grid.RowDefinitions>
-            <RowDefinition Height="45" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
         </Grid.RowDefinitions>
 
-        <DockPanel  Grid.Row="0"  VerticalAlignment="Top" Margin="0,0,0,0" Width="Auto" LastChildFill="True" Height="45" Grid.RowSpan="2">
-            <DockPanel.Resources>
-                <Style TargetType="{x:Type Button}">
-                    <Setter Property="Margin" Value="5,5,5,5" />
-                </Style>
-            </DockPanel.Resources>
-            <Label  x:Name ="StatusLabelText" Margin="35,0,0,0" VerticalAlignment="Center" HorizontalAlignment="Left" Content="{Binding Path=StatusLabel}" FontSize="18" Foreground="White" />
-            <Button x:Name="CancelBtn"  Visibility="Hidden" Content="Cancel" IsEnabled="False" Click="Cancel_Click"  FontSize="18" Width="100" Background="#FFF3420D" />
-
-            <Button DockPanel.Dock="Right" x:Name="ExecuteBtn" Content="Execute" IsEnabled="False" Click="Execute_Click"  FontSize="16" Width="100">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Width" Value="100" />
-                        <Setter Property="Height" Value="30" />
-                        <Setter Property="Margin" Value="0,0,3,0" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="LightGray" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="True">
-                                <Setter Property="Background" Value="#FF66F723" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-            <Button x:Name="PrepareBtn" DockPanel.Dock="Right" Content="Prepare" Click="Prepare_Click" HorizontalAlignment="Right">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="Background" Value="#FFF9EF21" />
-                        <Setter Property="FontSize" Value="16" />
-                        <Setter Property="Width" Value="100" />
-                        <Setter Property="Height" Value="30" />
-                        <Setter Property="Margin" Value="0,0,3,0" />
-                        <Setter Property="HorizontalAlignment" Value="Right" />
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="LightGray" />
-                            </Trigger>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
-        </DockPanel>
+        <views:CommandsBarView x:Name="commandBarView"  Grid.Row="0" />
 
         <TabControl Grid.Row="1" x:Name="tabControl">
             <TabItem>
@@ -124,7 +53,7 @@
                             <ScrollViewer Grid.Row="0" Background="LightSlateGray" Margin="0,0,0,0" VerticalAlignment="Top"  Height="{Binding Path=ActualHeight,
            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}">
                                 <StackPanel x:Name="Sources"  Orientation="Vertical" VerticalAlignment="Top">
-                                    <StackPanel.Resources>
+                                    <!--   <StackPanel.Resources>
                                         <Style TargetType="{x:Type local:TriggeredEventsUI}">
                                             <Setter Property="Margin" Value="5,5,5,0" />
                                         </Style>
@@ -140,7 +69,7 @@
                                         <Style TargetType="{x:Type local:Disabled}">
                                             <Setter Property="Margin" Value="5,5,5,0" />
                                         </Style>
-                                    </StackPanel.Resources>
+                                    </StackPanel.Resources> -->
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
@@ -177,7 +106,7 @@
                             <ScrollViewer Grid.Row="0" Background="LightSlateGray" Margin="0,0,0,5" VerticalAlignment="Top" Height="{Binding Path=ActualHeight,
            RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=UIElement}}">
                                 <StackPanel x:Name="Lines"  Orientation="Vertical">
-                                    <StackPanel.Resources>
+                                    <!--   <StackPanel.Resources>
                                         <Style TargetType="{x:Type local:TriggeredEventsUI}">
                                             <Setter Property="Margin" Value="5,5,5,0" />
                                         </Style>
@@ -190,7 +119,7 @@
                                         <Style TargetType="{x:Type local:Disabled}">
                                             <Setter Property="Margin" Value="5,5,5,0" />
                                         </Style>
-                                    </StackPanel.Resources>
+                                    </StackPanel.Resources> -->
                                 </StackPanel>
                             </ScrollViewer>
                         </Grid>
@@ -258,42 +187,11 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="90" />
                 <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="70" />
-                <ColumnDefinition Width="110" />
+                <ColumnDefinition Width="300" />
             </Grid.ColumnDefinitions>
             <TextBlock Grid.Column="0" Margin="0,19,4,0" Foreground="White" Text="Test Progress:" TextAlignment="Right" FontSize="14" />
             <ProgressBar Grid.Column="1" HorizontalAlignment="Stretch" Height="10"  VerticalAlignment="Center"  Minimum="0" Maximum="100" Value="{Binding Path=PercentComplete}" Name="executionStatus" RenderTransformOrigin="0.5,0.5" />
-            <TextBlock Grid.Column="2"  Margin="5,19,0,0" Foreground="White" Text="{Binding Path=ElapsedString}" FontSize="14" />
-            <Button Grid.Column="3" x:Name="StopBtn" Content="Stop" IsEnabled="False" Click="Stop_Click" Width="100" VerticalAlignment="Center">
-                <Button.Style>
-                    <Style TargetType="{x:Type Button}">
-                        <Setter Property="FontSize" Value="16" />
-                        <Setter Property="Width" Value="100" />
-                        <Setter Property="Height" Value="30" />
-
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="{x:Type Button}">
-                                    <Border Background="{TemplateBinding Background}" BorderBrush="Black" BorderThickness="1">
-                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="FontWeight" Value="Bold" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="False">
-                                <Setter Property="Background" Value="LightGray" />
-                            </Trigger>
-                            <Trigger Property="IsEnabled" Value="True">
-                                <Setter Property="Background" Value="#FFF3420D" />
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <TextBlock Grid.Column="2" Margin="0,19,4,0" Foreground="White" Text="{Binding Path=STATUSMESSAGE}" TextAlignment="Right" FontSize="14" />
         </Grid>
     </Grid>
 </Window>

@@ -1,0 +1,8 @@
+2021-05-08 22:10:43.011 +04:00 [INF] MSBuild registered from C:\Program Files\dotnet\sdk\5.0.202\
+2021-05-08 22:10:43.117 +04:00 [INF] Registered 1 extensions:
+	Default extension
+2021-05-08 22:10:50.466 +04:00 [INF] Initializing upgrade step Select an entrypoint
+2021-05-08 22:10:50.469 +04:00 [INF] Setting entrypoint to user selected project: C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorShell\LoadInjectorShell.csproj
+2021-05-08 22:10:50.477 +04:00 [INF] Initializing upgrade step Select project to upgrade
+2021-05-08 22:10:50.555 +04:00 [INF] Initializing upgrade step Back up project
+2021-05-08 22:11:17.025 +04:00 [INF] Saving upgrade progress file at C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorShell\.upgrade-assistant

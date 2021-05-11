@@ -243,17 +243,5 @@ namespace LoadInjector.RunTime.EngineComponents {
                 Task.Run(() => { this.hubProxy.Invoke("SetSchedTrigger", executionNodeUuid, sortedTriggers); });
             }
         }
-
-        //internal void SetDestinationMsgPerMinute(string executionNodeID, string uuid, string s) {
-        //    Task.Run(() => {
-        //        this.hubProxy.Invoke("SetDestinationMsgPerMinute", executionNodeID, uuid, s);
-        //    });
-        //}
-
-        //internal void SetDestinationConfigMsgPerMin(string executionNodeID, string uuid, string s) {
-        //    Task.Run(() => {
-        //        this.hubProxy.Invoke("SetDestinationConfigMsgPerMin", executionNodeID, uuid, s);
-        //    });
-        //}
     }
 }
