@@ -1,7 +1,5 @@
 ﻿using LoadInjector.Common;
 using LoadInjector.GridDefinitions;
-using LoadInjector.Runtime.EngineComponents;
-using LoadInjector.RunTime;
 using LoadInjector.Views;
 using Microsoft.Win32;
 using System;
@@ -9,6 +7,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -66,6 +65,8 @@ namespace LoadInjector.ViewModels {
 
         public ICommand SaveDocumentCommand { get; }
 
+        public ICommand ExportDocumentCommand { get; }
+
         public ICommand SaveAsDocumentCommand { get; }
 
         public ICommand LIExecuteCommand { get; }
@@ -106,6 +107,7 @@ namespace LoadInjector.ViewModels {
             AddFilterCommand = new RelayCommand<XmlNode>(p => { AddFilter(); }, p => { return CanAddFilter(); });
 
             SaveDocumentCommand = new RelayCommand(p => { Save(); });
+            ExportDocumentCommand = new RelayCommand(p => { Export(); });
             SaveAsDocumentCommand = new RelayCommand<string>(SaveAs);
             LIExecuteCommand = new RelayCommand(p => { ExecuteLoadInjectorRuntime(); });
 
@@ -244,9 +246,6 @@ namespace LoadInjector.ViewModels {
                 OnPropertyChanged("XMLText");
             }
         }
-
-        private ExecutionUI win;
-        private CentralMessagingHub centralMessagingHub;
 
         public LoadInjectorGridBase ProfilePropertyGrid { get; set; }
 
@@ -1218,6 +1217,69 @@ namespace LoadInjector.ViewModels {
             OnPropertyChanged("Path");
         }
 
+        public void Export() {
+            XmlDocument newDoc = DataModel.CloneNode(true) as XmlDocument;
+            SaveFileDialog dialog = new SaveFileDialog {
+                Filter = "Load Injector Archive Files (*.lia)|*.lia"
+            };
+
+            if (dialog.ShowDialog() == true) {
+                ExportToFile(newDoc, dialog.FileName);
+            }
+        }
+
+        private void ExportToFile(XmlDocument doc, string file) {
+            Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
+
+            foreach (XmlNode node in doc.SelectNodes(".//*")) {
+                if (node.Attributes["dataFile"]?.Value != null) {
+                    string fullFile = node.Attributes["dataFile"]?.Value;
+                    string[] f2 = fullFile.Split('\\');
+                    string filename = f2[f2.Length - 1];
+                    files.Add($"DATA/{filename}", File.ReadAllBytes(fullFile));
+                    node.Attributes["dataFile"].Value = $"./DATA/{filename}";
+                }
+                if (node.Attributes["templateFile"]?.Value != null) {
+                    string fullFile = node.Attributes["templateFile"]?.Value;
+                    string[] f2 = fullFile.Split('\\');
+                    string filename = f2[f2.Length - 1];
+                    files.Add($"TEMPLATES/{filename}", File.ReadAllBytes(fullFile));
+                    node.Attributes["templateFile"].Value = $"./TEMPLATES/{filename}";
+                }
+            }
+
+            byte[] configFilebytes = Encoding.ASCII.GetBytes(doc.OuterXml);
+
+            StringBuilder sb = new StringBuilder();
+            TextWriter tr = new StringWriter(sb);
+            XmlTextWriter wr = new XmlTextWriter(tr) {
+                Formatting = Formatting.Indented
+            };
+            doc.Save(wr);
+            wr.Close();
+
+            files.Add("config.xml", Encoding.ASCII.GetBytes(sb.ToString()));
+
+            byte[] archiveBytes = ZipFiles(files);
+
+            File.WriteAllBytes(file, archiveBytes);
+        }
+
+        public static byte[] ZipFiles(Dictionary<string, byte[]> files) {
+            using (MemoryStream ms = new MemoryStream()) {
+                using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update)) {
+                    foreach (var file in files) {
+                        ZipArchiveEntry orderEntry = archive.CreateEntry(file.Key); //create a file with this name
+                        using (BinaryWriter writer = new BinaryWriter(orderEntry.Open())) {
+                            writer.Write(file.Value); //write the binary data
+                        }
+                    }
+                }
+                //ZipArchive must be disposed before the MemoryStream has data
+                return ms.ToArray();
+            }
+        }
+
         private void SaveAs(string path) {
             XmlDocument newDoc = DataModel.CloneNode(true) as XmlDocument;
             using (TextWriter sw = new StreamWriter(path, false, Encoding.UTF8)) {
@@ -1240,28 +1302,7 @@ namespace LoadInjector.ViewModels {
         }
 
         private void ExecuteLoadInjectorRuntime() {
-            if (centralMessagingHub == null) {
-                int port = GetAvailablePort(49152);
-                centralMessagingHub = new CentralMessagingHub(port);
-                centralMessagingHub.StartHub();
-            }
-
-            if (!LockExecution) {
-                win = new ExecutionUI {
-                    DataModel = DataModel.CloneNode(true) as XmlDocument
-                };
-                win.VM = this;
-                LockExecution = true;
-                win.Show();
-                centralMessagingHub.SetExecutionUI(win);
-                win.SetCentralMessagingHub(centralMessagingHub);
-            } else {
-                MessageBox.Show("Only ONE Execution window at a time can be opened", "Execution Window", MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        public void ExecuteLoadInjectorRuntimeClose() {
-            win?.Close();
+            //Start Executeable here
         }
 
         private void AboutLoadInjector() {

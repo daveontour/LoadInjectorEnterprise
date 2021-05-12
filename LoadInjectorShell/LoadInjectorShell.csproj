@@ -150,34 +150,7 @@
     <Compile Include="GridDefinitions\TriggerPropertyGrid.cs" />
     <Compile Include="GridDefinitions\TriggerJsonPropertyGrid.cs" />
     <Compile Include="GridDefinitions\XMLDataDrivenGrid.cs" />
-    <Compile Include="RunTime\EngineComponents\CentralMessagingHub.cs" />
-    <Compile Include="RunTime\Views\ControlWriter.cs" />
-    <Compile Include="RunTime\Views\Disabled.xaml.cs">
-      <DependentUpon>Disabled.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\ExecutionUI.xaml.cs">
-      <DependentUpon>ExecutionUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\ChainedEventsUI.xaml.cs">
-      <DependentUpon>ChainedEventsUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\MarginConverter.cs" />
-    <Compile Include="RunTime\Views\TextOutWindow.xaml.cs">
-      <DependentUpon>TextOutWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\RateDrivenEventsUI.xaml.cs">
-      <DependentUpon>RateDrivenEventsUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\TriggeredEventsUI.xaml.cs">
-      <DependentUpon>TriggeredEventsUI.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="RunTime\Views\LineStyleSelector.cs" />
-    <Compile Include="RunTime\Views\LineUserControl.xaml.cs">
-      <DependentUpon>LineUserControl.xaml</DependentUpon>
-    </Compile>
     <Compile Include="GridDefinitions\Defintions.cs" />
-    <Compile Include="Common\DocumentLoadedEventArgs.cs" />
-    <Compile Include="Common\RelayCommand.cs" />
     <Compile Include="Common\TaskListDataTemplateSelector.cs" />
     <Compile Include="GridDefinitions\AmsDirectPropertyGrid.cs" />
     <Compile Include="GridDefinitions\DestinationPropertyGrid.cs" />
@@ -212,34 +185,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="GridDefinitions\FileNameSelector.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RunTime\Views\Disabled.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RunTime\Views\ExecutionUI.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RunTime\Views\ChainedEventsUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="RunTime\Views\TextOutWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="RunTime\Views\RateDrivenEventsUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="RunTime\Views\TriggeredEventsUI.xaml">
-      <Generator>MSBuild:Compile</Generator>
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Include="RunTime\Views\LineUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

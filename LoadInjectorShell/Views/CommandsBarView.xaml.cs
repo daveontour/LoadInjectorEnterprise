@@ -13,18 +13,28 @@ using Path = System.Windows.Shapes.Path;
 namespace LoadInjector.Views {
 
     public partial class CommandsBarView : UserControl {
-
         public readonly ICommand Save;
         public static MenuItem saveMenuItem;
         public static MenuItem saveAsMenuItem;
+        public static MenuItem exportMenuItem;
         public static MenuItem aboutMenuItem;
         public static MenuItem executeMenuItem;
 
         public event EventHandler<DocumentLoadedEventArgs> DocumentLoaded;
+
         public event EventHandler SaveRequested;
+
+        public event EventHandler ExportRequested;
+
         public event EventHandler LIExecuteRequested;
+
         public event EventHandler AboutRequested;
+
         public event EventHandler<SaveAsEventArgs> SaveAsRequested;
+
+        public DocumentLoadedEventArgs loadedArgs;
+        public SaveAsEventArgs saveAsArgs;
+
         public CommandsBarView() {
             InitializeComponent();
             MenuBar.Items.Clear();
@@ -56,11 +66,19 @@ namespace LoadInjector.Views {
             aboutMenuItem.Click += new RoutedEventHandler(aboutMenuItem_Click);
             aboutMenuItem.IsEnabled = true;
 
+            exportMenuItem = new MenuItem() { Header = "Export" };
+            exportMenuItem.Click += new RoutedEventHandler(exportMenuItem_Click);
+            exportMenuItem.IsEnabled = false;
+            Path export = GetResourceCopy<Path>("export");
+            exportMenuItem.Icon = export;
+
             fileMenuItem.Items.Add(newMenuItem);
             fileMenuItem.Items.Add(openMenuItem);
             fileMenuItem.Items.Add(new Separator());
             fileMenuItem.Items.Add(saveMenuItem);
             fileMenuItem.Items.Add(saveAsMenuItem);
+            fileMenuItem.Items.Add(new Separator());
+            fileMenuItem.Items.Add(exportMenuItem);
             fileMenuItem.Items.Add(new Separator());
             fileMenuItem.Items.Add(aboutMenuItem);
 
@@ -80,7 +98,7 @@ namespace LoadInjector.Views {
 
         #region Menu Click Handlers
 
-        void openMenuItem_Click(object sender, RoutedEventArgs e) {
+        private void openMenuItem_Click(object sender, RoutedEventArgs e) {
             OpenFileDialog open = new OpenFileDialog {
                 Filter = "XML Files (*.xml)|*.xml",
                 InitialDirectory = Directory.GetCurrentDirectory() + "\\Samples"
@@ -91,36 +109,37 @@ namespace LoadInjector.Views {
                 try {
                     document.Load(open.FileName);
                     DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = open.FileName, Document = document, FileName = open.SafeFileName };
+                    saveAsArgs = null;
+                    loadedArgs = args;
                     OnDocumentLoaded(this, args);
                 } catch (Exception ex) {
                     Debug.WriteLine(ex.Message);
                 }
-
             }
         }
 
-        void newMenuItem_Click(object sender, RoutedEventArgs e) {
-
+        private void newMenuItem_Click(object sender, RoutedEventArgs e) {
             XmlDocument document = new XmlDocument();
             document.LoadXml(Parameters.Template);
 
             try {
-
                 DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = null, Document = document, FileName = "new.xml" };
+                saveAsArgs = null;
+                loadedArgs = args;
                 OnDocumentLoaded(this, args);
-
             } catch (Exception ex) {
                 Debug.WriteLine(ex.Message);
             }
-
         }
 
-        void saveAsMenuItem_Click(object sender, RoutedEventArgs e) {
+        private void saveAsMenuItem_Click(object sender, RoutedEventArgs e) {
             SaveFileDialog dialog = new SaveFileDialog {
                 Filter = "XML Files (*.xml)|*.xml"
             };
             if (dialog.ShowDialog() == true) {
                 SaveAsEventArgs args = new SaveAsEventArgs { FileName = dialog.SafeFileName, Path = dialog.FileName };
+                saveAsArgs = args;
+                loadedArgs = null;
                 SaveAsRequested?.Invoke(this, args);
             }
         }
@@ -129,20 +148,40 @@ namespace LoadInjector.Views {
             SaveRequested?.Invoke(this, e);
         }
 
-        void aboutMenuItem_Click(object sender, RoutedEventArgs e) {
+        public void exportMenuItem_Click(object sender, RoutedEventArgs e) {
+            ExportRequested?.Invoke(this, e);
+        }
+
+        private void aboutMenuItem_Click(object sender, RoutedEventArgs e) {
             AboutRequested(this, e);
         }
 
-        void experimentalMenuItem_Click(object sender, RoutedEventArgs e) {
-            LIExecuteRequested?.Invoke(this, e);
-        }
-        #endregion
+        private void experimentalMenuItem_Click(object sender, RoutedEventArgs e) {
+            // LIExecuteRequested?.Invoke(this, e);
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
 
+            string lir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase) + "/LoadInjectorRuntimeExecutive.exe";
+            process.StartInfo.FileName = lir;
+            string configfile = null;
+            if (loadedArgs != null) {
+                configfile = $"{loadedArgs.Path}/{loadedArgs.FileName}";
+            } else if (saveAsArgs != null) {
+                configfile = $"{saveAsArgs.Path}/{saveAsArgs.FileName}";
+            }
+            // process.StartInfo.Arguments = configfile;
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+            process.Start();
+        }
+
+        #endregion Menu Click Handlers
 
         private T GetResourceCopy<T>(string key) {
             T model = (T)FindResource(key);
             return ElementClone<T>(model);
         }
+
         /// <summary>
         /// Clones an element.
         /// </summary>
@@ -176,6 +215,5 @@ namespace LoadInjector.Views {
 
             return (T)reconstructedElement;
         }
-
     }
 }

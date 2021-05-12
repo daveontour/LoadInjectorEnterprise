@@ -23,6 +23,7 @@ namespace LoadInjector {
             commandBarView.DocumentLoaded += new EventHandler<DocumentLoadedEventArgs>(CommandBarView_DocumentLoaded);
 
             commandBarView.SaveRequested += new EventHandler(CommandBarView_SaveRequested);
+            commandBarView.ExportRequested += new EventHandler(CommandBarView_ExportRequested);
             commandBarView.LIExecuteRequested += new EventHandler(CommandBarView_LIExecuteRequested);
             commandBarView.AboutRequested += new EventHandler(CommandBarView_AboutRequested);
             commandBarView.SaveAsRequested += new EventHandler<SaveAsEventArgs>(CommandBarView_SaveAsRequested);
@@ -51,19 +52,6 @@ namespace LoadInjector {
                 }
                 var xmlTreeViewModel = new TreeEditorViewModel(document, dir.ToString(), "new.xml");
                 editorsVM.Add(xmlTreeViewModel);
-            } else {
-                XmlDocument document = new XmlDocument();
-                try {
-                    string filename = args[0];
-                    document.Load(filename);
-                    DocumentLoadedEventArgs a = new DocumentLoadedEventArgs() { Path = filename, Document = document, FileName = filename };
-                    commandBarView.OnDocumentLoaded(this, a);
-                    ExecutionUI win = new ExecutionUI { DataModel = document, VM = editorsVM.ActiveEditor };
-                    win.Show();
-                    win.AutoStart(args);
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
-                }
             }
         }
 
@@ -80,6 +68,10 @@ namespace LoadInjector {
             editorsVM.ActiveEditor.SaveDocumentCommand.Execute(null);
         }
 
+        private void CommandBarView_ExportRequested(object sender, EventArgs e) {
+            editorsVM.ActiveEditor.ExportDocumentCommand.Execute(null);
+        }
+
         private void CommandBarView_LIExecuteRequested(object sender, EventArgs e) {
             editorsVM.ActiveEditor.LIExecuteCommand.Execute(null);
         }
@@ -93,11 +85,6 @@ namespace LoadInjector {
         }
 
         public void Window_Closing(object sender, CancelEventArgs e) {
-            try {
-                editorsVM.ActiveEditor.ExecuteLoadInjectorRuntimeClose();
-            } catch (Exception) {
-                // NO-OP
-            }
         }
     }
 }

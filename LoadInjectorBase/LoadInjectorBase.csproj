@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commom\DocumentLoadedEventArgs.cs" />
+    <Compile Include="Commom\RelayCommand.cs" />
     <Compile Include="Filters\Expression.cs" />
     <Compile Include="Filters\FilterBool.cs" />
     <Compile Include="Filters\FilterContains.cs" />

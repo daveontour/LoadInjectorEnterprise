@@ -652,7 +652,7 @@ namespace LoadInjector.RunTime {
             }
 
             if (!atLeastOneActive) {
-                ConsoleMsg("Preparation Phase Complete - No Active Destinaion Lines");
+                ConsoleMsg("Preparation Phase Complete - No Active Destination Lines");
                 return false;
             }
 

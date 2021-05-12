@@ -8,23 +8,13 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Markup;
 using System.Xml;
+using LoadInjector.Common;
 using Path = System.Windows.Shapes.Path;
 
 namespace LoadInjector.Views {
 
-    public class DocumentLoadedEventArgs : EventArgs {
-        public XmlDocument Document { get; set; }
-        public string Path { get; set; }
-        public string FileName { get; set; }
-    }
-
     public class SearchRequestedEventArgs : EventArgs {
         public string XPath { get; set; }
-    }
-
-    public class SaveAsEventArgs : EventArgs {
-        public string Path { get; set; }
-        public string FileName { get; set; }
     }
 
     public partial class CommandsBarView : UserControl {

@@ -1,7 +1,4 @@
 ﻿using LoadInjector.Common;
-using LoadInjector.RunTime.Views;
-using System.Windows;
-using System.Windows.Threading;
 using System.Xml;
 
 namespace LoadInjector.Destinations {

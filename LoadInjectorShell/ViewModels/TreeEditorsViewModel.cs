@@ -46,6 +46,7 @@ namespace LoadInjector.ViewModels {
                     CommandsBarView.executeMenuItem.IsEnabled = true;
                     CommandsBarView.saveMenuItem.IsEnabled = true;
                     CommandsBarView.saveAsMenuItem.IsEnabled = true;
+                    CommandsBarView.exportMenuItem.IsEnabled = true;
                     ActiveEditor = TreeEditors[ActiveEditorIndex];
                     try {
                         var dir = new FileInfo(ActiveEditor.Path).Directory;

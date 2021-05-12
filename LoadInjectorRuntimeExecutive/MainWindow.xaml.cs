@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Text;
@@ -19,6 +20,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using System.Xml.Linq;
+using LoadInjector.Common;
 using LoadInjector.Runtime.EngineComponents;
 using LoadInjector.RunTime;
 using LoadInjector.RunTime.Views;
@@ -31,10 +33,12 @@ namespace LoadInjectorRuntimeExecutive {
         private int duration;
         private int repeats;
         private int repeatRest;
+        private int restRemaining;
         private Timer percentCompleteTimer;
         private Timer executionTimer;
         private int repeatsExecuted = 0;
         private Timer repetitionTimer;
+        private Timer restSecondTimer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -120,13 +124,23 @@ namespace LoadInjectorRuntimeExecutive {
             }
         }
 
-        private string statusMessage = "Hello Dave";
+        private string statusMessage = "No configuration file loaded";
 
         public string STATUSMESSAGE {
             get => statusMessage;
             set {
                 statusMessage = value;
                 OnPropertyChanged("STATUSMESSAGE");
+            }
+        }
+
+        public string hubPort;
+
+        public string HUBPORT {
+            get => hubPort;
+            set {
+                hubPort = value;
+                OnPropertyChanged("HUBPORT");
             }
         }
 
@@ -138,7 +152,11 @@ namespace LoadInjectorRuntimeExecutive {
             }
         }
 
-        public MainWindow() {
+        private string[] args = null;
+
+        public MainWindow(string[] args = null) {
+            this.args = args;
+
             InitializeComponent();
             DataContext = this;
 
@@ -160,6 +178,23 @@ namespace LoadInjectorRuntimeExecutive {
             SetExecuteBtnEnabled(false);
             SetPrepareBtnEnabled(false);
             SetStopBtnEnabled(false);
+            StartUp();
+        }
+
+        private void StartUp() {
+            if (args == null) {
+                //NO-OP
+            } else {
+                XmlDocument document = new XmlDocument();
+                try {
+                    string filename = args[0];
+                    document.Load(filename);
+                    DocumentLoadedEventArgs a = new DocumentLoadedEventArgs() { Path = filename, Document = document, FileName = filename };
+                    commandBarView.OnDocumentLoaded(this, a);
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex.Message);
+                }
+            }
         }
 
         public void OnDocumentLoaded(object sender, DocumentLoadedEventArgs e) {
@@ -170,6 +205,15 @@ namespace LoadInjectorRuntimeExecutive {
             get => dataModel;
             set {
                 dataModel = value;
+
+                StringBuilder sb = new StringBuilder();
+                TextWriter tr = new StringWriter(sb);
+                XmlTextWriter wr = new XmlTextWriter(tr) {
+                    Formatting = Formatting.Indented
+                };
+                DataModel.Save(wr);
+                wr.Close();
+                configConsole.Text = sb.ToString();
 
                 string executionNodeID = Guid.NewGuid().ToString();
 
@@ -206,10 +250,20 @@ namespace LoadInjectorRuntimeExecutive {
                 PrepareLineUI();
 
                 SetPrepareBtnEnabled(true);
+
+                //     if (args == null) {
+                STATUSMESSAGE = "Configuration File Loaded";
+                //     } else {
+                //         STATUSMESSAGE = "Auto Start Enabled";
+                //         Prepare_Click(null, null);
+                //         Execute_Click(null, null);
+                //     }
             }
         }
 
         public void PrepareLineUI() {
+            STATUSMESSAGE = "Configuring UI Lines";
+
             //Add the data driven sources
             bool hasAMDDDLines = false;
 
@@ -296,6 +350,7 @@ namespace LoadInjectorRuntimeExecutive {
                 centralMessagingHub.SetExecutionUI(this);
                 centralMessagingHub.StartHub();
                 cnt = new NgExecutionController(this.centralMessagingHub.port);
+                HUBPORT = port.ToString();
             }
 
             outputConsole.Clear();
@@ -312,6 +367,8 @@ namespace LoadInjectorRuntimeExecutive {
             foreach (SourceUI src in this.sourceUIMap.Values) {
                 src.SentSeqNumber = 0;
             }
+
+            STATUSMESSAGE = "Waiting for user to initiate Prepare phase";
         }
 
         private bool AddDataDrivenUI(String label, XmlNodeList sourceList, List<TriggeredEventsUI> uiList) {
@@ -389,19 +446,21 @@ namespace LoadInjectorRuntimeExecutive {
         }
 
         private void Prepare_Click(object sender, EventArgs e) {
-            STATUSMESSAGE = "Prepare";
+            STATUSMESSAGE = "Preparing source and destinations";
 
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             try {
                 centralMessagingHub.Hub.Clients.All.InitModel(dataModel.OuterXml);
                 centralMessagingHub.Hub.Clients.All.ClearAndPrepare();
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                STATUSMESSAGE = "Preparing phase error. " + ex.Message;
             }
+
+            STATUSMESSAGE = "Ready to Execute";
         }
 
         private void Execute_Click(object sender, EventArgs e) {
-            STATUSMESSAGE = "Execute";
+            STATUSMESSAGE = "Executing";
             try {
                 centralMessagingHub.Hub.Clients.All.Execute();
 
@@ -465,14 +524,15 @@ namespace LoadInjectorRuntimeExecutive {
             repeatsExecuted++;
             centralMessagingHub.Hub.Clients.All.Stop(false);
 
-            consoleWriter.WriteLine($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete");
+            consoleWriter.WriteLine($"Test Execution Repetition {repeatsExecuted} of {repeats} Complete");
+            STATUSMESSAGE = $"Test Execution Repetition {repeatsExecuted} of {repeats} Complete";
 
             if (repeatsExecuted >= repeats || stopped) {
                 try {
                     Dispatcher.BeginInvoke((Action)(() => {
                         SetExecuteBtnEnabled(false);
                         SetPrepareBtnEnabled(true);
-                        SetStopBtnEnabled(true);
+                        SetStopBtnEnabled(false);
                     }));
                 } catch (Exception ex) {
                     Console.WriteLine($"Test Execution Completed Stopped Error {ex.Message}");
@@ -481,7 +541,17 @@ namespace LoadInjectorRuntimeExecutive {
                 return;
             }
 
-            centralMessagingHub.Hub.Clients.All.WaitForNextExecute($"Test Execution Reptition {repeatsExecuted} of {repeats} Complete. Waiting {repeatRest} seconds for next repitiion");
+            restRemaining = repeatRest;
+            centralMessagingHub.Hub.Clients.All.WaitForNextExecute($"Test Execution Repetition {repeatsExecuted} of {repeats} Complete. Waiting {repeatRest} seconds for next repetition");
+            STATUSMESSAGE = $"Test Execution Repetition {repeatsExecuted} of {repeats} Complete. Waiting {repeatRest} seconds for next repetition";
+
+            restSecondTimer = new Timer {
+                Interval = 1000,
+                AutoReset = true,
+                Enabled = true
+            };
+
+            restSecondTimer.Elapsed += NextRestSecond;
 
             repetitionTimer = new Timer {
                 Interval = repeatRest * 1000,
@@ -491,7 +561,13 @@ namespace LoadInjectorRuntimeExecutive {
             repetitionTimer.Elapsed += NextExecution;
         }
 
+        private void NextRestSecond(object sender, ElapsedEventArgs e) {
+            restRemaining = restRemaining - 1;
+            STATUSMESSAGE = $"Test Execution Repetition {repeatsExecuted} of {repeats} Complete. Waiting {restRemaining} seconds for next repetition";
+        }
+
         private void NextExecution(object sender, ElapsedEventArgs e) {
+            restSecondTimer.Enabled = false;
             try {
                 // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
                 foreach (LineUserControl li in this.directLinesUserControls) {
@@ -521,6 +597,8 @@ namespace LoadInjectorRuntimeExecutive {
                 }
 
                 centralMessagingHub.Hub.Clients.All.PrepareAndExecute();
+
+                STATUSMESSAGE = "Executing";
 
                 stopWatch.Reset();
                 stopWatch.Start();
