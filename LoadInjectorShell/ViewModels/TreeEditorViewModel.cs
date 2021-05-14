@@ -1248,24 +1248,24 @@ namespace LoadInjector.ViewModels {
                 }
             }
 
-            byte[] configFilebytes = Encoding.ASCII.GetBytes(doc.OuterXml);
+            //Pretty Print the XML config
 
-            StringBuilder sb = new StringBuilder();
-            TextWriter tr = new StringWriter(sb);
-            XmlTextWriter wr = new XmlTextWriter(tr) {
-                Formatting = Formatting.Indented
-            };
-            doc.Save(wr);
-            wr.Close();
+            //StringBuilder sb = new StringBuilder();
+            //TextWriter tr = new StringWriter(sb);
+            //XmlTextWriter wr = new XmlTextWriter(tr, System.Text.Encoding.UTF8) {
+            //    Formatting = Formatting.Indented,
+            //};
+            //doc.Save(wr);
+            //wr.Close();
 
-            files.Add("config.xml", Encoding.ASCII.GetBytes(sb.ToString()));
+            files.Add("config.xml", Encoding.ASCII.GetBytes(doc.OuterXml));
 
             byte[] archiveBytes = ZipFiles(files);
 
             File.WriteAllBytes(file, archiveBytes);
         }
 
-        public static byte[] ZipFiles(Dictionary<string, byte[]> files) {
+        private static byte[] ZipFiles(Dictionary<string, byte[]> files) {
             using (MemoryStream ms = new MemoryStream()) {
                 using (ZipArchive archive = new ZipArchive(ms, ZipArchiveMode.Update)) {
                     foreach (var file in files) {

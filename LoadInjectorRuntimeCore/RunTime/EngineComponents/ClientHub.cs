@@ -3,6 +3,9 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
+using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
@@ -16,10 +19,11 @@ namespace LoadInjector.RunTime.EngineComponents {
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
         public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
+        public static string hubURL;
 
         public ClientHub(string hostURL, NgExecutionController ngExecutionController) {
             this.ngExecutionController = ngExecutionController;
-
+            hubURL = hostURL;
             this.ConfigureHub(hostURL);
 
             Task.Run(async delegate {
@@ -54,8 +58,28 @@ namespace LoadInjector.RunTime.EngineComponents {
                 });
 
                 hubProxy.On("PrepareAndExecute", () => {
-                    ngExecutionController.PrepareAsync().Wait();
-                    ngExecutionController.Run();
+                    logger.Info("PrepareAndExecute Received");
+                    bool okToRun = ngExecutionController.PrepareAsync().Result;
+                    if (okToRun) {
+                        ngExecutionController.Run();
+                    } else {
+                        logger.Warn("Prepare did not complete successfully. Execution aborted");
+                    }
+                });
+
+                hubProxy.On("RetrieveStandAlone", (url) => {
+                    try {
+                        ngExecutionController.RetrieveStandAlone(url);
+                        bool readyToRun = ngExecutionController.PrepareAsync().Result;
+                        ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
+                    } catch (Exception ex) {
+                        logger.Info("Error in client Prepare Aync " + ex.Message);
+                    }
+                });
+
+                hubProxy.On("RetrieveArchive", (url) => {
+                    logger.Warn($"Requested to retrieve archive {url}");
+                    ngExecutionController.RetrieveArchive(url);
                 });
 
                 hubProxy.On("Stop", (mode) => {
@@ -75,9 +99,28 @@ namespace LoadInjector.RunTime.EngineComponents {
                     doc.LoadXml(model);
                     ngExecutionController.InitModel(doc);
                 });
+
+                hubProxy.On("Interrogate", () => {
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Task.Run(() => {
+                        this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
+                            GetLocalIPAddress(),
+                            Environment.OSVersion.VersionString);
+                    });
+                });
             } catch (Exception ex) {
                 logger.Info(ex.Message);
             }
+        }
+
+        public static string GetLocalIPAddress() {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList) {
+                if (ip.AddressFamily == AddressFamily.InterNetwork) {
+                    return ip.ToString();
+                }
+            }
+            throw new Exception("No network adapters with an IPv4 address in the system!");
         }
 
         public async Task StartSignalRClientHub() {
@@ -86,12 +129,14 @@ namespace LoadInjector.RunTime.EngineComponents {
             while (!started) {
                 try {
                     hubConnection.Start().Wait();
-                    logger.Info(hubConnection.State);
+                    logger.Info($"{hubConnection.State} ({hubURL})");
                     if (hubConnection.State == ConnectionState.Connected) {
                         started = true;
+                    } else {
+                        Thread.Sleep(5000);
                     }
                 } catch (Exception ex) {
-                    logger.Info("Waiting..");
+                    logger.Info($"Waiting.. ({hubURL})");
                 }
             }
         }

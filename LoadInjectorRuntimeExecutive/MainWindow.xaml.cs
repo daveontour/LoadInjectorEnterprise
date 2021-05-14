@@ -25,6 +25,7 @@ using LoadInjector.Runtime.EngineComponents;
 using LoadInjector.RunTime;
 using LoadInjector.RunTime.Views;
 using LoadInjector.Views;
+using Microsoft.Win32;
 
 namespace LoadInjectorRuntimeExecutive {
 
@@ -39,6 +40,8 @@ namespace LoadInjectorRuntimeExecutive {
         private int repeatsExecuted = 0;
         private Timer repetitionTimer;
         private Timer restSecondTimer;
+
+        private SimpleHTTPServer webServer;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -173,7 +176,7 @@ namespace LoadInjectorRuntimeExecutive {
             commandBarView.StopRequested += new EventHandler(Stop_Click);
             commandBarView.PrepareRequested += new EventHandler(Prepare_Click);
             commandBarView.LIExecuteRequested += new EventHandler(Execute_Click);
-            commandBarView.DocumentLoaded += new EventHandler<DocumentLoadedEventArgs>(OnDocumentLoaded);
+            commandBarView.OpenClicked += new EventHandler(OpenClicked);
 
             SetExecuteBtnEnabled(false);
             SetPrepareBtnEnabled(false);
@@ -197,36 +200,10 @@ namespace LoadInjectorRuntimeExecutive {
             }
         }
 
-        public void OnDocumentLoaded(object sender, DocumentLoadedEventArgs e) {
-            DataModel = e.Document;
-        }
-
         public XmlDocument DataModel {
             get => dataModel;
             set {
                 dataModel = value;
-
-                StringBuilder sb = new StringBuilder();
-                TextWriter tr = new StringWriter(sb);
-                XmlTextWriter wr = new XmlTextWriter(tr) {
-                    Formatting = Formatting.Indented
-                };
-                DataModel.Save(wr);
-                wr.Close();
-                configConsole.Text = sb.ToString();
-
-                string executionNodeID = Guid.NewGuid().ToString();
-
-                // Add unique Identifier for each node to the XML as well as an ID for the execution node
-                foreach (XmlNode node in dataModel.SelectNodes("//*")) {
-                    XmlAttribute newAttribute = DataModel.CreateAttribute("uuid");
-                    newAttribute.Value = Guid.NewGuid().ToString();
-                    node.Attributes.Append(newAttribute);
-
-                    XmlAttribute newAttribute2 = DataModel.CreateAttribute("executionNodeUuid");
-                    newAttribute2.Value = executionNodeID;
-                    node.Attributes.Append(newAttribute2);
-                }
 
                 XDocument doc = XDocument.Parse(dataModel.OuterXml);
                 try {
@@ -260,6 +237,9 @@ namespace LoadInjectorRuntimeExecutive {
                 //     }
             }
         }
+
+        public string ArchiveRoot { get; private set; }
+        public string ArchiveFileName { get; private set; }
 
         public void PrepareLineUI() {
             STATUSMESSAGE = "Configuring UI Lines";
@@ -349,8 +329,14 @@ namespace LoadInjectorRuntimeExecutive {
                 centralMessagingHub = new CentralMessagingHub(port);
                 centralMessagingHub.SetExecutionUI(this);
                 centralMessagingHub.StartHub();
-                cnt = new NgExecutionController(this.centralMessagingHub.port);
-                HUBPORT = port.ToString();
+                cnt = new NgExecutionController(ExecutionControllerType.Local, serverHub: $"http://localhost:{port}/");
+                HUBPORT = this.centralMessagingHub.port.ToString();
+            }
+
+            if (webServer == null) {
+                int webport = GetAvailablePort(49152);
+                webServer = new SimpleHTTPServer(ArchiveRoot, $"http://localhost:{webport}/");
+                Console.WriteLine("Webserver Port: " + webport);
             }
 
             outputConsole.Clear();
@@ -440,16 +426,17 @@ namespace LoadInjectorRuntimeExecutive {
             GetLinePanel().Children.Add(label);
         }
 
-        internal void SetCentralMessagingHub(CentralMessagingHub centralMessagingHub) {
-            this.centralMessagingHub = centralMessagingHub;
-            cnt = new NgExecutionController(this.centralMessagingHub.port);
-        }
+        //internal void SetCentralMessagingHub(CentralMessagingHub centralMessagingHub) {
+        //    this.centralMessagingHub = centralMessagingHub;
+        //    cnt = new NgExecutionController(this.centralMessagingHub.port);
+        //}
 
         private void Prepare_Click(object sender, EventArgs e) {
             STATUSMESSAGE = "Preparing source and destinations";
 
             Dispatcher.BeginInvoke((Action)(() => tabControl.SelectedIndex = 3));
             try {
+                // centralMessagingHub.Hub.Clients.All.RetrieveStandAlone("http://localhost:49153/lia.lia");
                 centralMessagingHub.Hub.Clients.All.InitModel(dataModel.OuterXml);
                 centralMessagingHub.Hub.Clients.All.ClearAndPrepare();
             } catch (Exception ex) {
@@ -648,6 +635,37 @@ namespace LoadInjectorRuntimeExecutive {
                 Console.WriteLine($"Test Execution Manually Stopped Error {ex.Message}");
             }
             Console.WriteLine("Test Execution Manually Stopped");
+        }
+
+        public void OpenClicked(object sender, EventArgs e) {
+            OpenFileDialog open = new OpenFileDialog {
+                Filter = "Load Injector Archive Files(*.lia)|*.lia",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)
+            };
+
+            if (open.ShowDialog() == true) {
+                string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTE";
+
+                try {
+                    // Extract the archive file and normalise template and datafile paths
+                    XmlDocument document = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(open.FileName, archiveRoot, "lia.lia");
+
+                    StringBuilder sb = new StringBuilder();
+                    TextWriter tr = new StringWriter(sb);
+                    XmlTextWriter wr = new XmlTextWriter(tr) {
+                        Formatting = Formatting.Indented
+                    };
+                    document.Save(wr);
+                    wr.Close();
+                    configConsole.Text = sb.ToString();
+
+                    ArchiveRoot = archiveRoot;
+                    ArchiveFileName = "lia.lia";
+                    DataModel = document;
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex.Message);
+                }
+            }
         }
 
         private void OutputConsole_Initialized(object sender, EventArgs e) {

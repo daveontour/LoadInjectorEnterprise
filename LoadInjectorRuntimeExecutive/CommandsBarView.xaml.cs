@@ -10,6 +10,7 @@ using System.Windows.Markup;
 using System.Xml;
 using LoadInjector.Common;
 using Path = System.Windows.Shapes.Path;
+using System.IO.Compression;
 
 namespace LoadInjector.Views {
 
@@ -29,6 +30,8 @@ namespace LoadInjector.Views {
         public event EventHandler LIExecuteRequested;
 
         public event EventHandler AboutRequested;
+
+        public event EventHandler OpenClicked;
 
         public event EventHandler StopRequested;
 
@@ -78,21 +81,7 @@ namespace LoadInjector.Views {
         #region Menu Click Handlers
 
         private void openMenuItem_Click(object sender, RoutedEventArgs e) {
-            OpenFileDialog open = new OpenFileDialog {
-                Filter = "XML Files (*.xml)|*.xml",
-                InitialDirectory = Directory.GetCurrentDirectory() + "\\Samples"
-            };
-
-            if (open.ShowDialog() == true) {
-                XmlDocument document = new XmlDocument();
-                try {
-                    document.Load(open.FileName);
-                    DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = open.FileName, Document = document, FileName = open.SafeFileName };
-                    OnDocumentLoaded(this, args);
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
-                }
-            }
+            OpenClicked?.Invoke(sender, e);
         }
 
         public void SetExecuteBtnEnabled(bool v) {

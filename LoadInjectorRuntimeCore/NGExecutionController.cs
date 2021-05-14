@@ -14,8 +14,16 @@ using System.Xml.Linq;
 using LoadInjector.RunTime.EngineComponents;
 using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
+using System.IO;
+using System.IO.Compression;
 
 namespace LoadInjector.RunTime {
+
+    public enum ExecutionControllerType {
+        StandAlone,
+        Client,
+        Local
+    }
 
     public class NgExecutionController {
         public TriggerEventDistributor eventDistributor;
@@ -25,6 +33,7 @@ namespace LoadInjector.RunTime {
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
+
         public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
 
         public readonly List<FlightNode> flights = new List<FlightNode>();
@@ -102,16 +111,45 @@ namespace LoadInjector.RunTime {
         private int repeatsExecuted = 0;
         private Timer repetitionTimer;
 
-        private void InitController(bool startHub = true) {
-            if (startHub) {
+        private string archiveDirectory;
+
+        public string ArchiveDirectory {
+            get {
+                if (archiveDirectory == null) {
+                    archiveDirectory = GetTemporaryDirectory();
+                }
+
+                return archiveDirectory;
+            }
+        }
+
+        public NgExecutionController(ExecutionControllerType type, string serverHub = null, string executeFile = null) {
+            // Client Server Mode
+            if (type == ExecutionControllerType.Client || type == ExecutionControllerType.Local) {
                 try {
-                    clientHub = new ClientHub($"http://localhost:{centralHubPort}", this);
+                    this.clientHub = new ClientHub(serverHub, this);
+                    this.eventDistributor = new TriggerEventDistributor(this);
                 } catch (Exception ex) {
                     ConsoleMsg(ex.Message);
                 }
             }
-            eventDistributor = new TriggerEventDistributor(this);
-            amsDataDrivenLines.Clear();
+
+            // Running directly from a local file
+            if (type == ExecutionControllerType.StandAlone) {
+                XmlDocument doc = new XmlDocument();
+                if (executeFile.ToLower().EndsWith(".lia")) {
+                    string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTController";
+                    doc = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(executeFile, archiveRoot, "lia.lia");
+                } else {
+                    doc.Load(executeFile);
+                }
+
+                this.clientHub = new ClientHub(this);
+                this.eventDistributor = new TriggerEventDistributor(this);
+                this.InitModel(doc);
+
+                this.RunLocal();
+            }
         }
 
         public void InitModel(XmlDocument model) {
@@ -191,28 +229,6 @@ namespace LoadInjector.RunTime {
                 LineExecutionController line = new LineExecutionController(node, this);
                 destLines.Add(line);
             }
-        }
-
-        public NgExecutionController(int hubPort, bool startHub = true) {
-            this.centralHubPort = hubPort;
-            InitController(startHub);
-        }
-
-        public NgExecutionController(XmlDocument model) {
-            InitController();
-            InitModel(model);
-        }
-
-        // Called for standalone Execution.
-        public NgExecutionController(string executeFile) {
-            clientHub = new ClientHub(this);
-            XmlDocument doc = new XmlDocument();
-            doc.Load(executeFile);
-
-            eventDistributor = new TriggerEventDistributor(this);
-            amsDataDrivenLines.Clear();
-            InitModel(doc);
-            RunLocal();
         }
 
         public void RunLocal() {
@@ -511,6 +527,10 @@ namespace LoadInjector.RunTime {
                 executedRepeats = 0;
             }
 
+            if (dataModel == null) {
+                logger.Error("Prepare initiated, but configuration has not been set.");
+                return false;
+            }
             Configure(dataModel);
             eventDistributor.Stop();
             eventDistributor.ClearHandlers();
@@ -829,7 +849,28 @@ namespace LoadInjector.RunTime {
             return disabled;
         }
 
+        public void RetrieveStandAlone(string remoteUri) {
+            WebClient myWebClient = new WebClient();
+            // Download home page data.
+            string archiveRoot = ArchiveDirectory;
+            logger.Warn("Downloading " + remoteUri + " to " + ArchiveDirectory);           // Download the Web resource and save it into a data buffer.
+            byte[] myDataBuffer = myWebClient.DownloadData(remoteUri);
+            dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", false);
+        }
+
+        public void RetrieveArchive(string remoteUri) {
+            Directory.Delete(ArchiveDirectory, true);
+            WebClient myWebClient = new WebClient();
+            // Download home page data.
+            string archiveRoot = ArchiveDirectory;
+            logger.Warn("Downloading " + remoteUri + " to " + ArchiveDirectory);            // Download the Web resource and save it into a data buffer.
+            byte[] myDataBuffer = myWebClient.DownloadData(remoteUri);
+            dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", false);
+        }
+
         public void Stop(bool manual = false) {
+            Directory.Delete(ArchiveDirectory, true);
+
             try {
                 timer?.Stop();
             } catch (Exception ex) {
@@ -988,6 +1029,10 @@ namespace LoadInjector.RunTime {
             }
         }
 
+        public void ProgramStop() {
+            Directory.Delete(ArchiveDirectory, true);
+        }
+
         public void StopLines() {
             foreach (LineExecutionController line in destLines) {
                 try {
@@ -1054,6 +1099,12 @@ namespace LoadInjector.RunTime {
                     // NO-OP
                 }
             }
+        }
+
+        public string GetTemporaryDirectory() {
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            return tempDirectory;
         }
 
         private void OnStartEvent(Object source, ElapsedEventArgs e) {
