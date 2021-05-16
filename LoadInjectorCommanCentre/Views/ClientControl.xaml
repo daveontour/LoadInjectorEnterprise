@@ -72,11 +72,12 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="120" Background="Bisque" Margin="5,5,5,5">
+    <Grid Height="140" Background="Bisque" Margin="5,5,5,5">
 
         <Grid  Grid.Row="0"  Background="LawnGreen">
             <Grid.RowDefinitions>
 
+                <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
@@ -98,6 +99,8 @@
             <Button Grid.Row="4" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="execBtn" Click="Exec_OnClick" HorizontalAlignment="Right" Content="Execute" />
             <Button Grid.Row="4" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="stopBtn" Click="Stop_OnClick" HorizontalAlignment="Left" Content="Stop" />
             <Button Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource RoundCorner}" x:Name="viewBtn" Click="Stop_OnClick" Width="144" Content="View Status" />
+
+            <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Text="{Binding Path=StatusText}" HorizontalAlignment="Center"></TextBlock>
         </Grid>
     </Grid>
 </UserControl>

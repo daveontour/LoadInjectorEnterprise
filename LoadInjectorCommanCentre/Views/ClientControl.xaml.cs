@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -24,8 +25,26 @@ namespace LoadInjectorCommanCentre.Views {
     /// Interaction logic for ClientControl.xaml
     /// </summary>
     public partial class ClientControl : UserControl, INotifyPropertyChanged {
+        private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
+
+        public ObservableCollection<ExecutionRecordClass> RecordsCollection {
+            get { return this._myCollection; }
+        }
+
         public string ConnectionID { get; }
         public CentralMessagingHub MessageHub { get; }
+
+        private string executionID;
+
+        public string ExecutionNodeID {
+            get {
+                return executionID;
+            }
+            set {
+                executionID = value;
+                OnPropertyChanged("ExecutionNodeID");
+            }
+        }
 
         private string osversion;
 
@@ -36,6 +55,18 @@ namespace LoadInjectorCommanCentre.Views {
             set {
                 osversion = value;
                 OnPropertyChanged("OSVersion");
+            }
+        }
+
+        private string statusText = "Un Assigned";
+
+        public string StatusText {
+            get {
+                return $"{statusText}";
+            }
+            set {
+                statusText = value;
+                OnPropertyChanged("StatusText");
             }
         }
 
@@ -84,15 +115,18 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         private void Prep_OnClick(object sender, RoutedEventArgs e) {
-            MessageHub.Hub.Clients.Client(ConnectionID).PrepareAndExecute();
+            MessageHub.Hub.Clients.Client(ConnectionID).ClearAndPrepare();
+            StatusText = "Prepared";
         }
 
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Execute();
+            StatusText = "Executing";
         }
 
         private void Stop_OnClick(object sender, RoutedEventArgs e) {
-            MessageHub.Hub.Clients.Client(ConnectionID).StopExecute();
+            MessageHub.Hub.Clients.Client(ConnectionID).Stop();
+            StatusText = "Stopped";
         }
 
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
@@ -107,6 +141,24 @@ namespace LoadInjectorCommanCentre.Views {
             if (open.ShowDialog() == true) {
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
                 MessageHub.Hub.Clients.Client(ConnectionID).RetrieveArchive(cCController.WebServerURL + "/" + open.SafeFileName);
+                StatusText = "Assigned";
+            }
+        }
+
+        public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
+            try {
+                ExecutionRecordClass r = (from record in RecordsCollection
+                                          where rec.ExecutionLineID == record.ExecutionLineID
+                                          select record).First();
+
+                //The only thing that is changing is the messages sent and messages per minute
+                r.MM = rec.MM;
+                r.Sent = rec.Sent;
+                OnPropertyChanged("RecordsCollection");
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+                RecordsCollection.Add(rec);
+                OnPropertyChanged("RecordsCollection");
             }
         }
     }

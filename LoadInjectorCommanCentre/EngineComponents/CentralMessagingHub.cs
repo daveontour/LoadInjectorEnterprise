@@ -118,8 +118,8 @@ namespace LoadInjector.Runtime.EngineComponents {
             });
         }
 
-        public void InterrogateResponse(string processID, string ipAddress, string osversion) {
-            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, Context);
+        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml) {
+            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, Context);
         }
 
         public void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {

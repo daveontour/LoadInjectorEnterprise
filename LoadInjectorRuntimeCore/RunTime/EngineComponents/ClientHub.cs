@@ -50,7 +50,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     }
                 });
                 hubProxy.On("Execute", () => {
-                    ngExecutionController.Run();
+                    ngExecutionController.RunLocal();
                 });
 
                 hubProxy.On("WaitForNextExecute", (message) => {
@@ -72,6 +72,13 @@ namespace LoadInjector.RunTime.EngineComponents {
                         ngExecutionController.RetrieveStandAlone(url);
                         bool readyToRun = ngExecutionController.PrepareAsync().Result;
                         ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
+                        Process currentProcess = Process.GetCurrentProcess();
+                        Task.Run(() => {
+                            this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
+                                GetLocalIPAddress(),
+                                Environment.OSVersion.VersionString,
+                                ngExecutionController.dataModel?.OuterXml);
+                        });
                     } catch (Exception ex) {
                         logger.Info("Error in client Prepare Aync " + ex.Message);
                     }
@@ -80,10 +87,17 @@ namespace LoadInjector.RunTime.EngineComponents {
                 hubProxy.On("RetrieveArchive", (url) => {
                     logger.Warn($"Requested to retrieve archive {url}");
                     ngExecutionController.RetrieveArchive(url);
+                    Process currentProcess = Process.GetCurrentProcess();
+                    Task.Run(() => {
+                        this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
+                            GetLocalIPAddress(),
+                            Environment.OSVersion.VersionString,
+                            ngExecutionController.dataModel?.OuterXml);
+                    });
                 });
 
-                hubProxy.On("Stop", (mode) => {
-                    ngExecutionController.Stop(mode);
+                hubProxy.On("Stop", () => {
+                    ngExecutionController.Stop();
                 });
 
                 hubProxy.On("Cancel", (mode) => {
@@ -105,7 +119,8 @@ namespace LoadInjector.RunTime.EngineComponents {
                     Task.Run(() => {
                         this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
                             GetLocalIPAddress(),
-                            Environment.OSVersion.VersionString);
+                            Environment.OSVersion.VersionString,
+                            ngExecutionController.dataModel?.OuterXml);
                     });
                 });
             } catch (Exception ex) {

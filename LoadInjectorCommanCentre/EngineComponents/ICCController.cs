@@ -6,6 +6,6 @@ namespace LoadInjector.Runtime.EngineComponents {
 
         void InitialInterrogation(HubCallerContext connectionId);
 
-        void InterrogateResponse(string processID, string ipAddress, string osversion, HubCallerContext context);
+        void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context);
     }
 }

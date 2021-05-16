@@ -28,7 +28,7 @@ namespace LoadInjector.RunTime {
     public class NgExecutionController {
         public TriggerEventDistributor eventDistributor;
 
-        private XmlDocument dataModel;
+        public XmlDocument dataModel;
         private readonly Stopwatch stopWatch = new Stopwatch();
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
@@ -147,7 +147,6 @@ namespace LoadInjector.RunTime {
                 this.clientHub = new ClientHub(this);
                 this.eventDistributor = new TriggerEventDistributor(this);
                 this.InitModel(doc);
-
                 this.RunLocal();
             }
         }
@@ -866,11 +865,15 @@ namespace LoadInjector.RunTime {
             logger.Warn("Downloading " + remoteUri + " to " + ArchiveDirectory);            // Download the Web resource and save it into a data buffer.
             byte[] myDataBuffer = myWebClient.DownloadData(remoteUri);
             dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", false);
+            this.InitModel(dataModel);
+        }
+
+        public void StopService() {
+            Directory.Delete(ArchiveDirectory, true);
+            Stop();
         }
 
         public void Stop(bool manual = false) {
-            Directory.Delete(ArchiveDirectory, true);
-
             try {
                 timer?.Stop();
             } catch (Exception ex) {

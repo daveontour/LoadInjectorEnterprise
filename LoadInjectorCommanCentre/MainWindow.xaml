@@ -35,6 +35,38 @@
                 </StackPanel>
             </Grid>
             <StackPanel Grid.Column="1"  Background="Blue">
+                <DataGrid Name="statusGrid" AutoGenerateColumns="False" ItemsSource="{Binding Path=RecordsCollection}"
+                          IsReadOnly="True">
+                    <DataGrid.Columns>
+
+                        <DataGridTextColumn Header="Client IP" Binding="{Binding IP}" />
+                        <DataGridTextColumn Header="Client Process" Binding="{Binding ProcessID}" />
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
+                        <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+
+                        <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
             </StackPanel>
         </Grid>
         <Grid  Grid.Row="2" Background="OrangeRed"></Grid>
