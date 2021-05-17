@@ -864,7 +864,7 @@ namespace LoadInjector.RunTime {
             string archiveRoot = ArchiveDirectory;
             logger.Warn("Downloading " + remoteUri + " to " + ArchiveDirectory);            // Download the Web resource and save it into a data buffer.
             byte[] myDataBuffer = myWebClient.DownloadData(remoteUri);
-            dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", false);
+            dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", true);
             this.InitModel(dataModel);
         }
 

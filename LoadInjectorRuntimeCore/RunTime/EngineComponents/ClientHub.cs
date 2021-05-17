@@ -84,6 +84,19 @@ namespace LoadInjector.RunTime.EngineComponents {
                     }
                 });
 
+                hubProxy.On("Refresh", () => {
+                    try {
+                        Process currentProcess = Process.GetCurrentProcess();
+                        Task.Run(() => {
+                            this.hubProxy.Invoke("RefreshResponse", currentProcess.Id.ToString(),
+                                GetLocalIPAddress(),
+                                Environment.OSVersion.VersionString,
+                                ngExecutionController.dataModel?.OuterXml);
+                        });
+                    } catch (Exception ex) {
+                        logger.Info("Error in client Prepare Aync " + ex.Message);
+                    }
+                });
                 hubProxy.On("RetrieveArchive", (url) => {
                     logger.Warn($"Requested to retrieve archive {url}");
                     ngExecutionController.RetrieveArchive(url);

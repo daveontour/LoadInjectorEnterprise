@@ -1,7 +1,10 @@
-﻿using System;
+﻿using LoadInjector.RunTime;
+using LoadInjectorCommandCentre;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -22,24 +25,19 @@ namespace LoadInjectorCommanCentre {
         private CCController cccontroller;
 
         private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
+        private string filterNodeID;
+        private ExecutionRecords _records;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
-            get { return this._myCollection; }
+            get { return this._records; }
         }
 
         public MainWindow() {
-            //RecordsCollection.Add(new ExecutionRecordClass() {
-            //    IP = "127.12.12.12",
-            //    ProcessID = "12344",
-            //    Type = "Source",
-            //    Name = "Flight",
-            //    ConfigMM = "60",
-            //    MM = "62.5"
-            //});
-
             InitializeComponent();
             DataContext = this;
             cccontroller = new CCController(this);
+
+            _records = (ExecutionRecords)this.Resources["records"];
         }
 
         public void OnPropertyChanged(string propName) {
@@ -65,7 +63,24 @@ namespace LoadInjectorCommanCentre {
         }
 
         private void AssignBtn_OnClick(object sender, RoutedEventArgs e) {
-            cccontroller.StopAll();
+            cccontroller.AssignAll();
+        }
+
+        private void RefreshBtn_OnClick(object sender, RoutedEventArgs e) {
+            cccontroller.RefreshClients();
+        }
+
+        private void LocalClientBtn_OnClick(object sender, RoutedEventArgs e) {
+            Process process = new Process();
+            // Configure the process using the StartInfo properties.
+
+            string lir = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug\LoadInjectorRuntime.exe";
+            process.StartInfo.WorkingDirectory = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug";
+            process.StartInfo.FileName = lir;
+            process.StartInfo.Arguments = $"-server:http://localhost:6220/";
+            process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+            process.Start();
         }
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
@@ -83,11 +98,30 @@ namespace LoadInjectorCommanCentre {
                 try {
                     Application.Current.Dispatcher.Invoke(delegate {
                         RecordsCollection.Add(rec);
+                        // RecordsCollection = new ObservableCollection<ExecutionRecordClass>(RecordsCollection.OrderBy(i => i.IP).ThenBy(n => n.ProcessID).ThenBy(m => m.Type));
                         OnPropertyChanged("RecordsCollection");
                         statusGrid.Items.Refresh();
                     });
                 } catch (Exception e1) {
                     Console.WriteLine("Dispatcher Distribute Error " + e1.Message);
+                }
+            }
+        }
+
+        public void SetFilterCriteria(string nodeID) {
+            this.filterNodeID = nodeID;
+            statusGrid.Items.Refresh();
+        }
+
+        private void CollectionViewSource_Filter(object sender, FilterEventArgs e) {
+            if (filterNodeID == null) {
+                e.Accepted = true;
+            } else {
+                ExecutionRecordClass rec = e.Item as ExecutionRecordClass;
+                if (rec.ExecutionNodeID == filterNodeID) {
+                    e.Accepted = true;
+                } else {
+                    e.Accepted = false;
                 }
             }
         }

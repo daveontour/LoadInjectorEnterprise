@@ -218,6 +218,14 @@
       <Project>{37db7b6c-b40e-4f08-ae46-d2a46ff9d951}</Project>
       <Name>LoadInjectorBase</Name>
     </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorRuntimeCore\LoadInjectorRuntimeCore.csproj">
+      <Project>{13F3F3B0-0861-436B-BA84-DEB709A3D33F}</Project>
+      <Name>LoadInjectorRuntimeCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorRuntime\LoadInjectorRuntime.csproj">
+      <Project>{73beabce-0b45-4076-9b57-3012397c20c4}</Project>
+      <Name>LoadInjectorRuntime</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

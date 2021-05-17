@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Windows;
@@ -7,7 +8,9 @@ using System.Windows.Documents;
 using System.Xml;
 using LoadInjector.Runtime.EngineComponents;
 using LoadInjectorCommanCentre.Views;
+using LoadInjectorCommandCentre;
 using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.Win32;
 
 namespace LoadInjectorCommanCentre {
 
@@ -57,6 +60,28 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.All.Stop();
         }
 
+        internal void AssignAll() {
+            string archiveRoot = ArchiveRoot;
+            Directory.CreateDirectory(archiveRoot);
+
+            OpenFileDialog open = new OpenFileDialog {
+                Filter = "Load Injector Archive Files(*.lia)|*.lia",
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            };
+
+            if (open.ShowDialog() == true) {
+                File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
+                MessageHub.Hub.Clients.All.RetrieveArchive(WebServerURL + "/" + open.SafeFileName);
+            }
+        }
+
+        internal void RefreshClients() {
+            View.RecordsCollection.Clear();
+            View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
+            clients.Clear();
+            MessageHub.Hub.Clients.All.Refresh();
+        }
+
         // Called after a client makes a connection
         public void InitialInterrogation(HubCallerContext context) {
             Console.Write("New Client Connection" + context.ConnectionId);
@@ -74,6 +99,10 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.Client(context.ConnectionId).Interrogate();
         }
 
+        internal void SetFilterCriteria(string executionNodeID) {
+            View.SetFilterCriteria(executionNodeID);
+        }
+
         public static int GetAvailablePort(int startingPort) {
             if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
@@ -88,7 +117,23 @@ namespace LoadInjectorCommanCentre {
             return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
 
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context) {
+            InterrogateResponse(processID, ipAddress, osversion, xml, context);
+        }
+
         public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context) {
+            if (!clients.ContainsKey(context.ConnectionId)) {
+                try {
+                    Application.Current.Dispatcher.Invoke((Action)delegate {
+                        ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this);
+                        clients.Add(context.ConnectionId, cl);
+                        View.clientControlStack.Children.Add(cl);
+                    });
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+
             ClientControl client = clients[context.ConnectionId];
 
             client.IP = ipAddress;
@@ -114,6 +159,7 @@ namespace LoadInjectorCommanCentre {
 
                         client.AddUpdateExecutionRecord(rec);
                         View.AddUpdateExecutionRecord(rec);
+                        client.ExecutionNodeID = rec.ExecutionNodeID;
                     }
                     if (node.Name == "ratedriven") {
                         ExecutionRecordClass rec = new ExecutionRecordClass() {
@@ -129,6 +175,7 @@ namespace LoadInjectorCommanCentre {
 
                         client.AddUpdateExecutionRecord(rec);
                         View.AddUpdateExecutionRecord(rec);
+                        client.ExecutionNodeID = rec.ExecutionNodeID;
                     }
                     if (node.Name.Contains("datadriven")) {
                         ExecutionRecordClass rec = new ExecutionRecordClass() {
@@ -144,6 +191,7 @@ namespace LoadInjectorCommanCentre {
 
                         client.AddUpdateExecutionRecord(rec);
                         View.AddUpdateExecutionRecord(rec);
+                        client.ExecutionNodeID = rec.ExecutionNodeID;
                     }
                     if (node.Name.Contains("chain")) {
                         ExecutionRecordClass rec = new ExecutionRecordClass() {
@@ -159,9 +207,25 @@ namespace LoadInjectorCommanCentre {
 
                         client.AddUpdateExecutionRecord(rec);
                         View.AddUpdateExecutionRecord(rec);
+                        client.ExecutionNodeID = rec.ExecutionNodeID;
                     }
                 }
             }
+        }
+
+        public void UpdateLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context) {
+            ClientControl client = clients[context.ConnectionId];
+
+            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                Sent = messagesSent,
+                MM = currentRate.ToString(),
+                ExecutionLineID = uuid,
+                ExecutionNodeID = executionNodeID
+            };
+
+            client.AddUpdateExecutionRecord(rec);
+
+            View.statusGrid.Items.Refresh();
         }
     }
 }

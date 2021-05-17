@@ -3,9 +3,28 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:LoadInjectorCommanCentre"
+        xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
+        xmlns:local="clr-namespace:LoadInjectorCommandCentre"
         mc:Ignorable="d"
-        Title="Load Injector Command Centre" Height="800" Width="1000">
+        Title="Load Injector Command Centre" Height="800" Width="1600">
+
+    <Window.Resources>
+        <local:ExecutionRecords x:Key="records" />
+        <CollectionViewSource x:Key="executionLines"
+                              Source="{StaticResource records}"
+                              Filter="CollectionViewSource_Filter">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="IP" />
+                <PropertyGroupDescription PropertyName="ProcessID" />
+            </CollectionViewSource.GroupDescriptions>
+            <CollectionViewSource.SortDescriptions>
+                <!-- Requires 'xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"' declaration. -->
+                <scm:SortDescription PropertyName="IP" />
+                <scm:SortDescription PropertyName="ProcessID" />
+                <scm:SortDescription PropertyName="Type" />
+            </CollectionViewSource.SortDescriptions>
+        </CollectionViewSource>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
@@ -25,36 +44,77 @@
                     <RowDefinition Height="*"></RowDefinition>
                     <RowDefinition Height="40"></RowDefinition>
                 </Grid.RowDefinitions>
-
-                <WrapPanel FlowDirection="LeftToRight" x:Name ="clientControlStack" Grid.Row="0" Orientation="Horizontal"></WrapPanel>
+                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                    <StackPanel FlowDirection="LeftToRight"  x:Name ="clientControlStack" Grid.Row="0" Orientation="Vertical"></StackPanel>
+                </ScrollViewer>
                 <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="LawnGreen">
                     <Button x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="80" Height="30" Margin="10,0,0,0" />
                     <Button x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                     <Button x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                     <Button x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
+                    <Button x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
+                    <Button x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
                 </StackPanel>
             </Grid>
-            <StackPanel Grid.Column="1"  Background="Blue">
-                <DataGrid Name="statusGrid" AutoGenerateColumns="False" ItemsSource="{Binding Path=RecordsCollection}"
-                          IsReadOnly="True">
+            <Grid Grid.Column="1"  Background="Blue">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <DataGrid Grid.Row="0" Name="statusGrid"
+                          AutoGenerateColumns="False"
+                          ItemsSource="{Binding Source={StaticResource executionLines}}"
+                          IsReadOnly="True"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          CanUserAddRows="False">
                     <DataGrid.Columns>
-
-                        <DataGridTextColumn Header="Client IP" Binding="{Binding IP}" />
-                        <DataGridTextColumn Header="Client Process" Binding="{Binding ProcessID}" />
-                        <DataGridTextColumn Header="Name" Binding="{Binding Name}" />
-                        <DataGridTextColumn Header="Type" Binding="{Binding Type}" />
-                        <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                        <!--
+                        <DataGridTextColumn Header="Client IP" Binding="{Binding IP}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Left" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>  -->
+                        <DataGridTextColumn Header="Client Process" Binding="{Binding ProcessID}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Setter Property="Foreground" Value="Black" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
-
+                        <DataGridTextColumn Header="Type" Binding="{Binding Type}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Left" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Name" Binding="{Binding Name}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Left" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
                         <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                        <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Setter Property="Foreground" Value="Black" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
@@ -62,12 +122,51 @@
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Center" />
+                                    <Setter Property="Foreground" Value="Black" />
                                 </Style>
                             </DataGridTextColumn.ElementStyle>
                         </DataGridTextColumn>
                     </DataGrid.Columns>
+                    <DataGrid.GroupStyle>
+                        <!-- Style for groups at top level. -->
+                        <GroupStyle>
+                            <GroupStyle.ContainerStyle>
+                                <Style TargetType="{x:Type GroupItem}">
+                                    <Setter Property="Margin" Value="0,0,0,5" />
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
+                                                    <Expander.Header>
+                                                        <StackPanel Orientation="Horizontal">
+                                                            <TextBlock FontWeight="Bold" Text="Execution Node IP:" Margin="5,0,0,0" />
+                                                            <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
+                                                        </StackPanel>
+                                                    </Expander.Header>
+                                                    <Expander.Content>
+                                                        <ItemsPresenter />
+                                                    </Expander.Content>
+                                                </Expander>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </GroupStyle.ContainerStyle>
+                        </GroupStyle>
+                        <!-- Style for groups under the top level.-->
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Background="LightBlue">
+                                        <TextBlock FontWeight="Bold" Text="Execution Node Process ID:" Foreground="Black" Margin="5,0,0,0" />
+                                        <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </DataGrid.GroupStyle>
                 </DataGrid>
-            </StackPanel>
+            </Grid>
         </Grid>
         <Grid  Grid.Row="2" Background="OrangeRed"></Grid>
     </Grid>

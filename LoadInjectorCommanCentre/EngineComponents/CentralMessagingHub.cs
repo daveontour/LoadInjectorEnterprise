@@ -122,15 +122,14 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, Context);
         }
 
-        public void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml) {
+            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, Context);
+        }
+
+        public void SourceReport(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    //   var ui = CentralMessagingHub.executionUI.SourceUIMap[uuid];
-                    //    if (messagesSent > ui.GetSentSeqNum()) {
-                    //        ui?.SetOutput(v);
-                    //        ui?.SetMessagesSent(messagesSent);
-                    //        ui?.SetActualRate(currentRate);
-                    //    }
+                    CentralMessagingHub.iccController.UpdateLine(executionNodeID, uuid, message, messagesSent, currentRate, messagesPerMinute, Context);
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Source Report error. " + ex.Message);
                 }

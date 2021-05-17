@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using LoadInjector.Runtime.EngineComponents;
+using LoadInjectorCommandCentre;
 using Microsoft.Win32;
 
 namespace LoadInjectorCommanCentre.Views {
@@ -29,6 +30,7 @@ namespace LoadInjectorCommanCentre.Views {
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._myCollection; }
+            set { this._myCollection = value; }
         }
 
         public string ConnectionID { get; }
@@ -129,13 +131,17 @@ namespace LoadInjectorCommanCentre.Views {
             StatusText = "Stopped";
         }
 
+        private void Status_OnClick(object sender, RoutedEventArgs e) {
+            this.cCController.SetFilterCriteria(ExecutionNodeID);
+        }
+
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
             string archiveRoot = cCController.ArchiveRoot;
             Directory.CreateDirectory(archiveRoot);
 
             OpenFileDialog open = new OpenFileDialog {
                 Filter = "Load Injector Archive Files(*.lia)|*.lia",
-                InitialDirectory = archiveRoot
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
             };
 
             if (open.ShowDialog() == true) {
