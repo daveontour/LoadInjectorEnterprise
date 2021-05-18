@@ -11,5 +11,6 @@ namespace LoadInjector.Runtime.EngineComponents {
         void RefreshResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context);
 
         void UpdateLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context);
+        void UpdateLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context);
     }
 }

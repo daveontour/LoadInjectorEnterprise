@@ -14,8 +14,10 @@
                               Source="{StaticResource records}"
                               Filter="CollectionViewSource_Filter">
             <CollectionViewSource.GroupDescriptions>
-                <PropertyGroupDescription PropertyName="IP" />
-                <PropertyGroupDescription PropertyName="ProcessID" />
+                <!--       <PropertyGroupDescription PropertyName="IP" />
+                <PropertyGroupDescription PropertyName="ProcessID" />  -->
+                <PropertyGroupDescription PropertyName="GroupID" />
+                <PropertyGroupDescription PropertyName="SourceDestination" />
             </CollectionViewSource.GroupDescriptions>
             <CollectionViewSource.SortDescriptions>
                 <!-- Requires 'xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"' declaration. -->
@@ -69,24 +71,7 @@
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           CanUserAddRows="False">
                     <DataGrid.Columns>
-                        <!--
-                        <DataGridTextColumn Header="Client IP" Binding="{Binding IP}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Left" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>  -->
-                        <DataGridTextColumn Header="Client Process" Binding="{Binding ProcessID}">
-                            <DataGridTextColumn.ElementStyle>
-                                <Style TargetType="TextBlock">
-                                    <Setter Property="HorizontalAlignment" Value="Center" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                </Style>
-                            </DataGridTextColumn.ElementStyle>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn Header="Type" Binding="{Binding Type}">
+                        <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
                             <DataGridTextColumn.ElementStyle>
                                 <Style TargetType="TextBlock">
                                     <Setter Property="HorizontalAlignment" Value="Left" />
@@ -139,7 +124,6 @@
                                                 <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
                                                     <Expander.Header>
                                                         <StackPanel Orientation="Horizontal">
-                                                            <TextBlock FontWeight="Bold" Text="Execution Node IP:" Margin="5,0,0,0" />
                                                             <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
                                                         </StackPanel>
                                                     </Expander.Header>
@@ -158,7 +142,6 @@
                             <GroupStyle.HeaderTemplate>
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal" Background="LightBlue">
-                                        <TextBlock FontWeight="Bold" Text="Execution Node Process ID:" Foreground="Black" Margin="5,0,0,0" />
                                         <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
                                     </StackPanel>
                                 </DataTemplate>

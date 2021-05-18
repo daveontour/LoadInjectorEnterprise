@@ -4,7 +4,7 @@ using System.ComponentModel;
 namespace LoadInjectorCommandCentre {
 
     public class ExecutionRecords : ObservableCollection<ExecutionRecordClass> {
-        // Creating the Tasks collection in this way enables data binding from XAML.
+        // Creating the Records collection in this way enables data binding from XAML.
     }
 
     public class ExecutionRecordClass : INotifyPropertyChanged {
@@ -15,15 +15,29 @@ namespace LoadInjectorCommandCentre {
         private string configMM;
         private string mM;
         private int sent;
+        private string protocol;
 
         private string executionNodeID;
         private string executionLineID;
+        private string sourceDestination;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string propertyName) {
             if (PropertyChanged != null) {
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        public string GroupID {
+            get { return $"Execution Node IP: {IP}, ProcessID: {ProcessID}"; }
+        }
+
+        public string SourceDestination {
+            get { return sourceDestination; }
+            set {
+                sourceDestination = value;
+                NotifyPropertyChanged("SourceDestination");
             }
         }
 
@@ -64,6 +78,14 @@ namespace LoadInjectorCommandCentre {
             set {
                 name = value;
                 NotifyPropertyChanged("Name");
+            }
+        }
+
+        public string Protocol {
+            get { return protocol; }
+            set {
+                protocol = value;
+                NotifyPropertyChanged("Protocol");
             }
         }
 

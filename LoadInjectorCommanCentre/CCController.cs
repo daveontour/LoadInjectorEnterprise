@@ -154,7 +154,9 @@ namespace LoadInjectorCommanCentre {
                             ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
                             MM = "-",
                             ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value
+                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                            SourceDestination = "Destination",
+                            Protocol = node.Attributes["protocol"]?.Value
                         };
 
                         client.AddUpdateExecutionRecord(rec);
@@ -170,7 +172,9 @@ namespace LoadInjectorCommanCentre {
                             ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
                             MM = "-",
                             ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value
+                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                            SourceDestination = "Rate Driven Source",
+                            Protocol = node.Attributes["dataSource"]?.Value
                         };
 
                         client.AddUpdateExecutionRecord(rec);
@@ -186,7 +190,8 @@ namespace LoadInjectorCommanCentre {
                             ConfigMM = "-",
                             MM = "-",
                             ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value
+                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                            SourceDestination = "Data Driven Source"
                         };
 
                         client.AddUpdateExecutionRecord(rec);
@@ -202,7 +207,8 @@ namespace LoadInjectorCommanCentre {
                             ConfigMM = "-",
                             MM = "-",
                             ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value
+                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                            SourceDestination = "Chained Source"
                         };
 
                         client.AddUpdateExecutionRecord(rec);
@@ -219,6 +225,20 @@ namespace LoadInjectorCommanCentre {
             ExecutionRecordClass rec = new ExecutionRecordClass() {
                 Sent = messagesSent,
                 MM = currentRate.ToString(),
+                ExecutionLineID = uuid,
+                ExecutionNodeID = executionNodeID
+            };
+
+            client.AddUpdateExecutionRecord(rec);
+
+            View.statusGrid.Items.Refresh();
+        }
+
+        public void UpdateLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context) {
+            ClientControl client = clients[context.ConnectionId];
+
+            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                Sent = messagesSent,
                 ExecutionLineID = uuid,
                 ExecutionNodeID = executionNodeID
             };
