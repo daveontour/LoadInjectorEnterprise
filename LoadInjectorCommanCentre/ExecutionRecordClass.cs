@@ -24,9 +24,9 @@ namespace LoadInjectorCommandCentre {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void NotifyPropertyChanged(string propertyName) {
-            if (PropertyChanged != null) {
-                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
-            }
+            //if (PropertyChanged != null) {
+            //    PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            //}
         }
 
         public string GroupID {

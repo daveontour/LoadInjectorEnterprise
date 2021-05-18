@@ -72,34 +72,35 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="100" Background="Bisque" Margin="5,5,5,5">
+    <Grid Height="105" Background="Bisque" Margin="5,5,5,5">
 
-        <Grid  Grid.Row="0"  Background="LawnGreen">
+        <Grid  Grid.Row="0"  Background="LightGray">
             <Grid.RowDefinitions>
 
-                <RowDefinition Height="20"></RowDefinition>
+                <RowDefinition Height="25"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="6*"></ColumnDefinition>
-                <ColumnDefinition Width="6*"></ColumnDefinition>
-                <ColumnDefinition Width="10*"></ColumnDefinition>
+                <ColumnDefinition Width="74"></ColumnDefinition>
+                <ColumnDefinition Width="80"></ColumnDefinition>
+                <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=ProcessID}"></TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=IP}"></TextBlock>
+            <Label Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,0" FontWeight="Bold">Execution Node</Label>
+            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=IP}"></TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=ProcessID}"></TextBlock>
             <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Path=OSVersion}"></TextBlock>
 
-            <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="Assign_OnClick" HorizontalAlignment="Right" Content="Assign" />
+            <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="Assign_OnClick" HorizontalAlignment="Left" Content="Assign" />
             <Button Grid.Row="1" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="prepBtn"  Click="Prep_OnClick" HorizontalAlignment="Left" Content="Prepare" />
-            <Button Grid.Row="2" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="execBtn" Click="Exec_OnClick" HorizontalAlignment="Right" Content="Execute" />
+            <Button Grid.Row="2" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="execBtn" Click="Exec_OnClick" HorizontalAlignment="Left" Content="Execute" />
             <Button Grid.Row="2" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="stopBtn" Click="Stop_OnClick" HorizontalAlignment="Left" Content="Stop" />
-            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource RoundCorner}" x:Name="viewBtn" Click="Status_OnClick" Width="144" Content="View Status" />
+            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource RoundCorner}" x:Name="viewBtn"  HorizontalAlignment="Left" Click="Status_OnClick" Width="144" Margin="2,1,0,1" Content="View Status" />
 
-            <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Text="{Binding Path=StatusText}" HorizontalAlignment="Center"></TextBlock>
+            <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
         </Grid>
     </Grid>
 </UserControl>

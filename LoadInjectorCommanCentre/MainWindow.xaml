@@ -14,13 +14,10 @@
                               Source="{StaticResource records}"
                               Filter="CollectionViewSource_Filter">
             <CollectionViewSource.GroupDescriptions>
-                <!--       <PropertyGroupDescription PropertyName="IP" />
-                <PropertyGroupDescription PropertyName="ProcessID" />  -->
                 <PropertyGroupDescription PropertyName="GroupID" />
                 <PropertyGroupDescription PropertyName="SourceDestination" />
             </CollectionViewSource.GroupDescriptions>
             <CollectionViewSource.SortDescriptions>
-                <!-- Requires 'xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"' declaration. -->
                 <scm:SortDescription PropertyName="IP" />
                 <scm:SortDescription PropertyName="ProcessID" />
                 <scm:SortDescription PropertyName="Type" />
@@ -31,36 +28,39 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="40" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="40" />
         </Grid.RowDefinitions>
 
-        <Grid  Grid.Row="0" Background="Aqua"></Grid>
+        <Grid  Grid.Row="0" Background="Aqua">
+            <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="AliceBlue">
+                <Button FontSize="10" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="80" Height="30" Margin="10,0,0,0" />
+                <Button FontSize="10" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+            </StackPanel>
+        </Grid>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="365" />
                 <ColumnDefinition Width="6*" />
             </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Background="Yellow">
+            <Grid Grid.Column="0" Background="AliceBlue">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="35"></RowDefinition>
                     <RowDefinition Height="*"></RowDefinition>
-                    <RowDefinition Height="40"></RowDefinition>
                 </Grid.RowDefinitions>
-                <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                <Label Grid.Row="0" FontWeight="Bold" FontSize="14">Connected  Clients</Label>
+                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                     <StackPanel FlowDirection="LeftToRight"  x:Name ="clientControlStack" Grid.Row="0" Orientation="Vertical"></StackPanel>
                 </ScrollViewer>
-                <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="LawnGreen">
-                    <Button x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="80" Height="30" Margin="10,0,0,0" />
-                    <Button x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                    <Button x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                    <Button x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
-                    <Button x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
-                    <Button x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="120" Height="30"  Margin="5,0,0,0" />
-                </StackPanel>
             </Grid>
-            <Grid Grid.Column="1"  Background="Blue">
+            <Grid Grid.Column="1"  Background="AliceBlue">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="*" />
+                    <RowDefinition Height="30" />
                 </Grid.RowDefinitions>
                 <DataGrid Grid.Row="0" Name="statusGrid"
                           AutoGenerateColumns="False"
@@ -69,7 +69,8 @@
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                          CanUserAddRows="False">
+                          CanUserAddRows="False" Grid.ColumnSpan="2"
+                          Margin="0,0,2,0">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
                             <DataGridTextColumn.ElementStyle>
@@ -149,8 +150,16 @@
                         </GroupStyle>
                     </DataGrid.GroupStyle>
                 </DataGrid>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+                    <Label Margin="0,0,0,0">Update Frequency:</Label>
+                    <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
+                        <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
+                        <ComboBoxItem>3 seconds</ComboBoxItem>
+                        <ComboBoxItem>10 seconds</ComboBoxItem>
+                        <ComboBoxItem>Continuous</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
             </Grid>
         </Grid>
-        <Grid  Grid.Row="2" Background="OrangeRed"></Grid>
     </Grid>
 </Window>

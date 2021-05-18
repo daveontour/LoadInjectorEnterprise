@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Timers;
 using System.Windows;
 using System.Windows.Documents;
 using System.Xml;
@@ -23,6 +25,8 @@ namespace LoadInjectorCommanCentre {
         public SimpleHTTPServer WebServer { get; }
 
         private Dictionary<string, ClientControl> clients = new Dictionary<string, ClientControl>();
+        private int gridRefreshRate = 1;
+        private Timer refreshTimer;
 
         public CCController(MainWindow mainWindow) {
             View = mainWindow;
@@ -50,6 +54,7 @@ namespace LoadInjectorCommanCentre {
             View.stopAllBtn.IsEnabled = true;
 
             MessageHub.Hub.Clients.All.Execute();
+            SetRefreshRate(gridRefreshRate);
         }
 
         public void StopAll() {
@@ -231,7 +236,9 @@ namespace LoadInjectorCommanCentre {
 
             client.AddUpdateExecutionRecord(rec);
 
-            View.statusGrid.Items.Refresh();
+            if (this.gridRefreshRate == 0) {
+                View.statusGrid.Items.Refresh();
+            }
         }
 
         public void UpdateLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context) {
@@ -245,7 +252,40 @@ namespace LoadInjectorCommanCentre {
 
             client.AddUpdateExecutionRecord(rec);
 
-            View.statusGrid.Items.Refresh();
+            if (this.gridRefreshRate == 0) {
+                View.statusGrid.Items.Refresh();
+            }
+        }
+
+        public void SetRefreshRate() {
+            SetRefreshRate(this.gridRefreshRate);
+        }
+
+        internal void SetRefreshRate(int gridRefreshRate) {
+            this.gridRefreshRate = gridRefreshRate;
+
+            refreshTimer?.Stop();
+
+            if (this.gridRefreshRate == 0) {
+                return;
+            }
+
+            refreshTimer = new Timer {
+                Interval = gridRefreshRate * 1000,
+                AutoReset = true,
+                Enabled = true,
+            };
+            refreshTimer.Elapsed += OnRefreshGridEvent;
+        }
+
+        private void OnRefreshGridEvent(object sender, ElapsedEventArgs e) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    View.statusGrid.Items.Refresh();
+                } catch (Exception ex) {
+                    Debug.WriteLine("Updating Grid Error. " + ex.Message);
+                }
+            });
         }
     }
 }

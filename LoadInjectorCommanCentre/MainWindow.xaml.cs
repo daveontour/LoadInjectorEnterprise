@@ -27,6 +27,7 @@ namespace LoadInjectorCommanCentre {
         private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
         private string filterNodeID;
         private ExecutionRecords _records;
+        private int gridRefreshRate = 1;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._records; }
@@ -70,6 +71,10 @@ namespace LoadInjectorCommanCentre {
             cccontroller.RefreshClients();
         }
 
+        private void ViewAllBtn_OnClick(object sender, RoutedEventArgs e) {
+            SetFilterCriteria(null);
+        }
+
         private void LocalClientBtn_OnClick(object sender, RoutedEventArgs e) {
             Process process = new Process();
             // Configure the process using the StartInfo properties.
@@ -110,7 +115,14 @@ namespace LoadInjectorCommanCentre {
 
         public void SetFilterCriteria(string nodeID) {
             this.filterNodeID = nodeID;
-            statusGrid.Items.Refresh();
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    RecordsCollection.Clear();
+                    cccontroller.MessageHub.Hub.Clients.All.Refresh();
+                } catch (Exception ex) {
+                    Debug.WriteLine("Updating Grid Error. " + ex.Message);
+                }
+            });
         }
 
         private void CollectionViewSource_Filter(object sender, FilterEventArgs e) {
@@ -124,6 +136,23 @@ namespace LoadInjectorCommanCentre {
                     e.Accepted = false;
                 }
             }
+        }
+
+        private void ComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (refreshRate.SelectedIndex == 0) {
+                this.gridRefreshRate = 1;
+            }
+            if (refreshRate.SelectedIndex == 1) {
+                this.gridRefreshRate = 3;
+            }
+            if (refreshRate.SelectedIndex == 2) {
+                this.gridRefreshRate = 10;
+            }
+            if (refreshRate.SelectedIndex == 3) {
+                this.gridRefreshRate = 0;
+            }
+
+            cccontroller?.SetRefreshRate(this.gridRefreshRate);
         }
     }
 }

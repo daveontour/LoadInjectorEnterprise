@@ -124,6 +124,7 @@ namespace LoadInjectorCommanCentre.Views {
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Execute();
             StatusText = "Executing";
+            this.cCController.SetRefreshRate();
         }
 
         private void Stop_OnClick(object sender, RoutedEventArgs e) {
@@ -160,7 +161,7 @@ namespace LoadInjectorCommanCentre.Views {
                 //The only thing that is changing is the messages sent and messages per minute
                 r.MM = rec.MM;
                 r.Sent = rec.Sent;
-                OnPropertyChanged("RecordsCollection");
+                // OnPropertyChanged("RecordsCollection");
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
                 RecordsCollection.Add(rec);
