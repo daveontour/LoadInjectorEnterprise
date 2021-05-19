@@ -80,6 +80,10 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
+        internal void DisconnectAll() {
+            MessageHub.Hub.Clients.All.Disconnect();
+        }
+
         internal void RefreshClients() {
             View.RecordsCollection.Clear();
             View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
@@ -284,6 +288,18 @@ namespace LoadInjectorCommanCentre {
                     View.statusGrid.Items.Refresh();
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);
+                }
+            });
+        }
+
+        public void Disconnect(HubCallerContext context) {
+            ClientControl client = clients[context.ConnectionId];
+            clients.Remove(context.ConnectionId);
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    View.clientControlStack.Children.Remove(client);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Removing Clinet. " + ex.Message);
                 }
             });
         }

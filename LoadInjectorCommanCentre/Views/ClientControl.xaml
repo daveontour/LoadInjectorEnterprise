@@ -98,7 +98,8 @@
             <Button Grid.Row="1" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="prepBtn"  Click="Prep_OnClick" HorizontalAlignment="Left" Content="Prepare" />
             <Button Grid.Row="2" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="execBtn" Click="Exec_OnClick" HorizontalAlignment="Left" Content="Execute" />
             <Button Grid.Row="2" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="stopBtn" Click="Stop_OnClick" HorizontalAlignment="Left" Content="Stop" />
-            <Button Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Style="{DynamicResource RoundCorner}" x:Name="viewBtn"  HorizontalAlignment="Left" Click="Status_OnClick" Width="144" Margin="2,1,0,1" Content="View Status" />
+            <Button Grid.Row="3" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="viewBtn"  HorizontalAlignment="Left" Click="Status_OnClick"  Content="View Status" />
+            <Button Grid.Row="3" Grid.Column="1"  Style="{DynamicResource RoundCorner}" x:Name="disconnectBtn"  HorizontalAlignment="Left" Click="Disconnect_OnClick"  Content="Disconnect" />
 
             <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
         </Grid>

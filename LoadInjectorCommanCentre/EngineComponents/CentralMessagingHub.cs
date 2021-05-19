@@ -91,6 +91,13 @@ namespace LoadInjector.Runtime.EngineComponents {
             return base.OnConnected();
         }
 
+        public override Task OnDisconnected(bool stop) {
+            //string name = Context.User.Identity.Name;
+            //Console.WriteLine($"New Connection.  ConnectionID:{Context.ConnectionId}");
+            CentralMessagingHub.iccController.Disconnect(Context);
+            return base.OnConnected();
+        }
+
         public void ConsoleMsg(string executionnodeID, string node, string message) {
             //CentralMessagingHub.executionUI.ConsoleWriter.WriteLine(message);
 
@@ -333,6 +340,11 @@ namespace LoadInjector.Runtime.EngineComponents {
             //  Console.WriteLine($"ConnectionID:{hub.Context.ConnectionId}");
             //CentralMessagingHub.iccController.InitialInterrogation(hub.Context.ConnectionId);
             base.OnAfterConnect(hub);
+        }
+
+        protected override bool OnBeforeDisconnect(IHub hub, bool stopCalled) {
+            Console.WriteLine("Disconnect called for " + hub.Context.ConnectionId);
+            return base.OnBeforeDisconnect(hub, stopCalled);
         }
 
         //protected override bool OnBeforeAuthorizeConnect(HubDescriptor hubDescriptor, IRequest request) {

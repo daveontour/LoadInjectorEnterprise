@@ -136,6 +136,11 @@ namespace LoadInjectorCommanCentre.Views {
             this.cCController.SetFilterCriteria(ExecutionNodeID);
         }
 
+        private void Disconnect_OnClick(object sender, RoutedEventArgs e) {
+            MessageHub.Hub.Clients.Client(ConnectionID).Disconnect();
+            StatusText = "Disconnecting";
+        }
+
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
             string archiveRoot = cCController.ArchiveRoot;
             Directory.CreateDirectory(archiveRoot);

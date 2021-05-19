@@ -75,6 +75,10 @@ namespace LoadInjectorCommanCentre {
             SetFilterCriteria(null);
         }
 
+        private void DisconnectAllBtn_OnClick(object sender, RoutedEventArgs e) {
+            cccontroller.DisconnectAll();
+        }
+
         private void LocalClientBtn_OnClick(object sender, RoutedEventArgs e) {
             Process process = new Process();
             // Configure the process using the StartInfo properties.
