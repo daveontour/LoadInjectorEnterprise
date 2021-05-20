@@ -25,6 +25,7 @@ namespace LoadInjectorCommanCentre {
         public SimpleHTTPServer WebServer { get; }
 
         private Dictionary<string, ClientControl> clients = new Dictionary<string, ClientControl>();
+
         private int gridRefreshRate = 1;
         private Timer refreshTimer;
 
@@ -84,11 +85,17 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.All.Disconnect();
         }
 
-        internal void RefreshClients() {
+        internal void RefreshClients(bool clear = true) {
             View.RecordsCollection.Clear();
-            View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
+            if (clear) {
+                View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
+            }
             clients.Clear();
             MessageHub.Hub.Clients.All.Refresh();
+        }
+
+        internal void SetFilterCriteria(string executionNodeID, string ConnectionID) {
+            View.SetFilterCriteria(executionNodeID, ConnectionID);
         }
 
         // Called after a client makes a connection
@@ -108,10 +115,6 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.Client(context.ConnectionId).Interrogate();
         }
 
-        internal void SetFilterCriteria(string executionNodeID) {
-            View.SetFilterCriteria(executionNodeID);
-        }
-
         public static int GetAvailablePort(int startingPort) {
             if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
             var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
@@ -126,16 +129,17 @@ namespace LoadInjectorCommanCentre {
             return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context) {
-            InterrogateResponse(processID, ipAddress, osversion, xml, context);
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
+            InterrogateResponse(processID, ipAddress, osversion, xml, status, context);
         }
 
-        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, HubCallerContext context) {
+        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
             if (!clients.ContainsKey(context.ConnectionId)) {
                 try {
                     Application.Current.Dispatcher.Invoke((Action)delegate {
-                        ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this);
+                        ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this) { StatusText = status };
                         clients.Add(context.ConnectionId, cl);
+
                         View.clientControlStack.Children.Add(cl);
                     });
                 } catch (Exception ex) {
@@ -148,116 +152,139 @@ namespace LoadInjectorCommanCentre {
             client.IP = ipAddress;
             client.ProcessID = processID;
             client.OSVersion = osversion;
+            client.StatusText = status;
 
             if (xml != null) {
                 XmlDocument doc = new XmlDocument();
                 doc.LoadXml(xml);
 
-                foreach (XmlNode node in doc.SelectNodes(".//*")) {
-                    if (node.Name == "destination") {
-                        ExecutionRecordClass rec = new ExecutionRecordClass() {
-                            IP = ipAddress,
-                            ProcessID = processID,
-                            Type = "Destination",
-                            Name = node.Attributes["name"]?.Value,
-                            ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
-                            MM = "-",
-                            ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                            SourceDestination = "Destination",
-                            Protocol = node.Attributes["protocol"]?.Value
-                        };
+                try {
+                    foreach (XmlNode node in doc.SelectNodes(".//*")) {
+                        if (node.Name == "destination") {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                IP = ipAddress,
+                                ProcessID = processID,
+                                Type = "Destination",
+                                Name = node.Attributes["name"]?.Value,
+                                ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
+                                MM = "-",
+                                ExecutionLineID = node.Attributes["uuid"]?.Value,
+                                ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                                SourceDestination = "Destination",
+                                Protocol = node.Attributes["protocol"]?.Value
+                            };
 
-                        client.AddUpdateExecutionRecord(rec);
-                        View.AddUpdateExecutionRecord(rec);
-                        client.ExecutionNodeID = rec.ExecutionNodeID;
-                    }
-                    if (node.Name == "ratedriven") {
-                        ExecutionRecordClass rec = new ExecutionRecordClass() {
-                            IP = ipAddress,
-                            ProcessID = processID,
-                            Type = "Rate Driven Source",
-                            Name = node.Attributes["name"]?.Value,
-                            ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
-                            MM = "-",
-                            ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                            SourceDestination = "Rate Driven Source",
-                            Protocol = node.Attributes["dataSource"]?.Value
-                        };
+                            View.AddUpdateExecutionRecord(rec);
+                            client.ExecutionNodeID = rec.ExecutionNodeID;
+                        }
+                        if (node.Name == "ratedriven") {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                IP = ipAddress,
+                                ProcessID = processID,
+                                Type = "Rate Driven Source",
+                                Name = node.Attributes["name"]?.Value,
+                                ConfigMM = node.Attributes["messagesPerMinute"]?.Value,
+                                MM = "-",
+                                ExecutionLineID = node.Attributes["uuid"]?.Value,
+                                ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                                SourceDestination = "Rate Driven Source",
+                                Protocol = node.Attributes["dataSource"]?.Value
+                            };
 
-                        client.AddUpdateExecutionRecord(rec);
-                        View.AddUpdateExecutionRecord(rec);
-                        client.ExecutionNodeID = rec.ExecutionNodeID;
-                    }
-                    if (node.Name.Contains("datadriven")) {
-                        ExecutionRecordClass rec = new ExecutionRecordClass() {
-                            IP = ipAddress,
-                            ProcessID = processID,
-                            Type = "Data Driven Source",
-                            Name = node.Attributes["name"]?.Value,
-                            ConfigMM = "-",
-                            MM = "-",
-                            ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                            SourceDestination = "Data Driven Source"
-                        };
+                            View.AddUpdateExecutionRecord(rec);
+                            client.ExecutionNodeID = rec.ExecutionNodeID;
+                        }
+                        if (node.Name.Contains("datadriven")) {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                IP = ipAddress,
+                                ProcessID = processID,
+                                Type = "Data Driven Source",
+                                Name = node.Attributes["name"]?.Value,
+                                ConfigMM = "-",
+                                MM = "-",
+                                ExecutionLineID = node.Attributes["uuid"]?.Value,
+                                ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                                SourceDestination = "Data Driven Source"
+                            };
 
-                        client.AddUpdateExecutionRecord(rec);
-                        View.AddUpdateExecutionRecord(rec);
-                        client.ExecutionNodeID = rec.ExecutionNodeID;
-                    }
-                    if (node.Name.Contains("chain")) {
-                        ExecutionRecordClass rec = new ExecutionRecordClass() {
-                            IP = ipAddress,
-                            ProcessID = processID,
-                            Type = "Chained Source",
-                            Name = node.Attributes["name"]?.Value,
-                            ConfigMM = "-",
-                            MM = "-",
-                            ExecutionLineID = node.Attributes["uuid"]?.Value,
-                            ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                            SourceDestination = "Chained Source"
-                        };
+                            View.AddUpdateExecutionRecord(rec);
+                            client.ExecutionNodeID = rec.ExecutionNodeID;
+                        }
+                        if (node.Name.Contains("chain")) {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                IP = ipAddress,
+                                ProcessID = processID,
+                                Type = "Chained Source",
+                                Name = node.Attributes["name"]?.Value,
+                                ConfigMM = "-",
+                                MM = "-",
+                                ExecutionLineID = node.Attributes["uuid"]?.Value,
+                                ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
+                                SourceDestination = "Chained Source"
+                            };
 
-                        client.AddUpdateExecutionRecord(rec);
-                        View.AddUpdateExecutionRecord(rec);
-                        client.ExecutionNodeID = rec.ExecutionNodeID;
+                            View.AddUpdateExecutionRecord(rec);
+                            client.ExecutionNodeID = rec.ExecutionNodeID;
+                        }
                     }
+                } catch (Exception ex) {
+                    Console.WriteLine(ex.Message);
                 }
             }
         }
 
         public void UpdateLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context) {
-            ClientControl client = clients[context.ConnectionId];
+            if (clients.ContainsKey(context.ConnectionId)) {
+                Application.Current.Dispatcher.Invoke(delegate {
+                    try {
+                        ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
 
-            ExecutionRecordClass rec = new ExecutionRecordClass() {
-                Sent = messagesSent,
-                MM = currentRate.ToString(),
-                ExecutionLineID = uuid,
-                ExecutionNodeID = executionNodeID
-            };
-
-            client.AddUpdateExecutionRecord(rec);
-
-            if (this.gridRefreshRate == 0) {
-                View.statusGrid.Items.Refresh();
+                        if (r != null) {
+                            r.MM = currentRate.ToString();
+                            r.Sent = messagesSent;
+                            if (this.gridRefreshRate == 0) {
+                                View.statusGrid.Items.Refresh();
+                            }
+                        } else {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                Sent = messagesSent,
+                                MM = currentRate.ToString(),
+                                ExecutionLineID = uuid,
+                                ExecutionNodeID = executionNodeID
+                            };
+                            View.RecordsCollection.Add(rec);
+                            View.statusGrid.Items.Refresh();
+                        }
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.Message);
+                    }
+                });
             }
         }
 
         public void UpdateLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context) {
-            ClientControl client = clients[context.ConnectionId];
-
-            ExecutionRecordClass rec = new ExecutionRecordClass() {
-                Sent = messagesSent,
-                ExecutionLineID = uuid,
-                ExecutionNodeID = executionNodeID
-            };
-
-            client.AddUpdateExecutionRecord(rec);
-
-            if (this.gridRefreshRate == 0) {
-                View.statusGrid.Items.Refresh();
+            if (clients.ContainsKey(context.ConnectionId)) {
+                try {
+                    Application.Current.Dispatcher.Invoke(delegate {
+                        ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
+                        if (r != null) {
+                            r.Sent = messagesSent;
+                            if (this.gridRefreshRate == 0) {
+                                View.statusGrid.Items.Refresh();
+                            }
+                        } else {
+                            ExecutionRecordClass rec = new ExecutionRecordClass() {
+                                Sent = messagesSent,
+                                ExecutionLineID = uuid,
+                                ExecutionNodeID = executionNodeID
+                            };
+                            View.RecordsCollection.Add(rec);
+                            View.statusGrid.Items.Refresh();
+                        }
+                    });
+                } catch (Exception ex) {
+                    Debug.WriteLine(ex.Message);
+                }
             }
         }
 
@@ -293,15 +320,26 @@ namespace LoadInjectorCommanCentre {
         }
 
         public void Disconnect(HubCallerContext context) {
-            ClientControl client = clients[context.ConnectionId];
-            clients.Remove(context.ConnectionId);
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    View.clientControlStack.Children.Remove(client);
-                } catch (Exception ex) {
-                    Debug.WriteLine("Removing Clinet. " + ex.Message);
-                }
-            });
+            if (clients.ContainsKey(context.ConnectionId)) {
+                ClientControl client = clients[context.ConnectionId];
+                clients.Remove(context.ConnectionId);
+                Application.Current.Dispatcher.Invoke(delegate {
+                    try {
+                        View.clientControlStack.Children.Remove(client);
+                    } catch (Exception ex) {
+                        Debug.WriteLine("Removing Client Error. " + ex.Message);
+                    }
+                });
+            }
+        }
+
+        public void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context) {
+            if (clients.ContainsKey(context.ConnectionId)) {
+                Application.Current.Dispatcher.Invoke(delegate {
+                    ClientControl client = clients[context.ConnectionId];
+                    client.SetStatusText(message);
+                });
+            }
         }
     }
 }

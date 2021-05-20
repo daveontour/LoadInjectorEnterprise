@@ -73,6 +73,7 @@ namespace LoadInjectorCommanCentre {
 
         private void ViewAllBtn_OnClick(object sender, RoutedEventArgs e) {
             SetFilterCriteria(null);
+            cccontroller.RefreshClients(true);
         }
 
         private void DisconnectAllBtn_OnClick(object sender, RoutedEventArgs e) {
@@ -94,35 +95,33 @@ namespace LoadInjectorCommanCentre {
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
-                ExecutionRecordClass r = (from record in RecordsCollection
-                                          where rec.ExecutionLineID == record.ExecutionLineID
-                                          select record).First();
+                Application.Current.Dispatcher.Invoke(delegate {
+                    ExecutionRecordClass r = RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
-                //The only thing that is changing is the messages sent and messages per minute
-                r.MM = rec.MM;
-                r.Sent = rec.Sent;
-                OnPropertyChanged("RecordsCollection");
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                try {
-                    Application.Current.Dispatcher.Invoke(delegate {
+                    if (r != null) {
+                        r.MM = rec.MM;
+                        r.Sent = rec.Sent;
+                        OnPropertyChanged("RecordsCollection");
+                    } else {
                         RecordsCollection.Add(rec);
-                        // RecordsCollection = new ObservableCollection<ExecutionRecordClass>(RecordsCollection.OrderBy(i => i.IP).ThenBy(n => n.ProcessID).ThenBy(m => m.Type));
                         OnPropertyChanged("RecordsCollection");
                         statusGrid.Items.Refresh();
-                    });
-                } catch (Exception e1) {
-                    Console.WriteLine("Dispatcher Distribute Error " + e1.Message);
-                }
+                    }
+                });
+            } catch (Exception ex) {
+                Console.WriteLine("Unmanaged error.   " + ex.Message);
             }
         }
 
-        public void SetFilterCriteria(string nodeID) {
+        public void SetFilterCriteria(string nodeID, string ConnectionID = null) {
             this.filterNodeID = nodeID;
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     RecordsCollection.Clear();
-                    cccontroller.MessageHub.Hub.Clients.All.Refresh();
+                    statusGrid.Items.Refresh();
+                    if (ConnectionID != null) {
+                        cccontroller.MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
+                    }
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);
                 }
@@ -157,6 +156,10 @@ namespace LoadInjectorCommanCentre {
             }
 
             cccontroller?.SetRefreshRate(this.gridRefreshRate);
+        }
+
+        private void assignBtn_Click(object sender, RoutedEventArgs e) {
+            Console.WriteLine(e);
         }
     }
 }

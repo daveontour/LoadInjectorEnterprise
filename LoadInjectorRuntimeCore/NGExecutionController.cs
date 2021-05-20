@@ -16,6 +16,7 @@ using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
 using System.IO;
 using System.IO.Compression;
+using LoadInjectorBase.Commom;
 
 namespace LoadInjector.RunTime {
 
@@ -30,6 +31,7 @@ namespace LoadInjector.RunTime {
 
         public XmlDocument dataModel;
         private readonly Stopwatch stopWatch = new Stopwatch();
+        public ClientState state = ClientState.UnAssigned;
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
@@ -151,6 +153,25 @@ namespace LoadInjector.RunTime {
             }
         }
 
+        public void Reset() {
+            dataModel = null;
+
+            flights.Clear();
+            arrflights.Clear();
+            depflights.Clear();
+
+            destLines.Clear();
+            amsLines.Clear();
+            amsDataDrivenLines.Clear();
+            csvDataDrivenLines.Clear();
+            excelDataDrivenLines.Clear();
+            xmlDataDrivenLines.Clear();
+            jsonDataDrivenLines.Clear();
+            databaseDataDrivenLines.Clear();
+            rateDrivenLines.Clear();
+            flightSets.Clear();
+        }
+
         public void InitModel(XmlDocument model) {
             dataModel = model;
 
@@ -228,9 +249,14 @@ namespace LoadInjector.RunTime {
                 LineExecutionController line = new LineExecutionController(node, this);
                 destLines.Add(line);
             }
+
+            this.state = ClientState.Assigned;
+
+            clientHub.SetStatus(executionNodeUuid);
         }
 
         public void RunLocal() {
+            repeatsExecuted = 0;
             PrepareAsync().Wait();
             Run();
 
@@ -251,6 +277,8 @@ namespace LoadInjector.RunTime {
             repeatsExecuted++;
             Stop();
             logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
+            state = ClientState.ExecutionComplete;
+            clientHub.SetStatus(this.executionNodeUuid);
             if (repeatsExecuted < repeats) {
                 repetitionTimer = new Timer {
                     Interval = repeatRest * 1000,
@@ -258,6 +286,8 @@ namespace LoadInjector.RunTime {
                     Enabled = true
                 };
                 repetitionTimer.Elapsed += NextExecution;
+                state = ClientState.WaitingNextIteration;
+                clientHub.SetStatus(this.executionNodeUuid);
             }
         }
 
@@ -679,6 +709,8 @@ namespace LoadInjector.RunTime {
         }
 
         public void Run(string[] args = null) {
+            state = ClientState.Executing;
+            clientHub.SetStatus(this.executionNodeUuid);
             if (args != null && args.Length > 1) {
                 startAtEnabled = true;
                 startAt = args[1];
@@ -849,6 +881,7 @@ namespace LoadInjector.RunTime {
         }
 
         public void RetrieveStandAlone(string remoteUri) {
+            Reset();
             WebClient myWebClient = new WebClient();
             // Download home page data.
             string archiveRoot = ArchiveDirectory;
@@ -858,6 +891,8 @@ namespace LoadInjector.RunTime {
         }
 
         public void RetrieveArchive(string remoteUri) {
+            Reset();
+
             Directory.Delete(ArchiveDirectory, true);
             WebClient myWebClient = new WebClient();
             // Download home page data.
@@ -874,6 +909,12 @@ namespace LoadInjector.RunTime {
         }
 
         public void Stop(bool manual = false) {
+            try {
+                executionTimer?.Stop();
+            } catch (Exception ex) {
+                ConsoleMsg(ex.Message);
+            }
+
             try {
                 timer?.Stop();
             } catch (Exception ex) {
@@ -893,6 +934,8 @@ namespace LoadInjector.RunTime {
             ConsoleMsg("Shutting down lines");
             StopLines();
             logger.Info("Test Execution Complete");
+            state = ClientState.Stopped;
+            clientHub.SetStatus(this.executionNodeUuid);
         }
 
         public void Cancel() {
@@ -1033,7 +1076,9 @@ namespace LoadInjector.RunTime {
         }
 
         public void ProgramStop() {
-            Directory.Delete(ArchiveDirectory, true);
+            try {
+                Directory.Delete(ArchiveDirectory, true);
+            } catch (Exception) { }
         }
 
         public void StopLines() {

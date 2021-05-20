@@ -125,12 +125,22 @@ namespace LoadInjector.Runtime.EngineComponents {
             });
         }
 
-        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml) {
-            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, Context);
+        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status) {
+            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, status, Context);
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml) {
-            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, Context);
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status) {
+            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, Context);
+        }
+
+        public void SetExecutionNodeStatus(string executionNodeID, string message) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                try {
+                    CentralMessagingHub.iccController.SetExecutionNodeStatus(executionNodeID, message, Context);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Source Report error. " + ex.Message);
+                }
+            });
         }
 
         public void SourceReport(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute) {

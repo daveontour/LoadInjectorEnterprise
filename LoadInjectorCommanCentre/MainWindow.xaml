@@ -9,6 +9,68 @@
         Title="Load Injector Command Centre" Height="800" Width="1600">
 
     <Window.Resources>
+        <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="Padding" Value="1" />
+            <Setter Property="FontSize" Value="10" />
+            <Setter Property="Width" Value="70" />
+            <Setter Property="Height" Value="18" />
+            <Setter Property="Margin" Value="2,0,2,0" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <Grid x:Name="grid">
+                            <Border x:Name="border" CornerRadius="8" BorderBrush="Black" BorderThickness="2">
+                                <Border.Background>
+                                    <RadialGradientBrush GradientOrigin="0.496,1.052">
+                                        <RadialGradientBrush.RelativeTransform>
+                                            <TransformGroup>
+                                                <ScaleTransform CenterX="0.5" CenterY="0.5"
+                                                        ScaleX="1.5" ScaleY="1.5" />
+                                                <TranslateTransform X="0.02" Y="0.3" />
+                                            </TransformGroup>
+                                        </RadialGradientBrush.RelativeTransform>
+                                        <GradientStop Offset="1" Color="#00000000" />
+                                        <GradientStop Offset="0.3" Color="#FFFFFFFF" />
+                                    </RadialGradientBrush>
+                                </Border.Background>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          TextElement.FontWeight="Bold">
+                                </ContentPresenter>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter Property="Background" TargetName="border">
+                                    <Setter.Value>
+                                        <RadialGradientBrush GradientOrigin="0.496,1.052">
+                                            <RadialGradientBrush.RelativeTransform>
+                                                <TransformGroup>
+                                                    <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="1.5" ScaleY="1.5" />
+                                                    <TranslateTransform X="0.02" Y="0.3" />
+                                                </TransformGroup>
+                                            </RadialGradientBrush.RelativeTransform>
+                                            <GradientStop Color="#00000000" Offset="1" />
+                                            <GradientStop Color="#FF303030" Offset="0.3" />
+                                        </RadialGradientBrush>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="BorderBrush" TargetName="border" Value="#FF33962B" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" TargetName="grid" Value="0.25" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <local:ExecutionRecords x:Key="records" />
         <CollectionViewSource x:Key="executionLines"
                               Source="{StaticResource records}"
@@ -60,10 +122,12 @@
             </Grid>
             <Grid Grid.Column="1"  Background="AliceBlue">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="35"></RowDefinition>
                     <RowDefinition Height="*" />
                     <RowDefinition Height="30" />
                 </Grid.RowDefinitions>
-                <DataGrid Grid.Row="0" Name="statusGrid"
+                <Label Grid.Row="0" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                <DataGrid Grid.Row="1" Name="statusGrid"
                           AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"
                           IsReadOnly="True"
@@ -127,6 +191,7 @@
                                                     <Expander.Header>
                                                         <StackPanel Orientation="Horizontal">
                                                             <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
+                                                            <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" />
                                                         </StackPanel>
                                                     </Expander.Header>
                                                     <Expander.Content>

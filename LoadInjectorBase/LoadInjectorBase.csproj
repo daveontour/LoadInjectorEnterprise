@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Commom\ClientState.cs" />
     <Compile Include="Commom\DocumentLoadedEventArgs.cs" />
     <Compile Include="Commom\RelayCommand.cs" />
     <Compile Include="Commom\Utils.cs" />

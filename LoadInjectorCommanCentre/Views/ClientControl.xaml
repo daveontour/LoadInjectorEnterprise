@@ -8,7 +8,56 @@
              d:DesignHeight="200" d:DesignWidth="300">
 
     <UserControl.Resources>
+
+        <Style x:Key="ExecutionNode" TargetType="Grid">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Ready To Run">
+                    <Setter Property="Background" Value="LawnGreen">
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Execution Complete">
+                    <Setter Property="Background" Value="LawnGreen">
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Waiting for next iteration">
+                    <Setter Property="Background" Value="Plum">
+                    </Setter>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Background" Value="DarkBlue" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Work Package Assigned">
+                    <Setter Property="Background" Value="Yellow" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Un Assigned">
+                    <Setter Property="Background" Value="LightGray" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NodeLabel" TargetType="Label">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="NodeText" TargetType="TextBlock">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Foreground" Value="White" />
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Foreground" Value="White">
+                    </Setter>
+                </DataTrigger>
+            </Style.Triggers>
             <Setter Property="HorizontalContentAlignment" Value="Center" />
             <Setter Property="VerticalContentAlignment" Value="Center" />
             <Setter Property="Padding" Value="1" />
@@ -17,7 +66,6 @@
             <Setter Property="Height" Value="18" />
             <Setter Property="Margin" Value="2,0,2,0" />
             <Setter Property="HorizontalAlignment" Value="Center" />
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
@@ -74,9 +122,8 @@
 
     <Grid Height="105" Background="Bisque" Margin="5,5,5,5">
 
-        <Grid  Grid.Row="0"  Background="LightGray">
+        <Grid  Grid.Row="0"   Style="{DynamicResource ExecutionNode}">
             <Grid.RowDefinitions>
-
                 <RowDefinition Height="25"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
@@ -89,10 +136,10 @@
                 <ColumnDefinition Width="*"></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Label Grid.Row="0" Grid.ColumnSpan="3" Margin="0,0,0,0" FontWeight="Bold">Execution Node</Label>
-            <TextBlock Grid.Row="1" Grid.Column="2" Text="{Binding Path=IP}"></TextBlock>
-            <TextBlock Grid.Row="2" Grid.Column="2" Text="{Binding Path=ProcessID}"></TextBlock>
-            <TextBlock Grid.Row="3" Grid.Column="2" Text="{Binding Path=OSVersion}"></TextBlock>
+            <Label Grid.Row="0" Grid.ColumnSpan="3"  Style="{DynamicResource NodeLabel}" Margin="0,0,0,0" FontWeight="Bold">Execution Node</Label>
+            <TextBlock Grid.Row="1" Grid.Column="2" Style="{DynamicResource NodeText}" Text="{Binding Path=IP}"></TextBlock>
+            <TextBlock Grid.Row="2" Grid.Column="2"  Style="{DynamicResource NodeText}" Text="{Binding Path=ProcessID}"></TextBlock>
+            <TextBlock Grid.Row="3" Grid.Column="2"  Style="{DynamicResource NodeText}" Text="{Binding Path=OSVersion}"></TextBlock>
 
             <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="Assign_OnClick" HorizontalAlignment="Left" Content="Assign" />
             <Button Grid.Row="1" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="prepBtn"  Click="Prep_OnClick" HorizontalAlignment="Left" Content="Prepare" />
@@ -101,7 +148,7 @@
             <Button Grid.Row="3" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="viewBtn"  HorizontalAlignment="Left" Click="Status_OnClick"  Content="View Status" />
             <Button Grid.Row="3" Grid.Column="1"  Style="{DynamicResource RoundCorner}" x:Name="disconnectBtn"  HorizontalAlignment="Left" Click="Disconnect_OnClick"  Content="Disconnect" />
 
-            <TextBlock Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock  Style="{DynamicResource NodeText}" Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
         </Grid>
     </Grid>
 </UserControl>

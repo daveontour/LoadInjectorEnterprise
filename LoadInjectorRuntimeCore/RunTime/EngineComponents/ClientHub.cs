@@ -72,41 +72,19 @@ namespace LoadInjector.RunTime.EngineComponents {
                         ngExecutionController.RetrieveStandAlone(url);
                         bool readyToRun = ngExecutionController.PrepareAsync().Result;
                         ReadyToRun(ngExecutionController.executionNodeUuid, readyToRun);
-                        Process currentProcess = Process.GetCurrentProcess();
-                        Task.Run(() => {
-                            this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
-                                GetLocalIPAddress(),
-                                Environment.OSVersion.VersionString,
-                                ngExecutionController.dataModel?.OuterXml);
-                        });
+                        InterrogateResponse();
                     } catch (Exception ex) {
                         logger.Info("Error in client Prepare Aync " + ex.Message);
                     }
                 });
 
                 hubProxy.On("Refresh", () => {
-                    try {
-                        Process currentProcess = Process.GetCurrentProcess();
-                        Task.Run(() => {
-                            this.hubProxy.Invoke("RefreshResponse", currentProcess.Id.ToString(),
-                                GetLocalIPAddress(),
-                                Environment.OSVersion.VersionString,
-                                ngExecutionController.dataModel?.OuterXml);
-                        });
-                    } catch (Exception ex) {
-                        logger.Info("Error in client Prepare Aync " + ex.Message);
-                    }
+                    RefreshResponse();
                 });
                 hubProxy.On("RetrieveArchive", (url) => {
                     logger.Warn($"Requested to retrieve archive {url}");
                     ngExecutionController.RetrieveArchive(url);
-                    Process currentProcess = Process.GetCurrentProcess();
-                    Task.Run(() => {
-                        this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
-                            GetLocalIPAddress(),
-                            Environment.OSVersion.VersionString,
-                            ngExecutionController.dataModel?.OuterXml);
-                    });
+                    InterrogateResponse();
                 });
 
                 hubProxy.On("Stop", () => {
@@ -115,6 +93,7 @@ namespace LoadInjector.RunTime.EngineComponents {
 
                 hubProxy.On("Disconnect", () => {
                     hubConnection.Stop();
+                    ngExecutionController.ProgramStop();
                     logger.Warn("Disconnection requested by host");
                     System.Environment.Exit(1);
                 });
@@ -175,11 +154,44 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
+        internal void RefreshResponse() {
+            try {
+                Process currentProcess = Process.GetCurrentProcess();
+                Task.Run(() => {
+                    this.hubProxy.Invoke("RefreshResponse", currentProcess.Id.ToString(),
+                        GetLocalIPAddress(),
+                        Environment.OSVersion.VersionString,
+                        ngExecutionController.dataModel?.OuterXml,
+                        ngExecutionController.state.Value);
+                });
+            } catch (Exception ex) {
+                logger.Info("Error in client Prepare Aync " + ex.Message);
+            }
+        }
+
+        internal void InterrogateResponse() {
+            try {
+                Process currentProcess = Process.GetCurrentProcess();
+                Task.Run(() => {
+                    this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
+                        GetLocalIPAddress(),
+                        Environment.OSVersion.VersionString,
+                        ngExecutionController.dataModel?.OuterXml,
+                        ngExecutionController.state.Value);
+                });
+            } catch (Exception ex) {
+                logger.Info("Error in client Interrogate respnse " + ex.Message);
+            }
+        }
+
         internal void ReadyToRun(string executionNodeID, bool ready) {
             if (localOnly) {
                 logger.Info("Ready To Run");
             } else {
-                Task.Run(() => { this.hubProxy.Invoke("ReadyToRun", executionNodeID, ready); });
+                Task.Run(() => {
+                    this.hubProxy.Invoke("ReadyToRun", executionNodeID, ready);
+                    this.hubProxy.Invoke("SetExecutionNodeStatus", executionNodeID, "Ready To Run");
+                });
             }
         }
 
@@ -247,6 +259,14 @@ namespace LoadInjector.RunTime.EngineComponents {
                         messagesPerMinute);
                 });
             }
+        }
+
+        internal void SetStatus(string executionNodeID) {
+            logger.Info($"Node Status:  {ngExecutionController.state.Value}");
+
+            Task.Run(() => {
+                this.hubProxy.Invoke("SetExecutionNodeStatus", executionNodeID, ngExecutionController.state.Value);
+            });
         }
 
         internal void SourceReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {

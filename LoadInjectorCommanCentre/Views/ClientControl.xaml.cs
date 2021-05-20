@@ -26,12 +26,12 @@ namespace LoadInjectorCommanCentre.Views {
     /// Interaction logic for ClientControl.xaml
     /// </summary>
     public partial class ClientControl : UserControl, INotifyPropertyChanged {
-        private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
+        //private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
 
-        public ObservableCollection<ExecutionRecordClass> RecordsCollection {
-            get { return this._myCollection; }
-            set { this._myCollection = value; }
-        }
+        //public ObservableCollection<ExecutionRecordClass> RecordsCollection {
+        //    get { return this._myCollection; }
+        //    set { this._myCollection = value; }
+        //}
 
         public string ConnectionID { get; }
         public CentralMessagingHub MessageHub { get; }
@@ -133,7 +133,8 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         private void Status_OnClick(object sender, RoutedEventArgs e) {
-            this.cCController.SetFilterCriteria(ExecutionNodeID);
+            this.cCController.SetFilterCriteria(ExecutionNodeID, ConnectionID);
+            MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
         }
 
         private void Disconnect_OnClick(object sender, RoutedEventArgs e) {
@@ -153,25 +154,28 @@ namespace LoadInjectorCommanCentre.Views {
             if (open.ShowDialog() == true) {
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
                 MessageHub.Hub.Clients.Client(ConnectionID).RetrieveArchive(cCController.WebServerURL + "/" + open.SafeFileName);
-                StatusText = "Assigned";
             }
         }
 
-        public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
-            try {
-                ExecutionRecordClass r = (from record in RecordsCollection
-                                          where rec.ExecutionLineID == record.ExecutionLineID
-                                          select record).First();
+        //public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
+        //    try {
+        //        ExecutionRecordClass r = (from record in RecordsCollection
+        //                                  where rec.ExecutionLineID == record.ExecutionLineID
+        //                                  select record).First();
 
-                //The only thing that is changing is the messages sent and messages per minute
-                r.MM = rec.MM;
-                r.Sent = rec.Sent;
-                // OnPropertyChanged("RecordsCollection");
-            } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
-                RecordsCollection.Add(rec);
-                OnPropertyChanged("RecordsCollection");
-            }
+        //        //The only thing that is changing is the messages sent and messages per minute
+        //        r.MM = rec.MM;
+        //        r.Sent = rec.Sent;
+        //        // OnPropertyChanged("RecordsCollection");
+        //    } catch (Exception ex) {
+        //        Console.WriteLine(ex.Message);
+        //        RecordsCollection.Add(rec);
+        //        OnPropertyChanged("RecordsCollection");
+        //    }
+        //}
+
+        public void SetStatusText(string message) {
+            StatusText = message;
         }
     }
 }
