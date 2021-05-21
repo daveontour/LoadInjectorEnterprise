@@ -1,4 +1,5 @@
 ﻿using LoadInjector.RunTime;
+using LoadInjector.RunTime.Views;
 using LoadInjectorCommandCentre;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,24 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
+        private Visibility vis = Visibility.Collapsed;
+        public ControlWriter consoleWriter;
+
+        public Visibility ShowDetailPanel {
+            get {
+                return vis;
+            }
+            set {
+                vis = value;
+                OnPropertyChanged("ShowDetailPanel");
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
+
+        private void OutputConsole_Initialized(object sender, EventArgs e) {
+            consoleWriter = new ControlWriter(outputConsole);
+        }
 
         private void PrepAllBtn_OnClick(object sender, RoutedEventArgs e) {
             cccontroller.PrepAll();
@@ -74,6 +92,7 @@ namespace LoadInjectorCommanCentre {
         private void ViewAllBtn_OnClick(object sender, RoutedEventArgs e) {
             SetFilterCriteria(null);
             cccontroller.RefreshClients(true);
+            ShowDetailPanel = Visibility.Collapsed;
         }
 
         private void DisconnectAllBtn_OnClick(object sender, RoutedEventArgs e) {
@@ -121,6 +140,9 @@ namespace LoadInjectorCommanCentre {
                     statusGrid.Items.Refresh();
                     if (ConnectionID != null) {
                         cccontroller.MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
+                    }
+                    if (nodeID != null) {
+                        ShowDetailPanel = Visibility.Visible;
                     }
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);

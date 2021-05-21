@@ -156,6 +156,23 @@ namespace LoadInjector.RunTime {
         public void Reset() {
             dataModel = null;
 
+            repeatsExecuted = 0;
+            repeatRest = 0;
+            repeats = 0;
+
+            executionNodeUuid = null;
+            timer?.Stop();
+            timer = null;
+
+            timerStart?.Stop();
+            timerStart = null;
+
+            executionTimer?.Stop();
+            executionTimer = null;
+
+            repetitionTimer?.Stop();
+            repetitionTimer = null;
+
             flights.Clear();
             arrflights.Clear();
             depflights.Clear();
@@ -170,6 +187,9 @@ namespace LoadInjector.RunTime {
             databaseDataDrivenLines.Clear();
             rateDrivenLines.Clear();
             flightSets.Clear();
+            clientHub?.consoleMessages?.Clear();
+            this.state = ClientState.Reset;
+            clientHub.SetStatus(executionNodeUuid);
         }
 
         public void InitModel(XmlDocument model) {
@@ -225,6 +245,7 @@ namespace LoadInjector.RunTime {
                 flightSets.Add(line.GetFlightSet());
                 if (!line.ConfigOK) {
                     ConsoleMsg("Error: Configuration is not valid");
+                    this.state = ClientState.ConfigInvalid;
                 }
             }
 
@@ -250,8 +271,9 @@ namespace LoadInjector.RunTime {
                 destLines.Add(line);
             }
 
-            this.state = ClientState.Assigned;
-
+            if (this.state != ClientState.ConfigInvalid) {
+                this.state = ClientState.Assigned;
+            }
             clientHub.SetStatus(executionNodeUuid);
         }
 
@@ -276,9 +298,11 @@ namespace LoadInjector.RunTime {
             // signalling the end of the test.
             repeatsExecuted++;
             Stop();
+
             logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
             state = ClientState.ExecutionComplete;
             clientHub.SetStatus(this.executionNodeUuid);
+
             if (repeatsExecuted < repeats) {
                 repetitionTimer = new Timer {
                     Interval = repeatRest * 1000,
@@ -702,9 +726,13 @@ namespace LoadInjector.RunTime {
 
             if (!atLeastOneActive) {
                 ConsoleMsg("Preparation Phase Complete - No Active Destination Lines");
+                this.state = ClientState.NoActive;
+                this.clientHub.SetStatus(this.executionNodeUuid);
                 return false;
             }
 
+            this.state = ClientState.Ready;
+            this.clientHub.SetStatus(this.executionNodeUuid);
             return prepareOK;
         }
 
@@ -741,6 +769,8 @@ namespace LoadInjector.RunTime {
                 }
 
                 ConsoleMsg($"Scheduling start for {start}");
+                state = ClientState.ExecutionPending;
+                this.clientHub.SetStatus(this.executionNodeUuid);
             } else {
                 Task.Run(() => RunInternal());
             }

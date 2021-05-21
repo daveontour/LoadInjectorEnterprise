@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Timers;
 using System.Windows;
 using System.Windows.Documents;
@@ -96,6 +97,36 @@ namespace LoadInjectorCommanCentre {
 
         internal void SetFilterCriteria(string executionNodeID, string ConnectionID) {
             View.SetFilterCriteria(executionNodeID, ConnectionID);
+
+            // Disable details from all clients
+            MessageHub.Hub.Clients.All.DisableDetails();
+            ClientControl client = clients.Values.FirstOrDefault<ClientControl>(x => x.ExecutionNodeID == executionNodeID);
+
+            if (client != null) {
+                // The config for the selected node
+                StringBuilder sb = new StringBuilder();
+                TextWriter tr = new StringWriter(sb);
+                XmlTextWriter wr = new XmlTextWriter(tr) {
+                    Formatting = Formatting.Indented
+                };
+
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(client.XML);
+                doc.Save(wr);
+                wr.Close();
+
+                View.configConsole.Text = sb.ToString();
+
+                View.consoleWriter.Clear();
+
+                // Enable details for the selected client
+                foreach (KeyValuePair<string, ClientControl> pair in clients) {
+                    if (pair.Value.ExecutionNodeID == executionNodeID) {
+                        MessageHub.Hub.Clients.Client(pair.Key).EnableDetails();
+                        break;
+                    }
+                }
+            }
         }
 
         // Called after a client makes a connection
@@ -141,6 +172,7 @@ namespace LoadInjectorCommanCentre {
                         clients.Add(context.ConnectionId, cl);
 
                         View.clientControlStack.Children.Add(cl);
+                        View.OnPropertyChanged("ShowDetailPanel");
                     });
                 } catch (Exception ex) {
                     Console.WriteLine(ex.Message);
@@ -153,6 +185,7 @@ namespace LoadInjectorCommanCentre {
             client.ProcessID = processID;
             client.OSVersion = osversion;
             client.StatusText = status;
+            client.XML = xml;
 
             if (xml != null) {
                 XmlDocument doc = new XmlDocument();
@@ -334,12 +367,18 @@ namespace LoadInjectorCommanCentre {
         }
 
         public void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context) {
-            if (clients.ContainsKey(context.ConnectionId)) {
-                Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate {
+                if (clients.ContainsKey(context.ConnectionId)) {
                     ClientControl client = clients[context.ConnectionId];
                     client.SetStatusText(message);
-                });
-            }
+                }
+            });
+        }
+
+        public void SetConsoleMessage(string message) {
+            Application.Current.Dispatcher.Invoke(delegate {
+                View.consoleWriter.WriteLine(message);
+            });
         }
     }
 }

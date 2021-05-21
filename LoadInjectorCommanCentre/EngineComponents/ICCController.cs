@@ -17,5 +17,6 @@ namespace LoadInjector.Runtime.EngineComponents {
         void Disconnect(HubCallerContext context);
 
         void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context);
+        void SetConsoleMessage(string message);
     }
 }

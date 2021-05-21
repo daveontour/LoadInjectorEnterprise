@@ -99,8 +99,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {
-            //CentralMessagingHub.executionUI.ConsoleWriter.WriteLine(message);
-
+            CentralMessagingHub.iccController.SetConsoleMessage(message);
             logger.Info(message);
         }
 
@@ -177,20 +176,6 @@ namespace LoadInjector.Runtime.EngineComponents {
             });
         }
 
-        public void ReadyToRun(string executionNodeID, bool ready) {
-            //    CentralMessagingHub.executionUI.ConsoleWriter.WriteLine($"Ready To Run = {ready}");
-
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    //            CentralMessagingHub.executionUI.SetExecuteBtnEnabled(true);
-                    //            CentralMessagingHub.executionUI.SetPrepareBtnEnabled(true);
-                    //            CentralMessagingHub.executionUI.SetStopBtnEnabled(false);
-                } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
-                }
-            });
-        }
-
         public void ClearTriggerData(string executionnodeID, string node) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
@@ -203,63 +188,6 @@ namespace LoadInjector.Runtime.EngineComponents {
                 }
             });
         }
-
-        //public void SetDestinationRate(string executionNodeID, string uuid, double s) {
-        //    Application.Current.Dispatcher.Invoke(delegate {
-        //        try {
-        //            //            var ui = CentralMessagingHub.executionUI.DestUIMap[uuid];
-        //            //             ui.SetRate(s);
-        //        } catch (Exception ex) {
-        //            Debug.WriteLine("Setting Dest Rate error. " + ex.Message);
-        //        }
-        //    });
-        //}
-
-        //public void SetDestinationSent(string executionNodeID, string uuid, int s) {
-        //    Application.Current.Dispatcher.Invoke(delegate {
-        //        try {
-        //            //          var ui = CentralMessagingHub.executionUI.DestUIMap[uuid];
-        //            //           if (s > ui.SentSeqNumber) {
-        //            //               ui.Sent(s);
-        //            //           }
-        //        } catch (Exception ex) {
-        //            Debug.WriteLine("Setting Dest sent error. " + ex.Message);
-        //        }
-        //    });
-        //}
-
-        //public void SetDestinationMsgPerMinute(string executionNodeID, string uuid, string s) {
-        //    Application.Current.Dispatcher.Invoke(delegate {
-        //        try {
-        //            //var ui = CentralMessagingHub.executionUI.DestUIMap[uuid];
-        //            //ui.MsgPerMinExecution = s;
-        //        } catch (Exception ex) {
-        //            Debug.WriteLine("Setting Dest MsgPer Min error. " + ex.Message);
-        //        }
-        //    });
-        //}
-
-        //public void SetDestinationConfigMsgPerMin(string executionNodeID, string uuid, string s) {
-        //    Application.Current.Dispatcher.Invoke(delegate {
-        //        try {
-        //            //var ui = CentralMessagingHub.executionUI.DestUIMap[uuid];
-        //            //ui.MsgPerMin = s;
-        //        } catch (Exception ex) {
-        //            Debug.WriteLine("Setting Dest Config Msg Per Min error. " + ex.Message);
-        //        }
-        //    });
-        //}
-
-        //public void SetDestinationOutput(string executionNodeID, string uuid, string s) {
-        //    Application.Current.Dispatcher.Invoke(delegate {
-        //        try {
-        //            //var ui = CentralMessagingHub.executionUI.DestUIMap[uuid];
-        //            //ui.SetOutput(s);
-        //        } catch (Exception ex) {
-        //            Debug.WriteLine("Setting Dest Output error. " + ex.Message);
-        //        }
-        //    });
-        //}
 
         public void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
             Application.Current.Dispatcher.Invoke(delegate {

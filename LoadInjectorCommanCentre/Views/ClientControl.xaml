@@ -24,7 +24,7 @@
                     </Setter>
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
-                    <Setter Property="Background" Value="DarkBlue" />
+                    <Setter Property="Background" Value="LightSalmon" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Work Package Assigned">
                     <Setter Property="Background" Value="Yellow" />
@@ -38,7 +38,8 @@
         <Style x:Key="NodeLabel" TargetType="Label">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
-                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -46,7 +47,8 @@
         <Style x:Key="NodeText" TargetType="TextBlock">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
-                    <Setter Property="Foreground" Value="White" />
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -54,8 +56,8 @@
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
-                    <Setter Property="Foreground" Value="White">
-                    </Setter>
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
             </Style.Triggers>
             <Setter Property="HorizontalContentAlignment" Value="Center" />

@@ -17,6 +17,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Xml;
 using LoadInjector.Runtime.EngineComponents;
+using LoadInjectorBase.Commom;
 using LoadInjectorCommandCentre;
 using Microsoft.Win32;
 
@@ -68,6 +69,36 @@ namespace LoadInjectorCommanCentre.Views {
             }
             set {
                 statusText = value;
+                if (statusText == ClientState.UnAssigned.Value) {
+                    assignBtn.IsEnabled = true;
+                    prepBtn.IsEnabled = false;
+                    execBtn.IsEnabled = false;
+                    stopBtn.IsEnabled = false;
+                }
+                if (statusText == ClientState.Assigned.Value) {
+                    assignBtn.IsEnabled = true;
+                    prepBtn.IsEnabled = true;
+                    execBtn.IsEnabled = false;
+                    stopBtn.IsEnabled = false;
+                }
+                if (statusText == ClientState.Ready.Value) {
+                    assignBtn.IsEnabled = true;
+                    prepBtn.IsEnabled = true;
+                    execBtn.IsEnabled = true;
+                    stopBtn.IsEnabled = false;
+                }
+                if (statusText == ClientState.Executing.Value || statusText == ClientState.WaitingNextIteration.Value || statusText == ClientState.ExecutionPending.Value) {
+                    assignBtn.IsEnabled = false;
+                    prepBtn.IsEnabled = false;
+                    execBtn.IsEnabled = false;
+                    stopBtn.IsEnabled = true;
+                }
+                if (statusText == ClientState.Stopped.Value) {
+                    assignBtn.IsEnabled = true;
+                    prepBtn.IsEnabled = true;
+                    execBtn.IsEnabled = false;
+                    stopBtn.IsEnabled = false;
+                }
                 OnPropertyChanged("StatusText");
             }
         }
@@ -96,6 +127,8 @@ namespace LoadInjectorCommanCentre.Views {
             }
         }
 
+        public string XML { get; set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private CCController cCController;
@@ -118,18 +151,15 @@ namespace LoadInjectorCommanCentre.Views {
 
         private void Prep_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).ClearAndPrepare();
-            StatusText = "Prepared";
         }
 
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Execute();
-            StatusText = "Executing";
             this.cCController.SetRefreshRate();
         }
 
         private void Stop_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Stop();
-            StatusText = "Stopped";
         }
 
         private void Status_OnClick(object sender, RoutedEventArgs e) {
@@ -139,7 +169,6 @@ namespace LoadInjectorCommanCentre.Views {
 
         private void Disconnect_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Disconnect();
-            StatusText = "Disconnecting";
         }
 
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
@@ -156,23 +185,6 @@ namespace LoadInjectorCommanCentre.Views {
                 MessageHub.Hub.Clients.Client(ConnectionID).RetrieveArchive(cCController.WebServerURL + "/" + open.SafeFileName);
             }
         }
-
-        //public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
-        //    try {
-        //        ExecutionRecordClass r = (from record in RecordsCollection
-        //                                  where rec.ExecutionLineID == record.ExecutionLineID
-        //                                  select record).First();
-
-        //        //The only thing that is changing is the messages sent and messages per minute
-        //        r.MM = rec.MM;
-        //        r.Sent = rec.Sent;
-        //        // OnPropertyChanged("RecordsCollection");
-        //    } catch (Exception ex) {
-        //        Console.WriteLine(ex.Message);
-        //        RecordsCollection.Add(rec);
-        //        OnPropertyChanged("RecordsCollection");
-        //    }
-        //}
 
         public void SetStatusText(string message) {
             StatusText = message;
