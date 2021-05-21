@@ -40,6 +40,27 @@ namespace LoadInjectorCommanCentre {
             WebServerURL = $"http://localhost:{webport}/";
             WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
             Console.WriteLine("Webserver Port: " + webport);
+
+            StartClients(4);
+        }
+
+        public void Close() {
+            WebServer.Stop();
+        }
+
+        public void StartClients(int num) {
+            for (int i = 0; i < num; i++) {
+                Process process = new Process();
+                // Configure the process using the StartInfo properties.
+
+                string lir = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug\LoadInjectorRuntime.exe";
+                process.StartInfo.WorkingDirectory = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug";
+                process.StartInfo.FileName = lir;
+                process.StartInfo.Arguments = $"-server:http://localhost:6220/";
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+                process.Start();
+            }
         }
 
         public void PrepAll() {
@@ -84,6 +105,29 @@ namespace LoadInjectorCommanCentre {
 
         internal void DisconnectAll() {
             MessageHub.Hub.Clients.All.Disconnect();
+            try {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
+                    View.RecordsCollection.Clear();
+                    View.statusGrid.Items.Refresh();
+                });
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+        }
+
+        internal void DisconnectClient(string id) {
+            MessageHub.Hub.Clients.Client(id).Disconnect();
+            try {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
+                    // var r = View.RecordsCollection.SelectMany<ExecutionRecordClass>(record => record.ExecutionLineID == id);
+
+                    View.RecordsCollection.Clear();
+                    MessageHub.Hub.Clients.All.Refresh();
+                    View.statusGrid.Items.Refresh();
+                });
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         internal void RefreshClients(bool clear = true) {

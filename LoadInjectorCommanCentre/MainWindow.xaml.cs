@@ -183,5 +183,9 @@ namespace LoadInjectorCommanCentre {
         private void assignBtn_Click(object sender, RoutedEventArgs e) {
             Console.WriteLine(e);
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e) {
+            cccontroller.Close();
+        }
     }
 }

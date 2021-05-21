@@ -61,7 +61,7 @@ namespace LoadInjectorCommanCentre.Views {
             }
         }
 
-        private string statusText = "Un Assigned";
+        private string statusText = ClientState.UnAssigned.Value;
 
         public string StatusText {
             get {
@@ -69,37 +69,39 @@ namespace LoadInjectorCommanCentre.Views {
             }
             set {
                 statusText = value;
-                if (statusText == ClientState.UnAssigned.Value) {
-                    assignBtn.IsEnabled = true;
-                    prepBtn.IsEnabled = false;
-                    execBtn.IsEnabled = false;
-                    stopBtn.IsEnabled = false;
-                }
-                if (statusText == ClientState.Assigned.Value) {
-                    assignBtn.IsEnabled = true;
-                    prepBtn.IsEnabled = true;
-                    execBtn.IsEnabled = false;
-                    stopBtn.IsEnabled = false;
-                }
-                if (statusText == ClientState.Ready.Value) {
-                    assignBtn.IsEnabled = true;
-                    prepBtn.IsEnabled = true;
-                    execBtn.IsEnabled = true;
-                    stopBtn.IsEnabled = false;
-                }
-                if (statusText == ClientState.Executing.Value || statusText == ClientState.WaitingNextIteration.Value || statusText == ClientState.ExecutionPending.Value) {
-                    assignBtn.IsEnabled = false;
-                    prepBtn.IsEnabled = false;
-                    execBtn.IsEnabled = false;
-                    stopBtn.IsEnabled = true;
-                }
-                if (statusText == ClientState.Stopped.Value) {
-                    assignBtn.IsEnabled = true;
-                    prepBtn.IsEnabled = true;
-                    execBtn.IsEnabled = false;
-                    stopBtn.IsEnabled = false;
-                }
-                OnPropertyChanged("StatusText");
+                Application.Current.Dispatcher.Invoke((Action)delegate {
+                    if (statusText == ClientState.UnAssigned.Value) {
+                        assignBtn.IsEnabled = true;
+                        prepBtn.IsEnabled = false;
+                        execBtn.IsEnabled = false;
+                        stopBtn.IsEnabled = false;
+                    }
+                    if (statusText == ClientState.Assigned.Value) {
+                        assignBtn.IsEnabled = true;
+                        prepBtn.IsEnabled = true;
+                        execBtn.IsEnabled = false;
+                        stopBtn.IsEnabled = false;
+                    }
+                    if (statusText == ClientState.Ready.Value) {
+                        assignBtn.IsEnabled = true;
+                        prepBtn.IsEnabled = true;
+                        execBtn.IsEnabled = true;
+                        stopBtn.IsEnabled = false;
+                    }
+                    if (statusText == ClientState.Executing.Value || statusText == ClientState.WaitingNextIteration.Value || statusText == ClientState.ExecutionPending.Value) {
+                        assignBtn.IsEnabled = false;
+                        prepBtn.IsEnabled = false;
+                        execBtn.IsEnabled = false;
+                        stopBtn.IsEnabled = true;
+                    }
+                    if (statusText == ClientState.Stopped.Value) {
+                        assignBtn.IsEnabled = true;
+                        prepBtn.IsEnabled = true;
+                        execBtn.IsEnabled = false;
+                        stopBtn.IsEnabled = false;
+                    }
+                    OnPropertyChanged("StatusText");
+                });
             }
         }
 
@@ -168,7 +170,7 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         private void Disconnect_OnClick(object sender, RoutedEventArgs e) {
-            MessageHub.Hub.Clients.Client(ConnectionID).Disconnect();
+            this.cCController.DisconnectClient(ConnectionID);
         }
 
         private void Assign_OnClick(object sender, RoutedEventArgs e) {

@@ -6,7 +6,8 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:LoadInjectorCommandCentre"
         mc:Ignorable="d"
-        Title="Load Injector Command Centre" Height="800" Width="1600">
+        Title="Load Injector Command Centre" Height="800" Width="1600"
+        Closing="Window_Closing">
 
     <Window.Resources>
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">

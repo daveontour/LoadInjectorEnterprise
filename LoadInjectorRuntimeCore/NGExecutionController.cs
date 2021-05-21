@@ -940,6 +940,11 @@ namespace LoadInjector.RunTime {
 
         public void Stop(bool manual = false) {
             try {
+                this.repetitionTimer?.Stop();
+            } catch (Exception ex) {
+                ConsoleMsg(ex.Message);
+            }
+            try {
                 executionTimer?.Stop();
             } catch (Exception ex) {
                 ConsoleMsg(ex.Message);
