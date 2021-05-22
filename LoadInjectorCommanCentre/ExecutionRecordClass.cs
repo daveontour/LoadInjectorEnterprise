@@ -16,6 +16,7 @@ namespace LoadInjectorCommandCentre {
         private string mM;
         private int sent;
         private string protocol;
+        private string connectionID;
 
         private string executionNodeID;
         private string executionLineID;
@@ -38,6 +39,13 @@ namespace LoadInjectorCommandCentre {
             set {
                 sourceDestination = value;
                 NotifyPropertyChanged("SourceDestination");
+            }
+        }
+
+        public string ConnectionID {
+            get { return connectionID; }
+            set {
+                connectionID = value;
             }
         }
 

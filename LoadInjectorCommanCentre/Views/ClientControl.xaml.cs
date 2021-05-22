@@ -23,18 +23,8 @@ using Microsoft.Win32;
 
 namespace LoadInjectorCommanCentre.Views {
 
-    /// <summary>
-    /// Interaction logic for ClientControl.xaml
-    /// </summary>
     public partial class ClientControl : UserControl, INotifyPropertyChanged {
-        //private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
-
-        //public ObservableCollection<ExecutionRecordClass> RecordsCollection {
-        //    get { return this._myCollection; }
-        //    set { this._myCollection = value; }
-        //}
-
-        public string ConnectionID { get; }
+        public string ConnectionID { get; set; }
         public CentralMessagingHub MessageHub { get; }
 
         private string executionID;
@@ -75,30 +65,35 @@ namespace LoadInjectorCommanCentre.Views {
                         prepBtn.IsEnabled = false;
                         execBtn.IsEnabled = false;
                         stopBtn.IsEnabled = false;
+                        viewBtn.IsEnabled = false;
                     }
                     if (statusText == ClientState.Assigned.Value) {
                         assignBtn.IsEnabled = true;
                         prepBtn.IsEnabled = true;
                         execBtn.IsEnabled = false;
                         stopBtn.IsEnabled = false;
+                        viewBtn.IsEnabled = true;
                     }
                     if (statusText == ClientState.Ready.Value) {
                         assignBtn.IsEnabled = true;
                         prepBtn.IsEnabled = true;
                         execBtn.IsEnabled = true;
                         stopBtn.IsEnabled = false;
+                        viewBtn.IsEnabled = true;
                     }
                     if (statusText == ClientState.Executing.Value || statusText == ClientState.WaitingNextIteration.Value || statusText == ClientState.ExecutionPending.Value) {
                         assignBtn.IsEnabled = false;
                         prepBtn.IsEnabled = false;
                         execBtn.IsEnabled = false;
                         stopBtn.IsEnabled = true;
+                        viewBtn.IsEnabled = true;
                     }
                     if (statusText == ClientState.Stopped.Value) {
                         assignBtn.IsEnabled = true;
                         prepBtn.IsEnabled = true;
                         execBtn.IsEnabled = false;
                         stopBtn.IsEnabled = false;
+                        viewBtn.IsEnabled = true;
                     }
                     OnPropertyChanged("StatusText");
                 });
@@ -138,8 +133,8 @@ namespace LoadInjectorCommanCentre.Views {
         public void OnPropertyChanged(string propName) {
             try {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-            } catch (Exception ex) {
-                Console.WriteLine("On Property Error. " + ex.Message);
+            } catch (Exception) {
+                // NO-OP
             }
         }
 
@@ -156,8 +151,7 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
-            MessageHub.Hub.Clients.Client(ConnectionID).Execute();
-            this.cCController.SetRefreshRate();
+            this.cCController.ExecuteClient(ConnectionID);
         }
 
         private void Stop_OnClick(object sender, RoutedEventArgs e) {

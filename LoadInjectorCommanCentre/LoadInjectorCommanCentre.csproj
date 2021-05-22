@@ -169,7 +169,6 @@
     </Compile>
     <Compile Include="CCController.cs" />
     <Compile Include="EngineComponents\CentralMessagingHub.cs" />
-    <Compile Include="EngineComponents\ICCController.cs" />
     <Compile Include="EngineComponents\SimpleHTTPServer.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>

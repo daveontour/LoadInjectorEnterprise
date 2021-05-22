@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Xml;
 using LoadInjector.Runtime.EngineComponents;
+using LoadInjectorBase.Common;
 using LoadInjectorCommanCentre.Views;
 using LoadInjectorCommandCentre;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -17,7 +18,7 @@ using Microsoft.Win32;
 
 namespace LoadInjectorCommanCentre {
 
-    public class CCController : ICCController {
+    public class CCController {
         public MainWindow View { get; set; }
         public CentralMessagingHub MessageHub { get; set; }
         public string ArchiveRoot { get; }
@@ -71,6 +72,12 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.All.ClearAndPrepare();
         }
 
+        internal void ViewAll() {
+            View.SetFilterCriteria(null);
+            RefreshClients(true);
+            View.ShowDetailPanel = Visibility.Collapsed;
+        }
+
         public void ExecuteAll() {
             View.prepAllBtn.IsEnabled = false;
             View.execAllBtn.IsEnabled = false;
@@ -78,6 +85,11 @@ namespace LoadInjectorCommanCentre {
 
             MessageHub.Hub.Clients.All.Execute();
             SetRefreshRate(gridRefreshRate);
+        }
+
+        public void ExecuteClient(string clientID) {
+            MessageHub.Hub.Clients.Client(clientID).Execute();
+            SetRefreshRate();
         }
 
         public void StopAll() {
@@ -116,12 +128,27 @@ namespace LoadInjectorCommanCentre {
         }
 
         internal void DisconnectClient(string id) {
+            //Tell the client to disconnect
             MessageHub.Hub.Clients.Client(id).Disconnect();
+
             try {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
-                    // var r = View.RecordsCollection.SelectMany<ExecutionRecordClass>(record => record.ExecutionLineID == id);
+                    // The client control for the disconnecting
+                    ClientControl client = clients.Values.FirstOrDefault<ClientControl>(x => x.ConnectionID == id);
+                    //Remove it from the list of execution nodes.
+                    View.clientControlStack.Children.Remove(client);
 
-                    View.RecordsCollection.Clear();
+                    //Remove any entries from the messaging grid
+                    var query = View.RecordsCollection.ToList<ExecutionRecordClass>().Where(rec => rec.ConnectionID == id);
+                    foreach (ExecutionRecordClass x in query) {
+                        View.RecordsCollection.Remove(x);
+                    }
+
+                    // Close the detail panel if it was open for this connection
+                    if (View.filterConnectionID == id) {
+                        View.ShowDetailPanel = Visibility.Collapsed;
+                        View.SetFilterCriteria(null);
+                    }
                     MessageHub.Hub.Clients.All.Refresh();
                     View.statusGrid.Items.Refresh();
                 });
@@ -132,6 +159,7 @@ namespace LoadInjectorCommanCentre {
 
         internal void RefreshClients(bool clear = true) {
             View.RecordsCollection.Clear();
+            View.statusGrid.Items.Refresh();
             if (clear) {
                 View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
             }
@@ -147,29 +175,11 @@ namespace LoadInjectorCommanCentre {
             ClientControl client = clients.Values.FirstOrDefault<ClientControl>(x => x.ExecutionNodeID == executionNodeID);
 
             if (client != null) {
-                // The config for the selected node
-                StringBuilder sb = new StringBuilder();
-                TextWriter tr = new StringWriter(sb);
-                XmlTextWriter wr = new XmlTextWriter(tr) {
-                    Formatting = Formatting.Indented
-                };
-
-                XmlDocument doc = new XmlDocument();
-                doc.LoadXml(client.XML);
-                doc.Save(wr);
-                wr.Close();
-
-                View.configConsole.Text = sb.ToString();
-
+                View.configConsole.Text = Utils.FormatXML(client.XML);
                 View.consoleWriter.Clear();
 
                 // Enable details for the selected client
-                foreach (KeyValuePair<string, ClientControl> pair in clients) {
-                    if (pair.Value.ExecutionNodeID == executionNodeID) {
-                        MessageHub.Hub.Clients.Client(pair.Key).EnableDetails();
-                        break;
-                    }
-                }
+                MessageHub.Hub.Clients.Client(ConnectionID).EnableDetails();
             }
         }
 
@@ -204,8 +214,15 @@ namespace LoadInjectorCommanCentre {
             return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, double>> latestDestinationReport, HubCallerContext context) {
             InterrogateResponse(processID, ipAddress, osversion, xml, status, context);
+            foreach (Tuple<string, string, string, int, double, double> rec in latestSourceReport.Values) {
+                UpdateSourceLine(rec.Item1, rec.Item2, rec.Item3, rec.Item4, rec.Item5, rec.Item6, context, true);
+            }
+
+            foreach (Tuple<string, string, int, double> rec in latestDestinationReport.Values) {
+                UpdateDestinationLine(rec.Item1, rec.Item2, rec.Item3, context, true);
+            }
         }
 
         public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
@@ -248,7 +265,8 @@ namespace LoadInjectorCommanCentre {
                                 ExecutionLineID = node.Attributes["uuid"]?.Value,
                                 ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
                                 SourceDestination = "Destination",
-                                Protocol = node.Attributes["protocol"]?.Value
+                                Protocol = node.Attributes["protocol"]?.Value,
+                                ConnectionID = context.ConnectionId
                             };
 
                             View.AddUpdateExecutionRecord(rec);
@@ -265,7 +283,8 @@ namespace LoadInjectorCommanCentre {
                                 ExecutionLineID = node.Attributes["uuid"]?.Value,
                                 ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
                                 SourceDestination = "Rate Driven Source",
-                                Protocol = node.Attributes["dataSource"]?.Value
+                                Protocol = node.Attributes["dataSource"]?.Value,
+                                ConnectionID = context.ConnectionId
                             };
 
                             View.AddUpdateExecutionRecord(rec);
@@ -281,7 +300,8 @@ namespace LoadInjectorCommanCentre {
                                 MM = "-",
                                 ExecutionLineID = node.Attributes["uuid"]?.Value,
                                 ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                                SourceDestination = "Data Driven Source"
+                                SourceDestination = "Data Driven Source",
+                                ConnectionID = context.ConnectionId
                             };
 
                             View.AddUpdateExecutionRecord(rec);
@@ -297,7 +317,8 @@ namespace LoadInjectorCommanCentre {
                                 MM = "-",
                                 ExecutionLineID = node.Attributes["uuid"]?.Value,
                                 ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
-                                SourceDestination = "Chained Source"
+                                SourceDestination = "Chained Source",
+                                ConnectionID = context.ConnectionId
                             };
 
                             View.AddUpdateExecutionRecord(rec);
@@ -310,7 +331,7 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
-        public void UpdateLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context) {
+        public void UpdateSourceLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context, bool forceUpdate = false) {
             if (clients.ContainsKey(context.ConnectionId)) {
                 Application.Current.Dispatcher.Invoke(delegate {
                     try {
@@ -319,7 +340,7 @@ namespace LoadInjectorCommanCentre {
                         if (r != null) {
                             r.MM = currentRate.ToString();
                             r.Sent = messagesSent;
-                            if (this.gridRefreshRate == 0) {
+                            if (this.gridRefreshRate == 0 || forceUpdate) {
                                 View.statusGrid.Items.Refresh();
                             }
                         } else {
@@ -327,7 +348,8 @@ namespace LoadInjectorCommanCentre {
                                 Sent = messagesSent,
                                 MM = currentRate.ToString(),
                                 ExecutionLineID = uuid,
-                                ExecutionNodeID = executionNodeID
+                                ExecutionNodeID = executionNodeID,
+                                ConnectionID = context.ConnectionId
                             };
                             View.RecordsCollection.Add(rec);
                             View.statusGrid.Items.Refresh();
@@ -339,21 +361,22 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
-        public void UpdateLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context) {
+        public void UpdateDestinationLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context, bool forceUpdate = false) {
             if (clients.ContainsKey(context.ConnectionId)) {
                 try {
                     Application.Current.Dispatcher.Invoke(delegate {
                         ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
                         if (r != null) {
                             r.Sent = messagesSent;
-                            if (this.gridRefreshRate == 0) {
+                            if (this.gridRefreshRate == 0 || forceUpdate) {
                                 View.statusGrid.Items.Refresh();
                             }
                         } else {
                             ExecutionRecordClass rec = new ExecutionRecordClass() {
                                 Sent = messagesSent,
                                 ExecutionLineID = uuid,
-                                ExecutionNodeID = executionNodeID
+                                ExecutionNodeID = executionNodeID,
+                                ConnectionID = context.ConnectionId
                             };
                             View.RecordsCollection.Add(rec);
                             View.statusGrid.Items.Refresh();

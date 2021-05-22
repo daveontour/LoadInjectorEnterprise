@@ -23,6 +23,8 @@ namespace LoadInjector.RunTime.EngineComponents {
         public static string hubURL;
         public StringBuilder consoleMessages = new StringBuilder();
         public bool sendDetails = false;
+        public Dictionary<string, Tuple<string, string, string, int, double, double>> latsetSourceReport = new Dictionary<string, Tuple<string, string, string, int, double, double>>();
+        public Dictionary<string, Tuple<string, string, int, double>> latsetDestinationReport = new Dictionary<string, Tuple<string, string, int, double>>();
 
         public ClientHub(string hostURL, NgExecutionController ngExecutionController) {
             this.ngExecutionController = ngExecutionController;
@@ -166,7 +168,9 @@ namespace LoadInjector.RunTime.EngineComponents {
                         GetLocalIPAddress(),
                         Environment.OSVersion.VersionString,
                         ngExecutionController.dataModel?.OuterXml,
-                        ngExecutionController.state.Value);
+                        ngExecutionController.state.Value,
+                        this.latsetSourceReport,
+                        this.latsetDestinationReport);
                 });
             } catch (Exception ex) {
                 logger.Info("Error in client Prepare Aync " + ex.Message);
@@ -248,13 +252,41 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
+        internal void SendSourceReport(string executionNodeID, string uuid, string v, int messagesSent, double currentRate, double messagesPerMinute) {
+            Tuple<string, string, string, int, double, double> rec = new Tuple<string, string, string, int, double, double>(executionNodeID, uuid, v, messagesSent, currentRate, messagesPerMinute);
+            if (latsetSourceReport.ContainsKey(uuid)) {
+                latsetSourceReport[uuid] = rec;
+            } else {
+                latsetSourceReport.Add(uuid, rec);
+            }
+
             if (localOnly) {
                 sourceLogger.Info($"{v} Messages Sent: {messagesSent}, Current Rate: {currentRate}, Messages Per Minute: {messagesPerMinute}");
             } else {
                 Task.Run(() => {
-                    this.hubProxy.Invoke("SourceReport", executionNodeID, uuid, v, messagesSent, currentRate,
-                        messagesPerMinute);
+                    this.hubProxy.Invoke("SourceReport", executionNodeID, uuid, v, messagesSent, currentRate, messagesPerMinute);
+                });
+            }
+        }
+
+        internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
+            Tuple<string, string, int, double> rec = new Tuple<string, string, int, double>(executionNodeID, uuid, messagesSent, rate);
+
+            if (latsetDestinationReport.ContainsKey(uuid)) {
+                latsetDestinationReport[uuid] = rec;
+            } else {
+                latsetDestinationReport.Add(uuid, rec);
+            }
+
+            if (localOnly) {
+                destLogger.Info($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
+            } else {
+                Task.Run(() => {
+                    try {
+                        this.hubProxy.Invoke("SendDestinationReport", executionNodeID, uuid, messagesSent, rate);
+                    } catch (Exception ex) {
+                        Debug.WriteLine("Error call SendDestination Report " + ex.Message);
+                    }
                 });
             }
         }
@@ -284,20 +316,6 @@ namespace LoadInjector.RunTime.EngineComponents {
                 logger.Info("Lock VM");
             } else {
                 Task.Run(() => { this.hubProxy.Invoke("LockVM", executionNodeID, uuid, l); });
-            }
-        }
-
-        internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
-            if (localOnly) {
-                destLogger.Info($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
-            } else {
-                Task.Run(() => {
-                    try {
-                        this.hubProxy.Invoke("SendDestinationReport", executionNodeID, uuid, messagesSent, rate);
-                    } catch (Exception ex) {
-                        Debug.WriteLine("Error call SendDestination Report " + ex.Message);
-                    }
-                });
             }
         }
 

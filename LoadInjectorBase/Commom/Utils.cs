@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using System.Xml;
 
 namespace LoadInjectorBase.Common {
@@ -66,6 +62,24 @@ namespace LoadInjectorBase.Common {
             XmlDocument document = ExtractArchiveToDirectory(temmpArchiveFileName, archiveRoot, archiveFileName, addUniqueID);
             File.Delete(temmpArchiveFileName);
             return document;
+        }
+
+        public static string FormatXML(string xml) {
+            try {
+                StringBuilder sb = new StringBuilder();
+                TextWriter tr = new StringWriter(sb);
+                XmlTextWriter wr = new XmlTextWriter(tr) {
+                    Formatting = Formatting.Indented
+                };
+
+                XmlDocument doc = new XmlDocument();
+                doc.LoadXml(xml);
+                doc.Save(wr);
+                wr.Close();
+                return sb.ToString();
+            } catch (Exception) {
+                return null;
+            }
         }
     }
 }

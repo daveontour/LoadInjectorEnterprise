@@ -1,34 +1,24 @@
-﻿using LoadInjector.RunTime;
-using LoadInjector.RunTime.Views;
+﻿using LoadInjector.RunTime.Views;
 using LoadInjectorCommandCentre;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace LoadInjectorCommanCentre {
 
     public partial class MainWindow : Window, INotifyPropertyChanged {
         private CCController cccontroller;
 
-        private ObservableCollection<ExecutionRecordClass> _myCollection = new ObservableCollection<ExecutionRecordClass>();
         private string filterNodeID;
+        public string filterConnectionID;
         private ExecutionRecords _records;
         private int gridRefreshRate = 1;
+        public ControlWriter consoleWriter;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._records; }
@@ -45,13 +35,12 @@ namespace LoadInjectorCommanCentre {
         public void OnPropertyChanged(string propName) {
             try {
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
-            } catch (Exception ex) {
-                Console.WriteLine("On Property Error. " + ex.Message);
+            } catch (Exception) {
+                //NO-OP
             }
         }
 
         private Visibility vis = Visibility.Collapsed;
-        public ControlWriter consoleWriter;
 
         public Visibility ShowDetailPanel {
             get {
@@ -90,9 +79,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         private void ViewAllBtn_OnClick(object sender, RoutedEventArgs e) {
-            SetFilterCriteria(null);
-            cccontroller.RefreshClients(true);
-            ShowDetailPanel = Visibility.Collapsed;
+            cccontroller.ViewAll();
         }
 
         private void DisconnectAllBtn_OnClick(object sender, RoutedEventArgs e) {
@@ -100,16 +87,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         private void LocalClientBtn_OnClick(object sender, RoutedEventArgs e) {
-            Process process = new Process();
-            // Configure the process using the StartInfo properties.
-
-            string lir = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug\LoadInjectorRuntime.exe";
-            process.StartInfo.WorkingDirectory = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug";
-            process.StartInfo.FileName = lir;
-            process.StartInfo.Arguments = $"-server:http://localhost:6220/";
-            process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-
-            process.Start();
+            cccontroller.StartClients(1);
         }
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
@@ -120,6 +98,8 @@ namespace LoadInjectorCommanCentre {
                     if (r != null) {
                         r.MM = rec.MM;
                         r.Sent = rec.Sent;
+                        r.Name = rec.Name;
+                        r.Type = rec.Type;
                         OnPropertyChanged("RecordsCollection");
                     } else {
                         RecordsCollection.Add(rec);
@@ -134,6 +114,8 @@ namespace LoadInjectorCommanCentre {
 
         public void SetFilterCriteria(string nodeID, string ConnectionID = null) {
             this.filterNodeID = nodeID;
+            this.filterConnectionID = ConnectionID;
+
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     RecordsCollection.Clear();
@@ -178,10 +160,6 @@ namespace LoadInjectorCommanCentre {
             }
 
             cccontroller?.SetRefreshRate(this.gridRefreshRate);
-        }
-
-        private void assignBtn_Click(object sender, RoutedEventArgs e) {
-            Console.WriteLine(e);
         }
 
         private void Window_Closing(object sender, CancelEventArgs e) {

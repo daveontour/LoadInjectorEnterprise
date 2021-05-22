@@ -11,7 +11,7 @@
 
         <Style x:Key="ExecutionNode" TargetType="Grid">
             <Style.Triggers>
-                <DataTrigger Binding="{Binding Path=StatusText}" Value="Ready To Run">
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Ready to Execute">
                     <Setter Property="Background" Value="LawnGreen">
                     </Setter>
                 </DataTrigger>
@@ -26,11 +26,23 @@
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
                     <Setter Property="Background" Value="LightSalmon" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="No Active Destination">
+                    <Setter Property="Background" Value="OrangeRed" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Configuration Invalid">
+                    <Setter Property="Background" Value="OrangeRed" />
+                </DataTrigger>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Work Package Assigned">
                     <Setter Property="Background" Value="Yellow" />
                 </DataTrigger>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Un Assigned">
                     <Setter Property="Background" Value="LightGray" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Reset">
+                    <Setter Property="Background" Value="LightGray" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Stopped">
+                    <Setter Property="Background" Value="Yellow" />
                 </DataTrigger>
             </Style.Triggers>
         </Style>
@@ -38,6 +50,10 @@
         <Style x:Key="NodeLabel" TargetType="Label">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Waiting for next iteration">
                     <Setter Property="Foreground" Value="Black" />
                     <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
@@ -50,12 +66,20 @@
                     <Setter Property="Foreground" Value="Black" />
                     <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Waiting for next iteration">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
             </Style.Triggers>
         </Style>
 
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
             <Style.Triggers>
                 <DataTrigger Binding="{Binding Path=StatusText}" Value="Executing">
+                    <Setter Property="Foreground" Value="Black" />
+                    <Setter Property="FontStyle" Value="Italic" />
+                </DataTrigger>
+                <DataTrigger Binding="{Binding Path=StatusText}" Value="Waiting for next iteration">
                     <Setter Property="Foreground" Value="Black" />
                     <Setter Property="FontStyle" Value="Italic" />
                 </DataTrigger>
@@ -122,7 +146,7 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="105" Background="Bisque" Margin="5,5,5,5">
+    <Grid Height="105" Background="Brown" Margin="5,5,5,5">
 
         <Grid  Grid.Row="0"   Style="{DynamicResource ExecutionNode}">
             <Grid.RowDefinitions>

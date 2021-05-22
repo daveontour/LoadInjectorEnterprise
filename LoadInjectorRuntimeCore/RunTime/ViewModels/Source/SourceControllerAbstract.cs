@@ -508,7 +508,7 @@ namespace LoadInjector.RunTime.ViewModels {
         }
 
         public void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
-            clientHub.SourceReport(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
+            clientHub.SendSourceReport(this.executionNodeID, this.uuid, v, messagesSent, currentRate, messagesPerMinute);
         }
 
         public void ReportChain(string v, int messagesSent) {

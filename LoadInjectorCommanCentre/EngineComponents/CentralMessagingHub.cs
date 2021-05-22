@@ -14,6 +14,7 @@ using System.Net;
 using System.IO;
 using System.Text;
 using LoadInjector.RunTime;
+using LoadInjectorCommanCentre;
 
 [assembly: OwinStartup(typeof(LoadInjector.Runtime.EngineComponents.StartupHub))]
 
@@ -22,7 +23,7 @@ namespace LoadInjector.Runtime.EngineComponents {
     public class CentralMessagingHub {
 
         // Need to fix for new structure
-        public static ICCController iccController;
+        public static CCController iccController;
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
 
@@ -32,7 +33,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             get => GlobalHost.ConnectionManager.GetHubContext<MyHub>();
         }
 
-        public CentralMessagingHub(ICCController iccController) {
+        public CentralMessagingHub(CCController iccController) {
             CentralMessagingHub.iccController = iccController;
         }
 
@@ -40,7 +41,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             this.port = port;
         }
 
-        public void SetExecutionUI(ICCController iccController) {
+        public void SetExecutionUI(CCController iccController) {
             CentralMessagingHub.iccController = iccController;
         }
 
@@ -85,17 +86,13 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public override Task OnConnected() {
-            //string name = Context.User.Identity.Name;
-            //Console.WriteLine($"New Connection.  ConnectionID:{Context.ConnectionId}");
             CentralMessagingHub.iccController.InitialInterrogation(Context);
             return base.OnConnected();
         }
 
         public override Task OnDisconnected(bool stop) {
-            //string name = Context.User.Identity.Name;
-            //Console.WriteLine($"New Connection.  ConnectionID:{Context.ConnectionId}");
             CentralMessagingHub.iccController.Disconnect(Context);
-            return base.OnConnected();
+            return base.OnDisconnected(stop);
         }
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {
@@ -128,8 +125,8 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, status, Context);
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status) {
-            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, Context);
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, double>> latestDestinationReport) {
+            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, Context);
         }
 
         public void SetExecutionNodeStatus(string executionNodeID, string message) {
@@ -145,7 +142,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         public void SourceReport(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    CentralMessagingHub.iccController.UpdateLine(executionNodeID, uuid, message, messagesSent, currentRate, messagesPerMinute, Context);
+                    CentralMessagingHub.iccController.UpdateSourceLine(executionNodeID, uuid, message, messagesSent, currentRate, messagesPerMinute, Context);
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Source Report error. " + ex.Message);
                 }
@@ -192,7 +189,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         public void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    CentralMessagingHub.iccController.UpdateLine(executionNodeID, uuid, messagesSent, Context);
+                    CentralMessagingHub.iccController.UpdateDestinationLine(executionNodeID, uuid, messagesSent, Context);
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Source Report error. " + ex.Message);
                 }

@@ -278,6 +278,12 @@ namespace LoadInjector.RunTime {
         }
 
         public void RunLocal() {
+            if (state.Value != ClientState.Ready.Value) {
+                logger.Warn("Execute requested, but not in ready state");
+                clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state");
+                return;
+            }
+
             repeatsExecuted = 0;
             PrepareAsync().Wait();
             Run();
@@ -576,6 +582,11 @@ namespace LoadInjector.RunTime {
         }
 
         public async Task<bool> PrepareAsync(bool resetRepeats = false) {
+            if (state.Value != ClientState.Assigned.Value) {
+                clientHub.ConsoleMsg(executionNodeUuid, null, "Prepare requested, but no package assigned");
+                return false;
+            }
+
             if (resetRepeats) {
                 executedRepeats = 0;
             }
