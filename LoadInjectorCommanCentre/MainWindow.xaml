@@ -7,7 +7,8 @@
         xmlns:local="clr-namespace:LoadInjectorCommandCentre"
         mc:Ignorable="d"
         Title="Load Injector Command Centre" Height="800" Width="1600"
-        Closing="Window_Closing">
+        Closing="Window_Closing"
+        ContentRendered="Window_ContentRendered">
 
     <Window.Resources>
         <Style x:Key="RoundCorner" TargetType="{x:Type Button}">
@@ -101,8 +102,8 @@
                 <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
@@ -164,7 +165,11 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="30" />
                     </Grid.RowDefinitions>
-                    <Label Grid.Row="0" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                    <DockPanel  Grid.Row="0">
+                        <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                        <Button DockPanel.Dock="Right" FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Right"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,10,0" Visibility="{Binding Path=ShowDetailPanel}" />
+                    </DockPanel>
+
                     <DataGrid Grid.Row="1" Name="statusGrid"
                           AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"

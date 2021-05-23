@@ -59,6 +59,36 @@ namespace LoadInjector.Runtime.EngineComponents {
 
             Console.WriteLine("Hub Started On" + url);
         }
+
+        public void StartHub(int port) {
+            // This will *ONLY* bind to localhost, if you want to bind to all addresses
+            // use http://*:8080 to bind to all addresses.
+            // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
+            // for more information.
+            this.port = port;
+            string url = $"http://localhost:{port}";
+            try {
+                WebApp.Start<StartupHub>(url);
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.WriteLine("Hub Started On" + url);
+        }
+
+        public void StartHub(string url) {
+            // This will *ONLY* bind to localhost, if you want to bind to all addresses
+            // use http://*:8080 to bind to all addresses.
+            // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
+            // for more information.
+            try {
+                WebApp.Start<StartupHub>(url);
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.WriteLine("Hub Started On" + url);
+        }
     }
 
     internal class StartupHub {
@@ -97,17 +127,6 @@ namespace LoadInjector.Runtime.EngineComponents {
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {
             CentralMessagingHub.iccController.SetConsoleMessage(message);
-            logger.Info(message);
-        }
-
-        public void SetStatusLabel(string executionnodeID, string node, string message) {
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    //  CentralMessagingHub.executionUI.StatusLabel = message;
-                } catch (Exception ex) {
-                    Debug.WriteLine("Setting status label error. " + ex.Message);
-                }
-            });
         }
 
         public void SetSourceLineOutput(string executionnodeID, string uuid, string s) {
@@ -155,20 +174,6 @@ namespace LoadInjector.Runtime.EngineComponents {
                     //      CentralMessagingHub.executionUI.TriggerLabel = message;
                 } catch (Exception ex) {
                     Debug.WriteLine("Setting Trigger Label error. " + ex.Message);
-                }
-            });
-        }
-
-        public void SetButtonStatus(string executionnodeID, string node, bool execute, bool prepare, bool stop) {
-            Console.WriteLine($"Set Button Status - Host execute: {execute}, prepare:{prepare}, stop:{stop}");
-
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    //         CentralMessagingHub.executionUI.SetExecuteBtnEnabled(execute);
-                    //          CentralMessagingHub.executionUI.SetPrepareBtnEnabled(prepare);
-                    //          CentralMessagingHub.executionUI.SetStopBtnEnabled(stop);
-                } catch (Exception ex) {
-                    Debug.WriteLine("Setting button status error. " + ex.Message);
                 }
             });
         }

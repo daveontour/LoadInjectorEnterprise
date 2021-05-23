@@ -154,6 +154,7 @@ namespace LoadInjector.RunTime {
         }
 
         public void Reset() {
+            Stop();
             dataModel = null;
 
             repeatsExecuted = 0;
@@ -188,6 +189,7 @@ namespace LoadInjector.RunTime {
             rateDrivenLines.Clear();
             flightSets.Clear();
             clientHub?.consoleMessages?.Clear();
+            clientHub?.consoleMessages.Clear();
             this.state = ClientState.Reset;
             clientHub.SetStatus(executionNodeUuid);
         }
@@ -950,6 +952,13 @@ namespace LoadInjector.RunTime {
         }
 
         public void Stop(bool manual = false) {
+            if (state.Value != ClientState.Executing.Value ||
+                state.Value != ClientState.ExecutionPending.Value ||
+                state.Value != ClientState.WaitingNextIteration.Value
+                ) {
+                clientHub.ConsoleMsg(executionNodeUuid, null, "Stop received, but not in executing state");
+            }
+
             try {
                 this.repetitionTimer?.Stop();
             } catch (Exception ex) {

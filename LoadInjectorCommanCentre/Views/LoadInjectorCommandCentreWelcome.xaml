@@ -1,0 +1,67 @@
+﻿<Window x:Class="LoadInjectorCommanCentre.Views.LoadInjectorCommandCentreWelcome"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:local="clr-namespace:LoadInjectorCommanCentre.Views"
+        mc:Ignorable="d"
+        Title="Load Injector Command Centre"
+        Height="500"
+        Width="600"
+        MinHeight="10"
+        MinWidth="300"
+        Background="AliceBlue"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="200" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <StackPanel  Grid.Column="0" Grid.Row="0"  HorizontalAlignment="Center" Orientation="Vertical">
+
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="36" Margin="0,0" FontFamily="Dubai" FontStyle="Italic" Height="53" >Load Injector</TextBlock>
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" FontSize="24" Margin="0,0" FontFamily="Dubai" Height="37"  >Runtime Command Centre</TextBlock>
+            <TextBlock TextWrapping="Wrap" TextAlignment="Center" Margin="5,10" Height="18" ><Run Text="Copyright: David Burton, 2020" /></TextBlock>
+        </StackPanel>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="5*" />
+                <ColumnDefinition Width="5*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Client Hub URL:</Label>
+            <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Web Server URL:</Label>
+            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Initial number of local execution nodes:</Label>
+            <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Auto Assign Archive:</Label>
+            <TextBox Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Mode=TwoWay, Path=SignalRURL}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            <TextBox Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Text="{Binding Mode=TwoWay, Path=ServerURL}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            <xctk:IntegerUpDown Grid.Row="2" Grid.Column="1" Name="myUpDownControl"  Width="50" HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Value="{Binding Mode=TwoWay, Path=NumClients}" Maximum="10" Minimum="0" Padding="0,0,10,0" />
+            <DockPanel Grid.Row="3" Grid.Column="1" LastChildFill="True">
+                <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" DockPanel.Dock="Right">
+                    <Button  Height="24" Margin="0,0,5,0" Width="50" DockPanel.Dock="Right" Click="SelectAutoArchive_Click">Select</Button>
+                    <Button  Height="24" Margin="0,0,5,0" Width="50" DockPanel.Dock="Right" Click="ClearAutoArchive_Click">Clear</Button>
+                </StackPanel>
+                <TextBox  Text="{Binding Mode=TwoWay, Path=AutoAssignArchive}" Margin="0,0,5,0"   Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            </DockPanel>
+        </Grid>
+
+        <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,0,10" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">
+            <Button  Width="100" Name="okButton" Click="okButton_Click" IsDefault="True"  Margin="5,0,5,0">OK</Button>
+        </StackPanel>
+    </Grid>
+</Window>

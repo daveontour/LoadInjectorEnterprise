@@ -1,4 +1,5 @@
 ﻿using LoadInjector.RunTime.Views;
+using LoadInjectorCommanCentre.Views;
 using LoadInjectorCommandCentre;
 using System;
 using System.Collections.ObjectModel;
@@ -19,6 +20,10 @@ namespace LoadInjectorCommanCentre {
         private ExecutionRecords _records;
         private int gridRefreshRate = 1;
         public ControlWriter consoleWriter;
+        private int numClients = 1;
+        private string webServerURL = "http://localhost:49152/";
+        private string signalRURL = "http://localhost:6220/";
+        private string autoArchiveFile;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._records; }
@@ -27,9 +32,6 @@ namespace LoadInjectorCommanCentre {
         public MainWindow() {
             InitializeComponent();
             DataContext = this;
-            cccontroller = new CCController(this);
-
-            _records = (ExecutionRecords)this.Resources["records"];
         }
 
         public void OnPropertyChanged(string propName) {
@@ -51,6 +53,11 @@ namespace LoadInjectorCommanCentre {
                 OnPropertyChanged("ShowDetailPanel");
             }
         }
+
+        public int NumClients { get { return numClients; } set { numClients = value; } }
+        public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
+        public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
+        public string AutoAssignArchive { get { return autoArchiveFile; } set { autoArchiveFile = value; OnPropertyChanged("AutoAssignArchive"); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -164,6 +171,21 @@ namespace LoadInjectorCommanCentre {
 
         private void Window_Closing(object sender, CancelEventArgs e) {
             cccontroller.Close();
+        }
+
+        private void resetAllBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.MessageHub.Hub.Clients.All.Reset();
+        }
+
+        private void Window_ContentRendered(object sender, EventArgs e) {
+            LoadInjectorCommandCentreWelcome welcome = new LoadInjectorCommandCentreWelcome(this) {
+                Owner = this,
+                DataContext = this
+            };
+            welcome.ShowDialog();
+
+            cccontroller = new CCController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
+            _records = (ExecutionRecords)this.Resources["records"];
         }
     }
 }

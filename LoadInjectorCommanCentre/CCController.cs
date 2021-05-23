@@ -20,29 +20,63 @@ namespace LoadInjectorCommanCentre {
 
     public class CCController {
         public MainWindow View { get; set; }
+        public string AutoAssignArchive { get; private set; }
         public CentralMessagingHub MessageHub { get; set; }
         public string ArchiveRoot { get; }
 
         public string WebServerURL { get; }
         public SimpleHTTPServer WebServer { get; }
+        public int NumClients { get; set; }
+        public int SignalRPort { get; set; }
+        public string ServerURL { get; }
 
         private Dictionary<string, ClientControl> clients = new Dictionary<string, ClientControl>();
 
         private int gridRefreshRate = 1;
         private Timer refreshTimer;
 
-        public CCController(MainWindow mainWindow) {
+        //public CCController(MainWindow mainWindow) {
+        //    View = mainWindow;
+        //    MessageHub = new CentralMessagingHub(this);
+        //    MessageHub.StartHub();
+
+        //    ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
+        //    int webport = GetAvailablePort(49152);
+        //    WebServerURL = $"http://localhost:{webport}/";
+        //    WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
+        //    Console.WriteLine("Webserver Port: " + webport);
+
+        //    StartClients(4);
+        //}
+
+        public CCController(MainWindow mainWindow, int numClients, string signalRURL, string serverURL, string autoAssignArchive) {
+            NumClients = numClients;
+
+            ServerURL = serverURL;
+
             View = mainWindow;
-            MessageHub = new CentralMessagingHub(this);
-            MessageHub.StartHub();
 
             ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
-            int webport = GetAvailablePort(49152);
-            WebServerURL = $"http://localhost:{webport}/";
-            WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
-            Console.WriteLine("Webserver Port: " + webport);
 
-            StartClients(4);
+            this.AutoAssignArchive = autoAssignArchive;
+            if (AutoAssignArchive != null) {
+                string[] a = AutoAssignArchive.Split('\\');
+                string safeName = a[a.Length - 1];
+                File.Copy(AutoAssignArchive, ArchiveRoot + "\\" + safeName, true);
+                AutoAssignArchive = safeName;
+            }
+
+            MessageHub = new CentralMessagingHub(this);
+            MessageHub.StartHub(signalRURL);
+
+            int webport = GetAvailablePort(49152);
+            // WebServerURL = $"http://localhost:{webport}/";
+            WebServerURL = serverURL;
+
+            WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
+            //Console.WriteLine("Webserver Port: " + webport);
+
+            StartClients(NumClients);
         }
 
         public void Close() {
@@ -198,6 +232,10 @@ namespace LoadInjectorCommanCentre {
             }
 
             MessageHub.Hub.Clients.Client(context.ConnectionId).Interrogate();
+
+            if (AutoAssignArchive != null) {
+                MessageHub.Hub.Clients.Client(context.ConnectionId).RetrieveArchive(WebServerURL + "/" + AutoAssignArchive);
+            }
         }
 
         public static int GetAvailablePort(int startingPort) {
@@ -444,7 +482,7 @@ namespace LoadInjectorCommanCentre {
 
         public void SetConsoleMessage(string message) {
             Application.Current.Dispatcher.Invoke(delegate {
-                View.consoleWriter.WriteLine(message);
+                View.consoleWriter.WriteLineNoDate(message);
             });
         }
     }

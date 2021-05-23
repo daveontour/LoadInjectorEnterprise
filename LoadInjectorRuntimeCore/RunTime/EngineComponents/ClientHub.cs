@@ -102,6 +102,10 @@ namespace LoadInjector.RunTime.EngineComponents {
                     ngExecutionController.Stop();
                 });
 
+                hubProxy.On("Reset", () => {
+                    ngExecutionController.Reset();
+                });
+
                 hubProxy.On("Disconnect", () => {
                     hubConnection.Stop();
                     ngExecutionController.ProgramStop();
@@ -229,6 +233,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 logger.Info(s);
             } else {
                 if (sendDetails) {
+                    //string message = $"[{DateTime.Now:HH:mm:ss.ffff}] {s}";
                     Task.Run(() => {
                         logger.Info($"ConsoleMag: {uuid}, {s}");
                         try {
@@ -239,7 +244,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     });
                     consoleMessages.AppendLine(s);
                 } else {
-                    consoleMessages.AppendLine(s);
+                    consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
                 }
             }
         }

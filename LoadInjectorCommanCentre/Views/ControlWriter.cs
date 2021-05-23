@@ -84,6 +84,19 @@ namespace LoadInjector.RunTime.Views {
                 });
         }
 
+        public void WriteLineNoDate(string value) {
+            textbox.Dispatcher.Invoke(
+                () => {
+                    if (textbox.Text.Length > 10000) {
+                        textbox.Text = textbox.Text.Substring(2000);
+                    }
+                    textbox.Text += $"{value}\n";
+                    if (!DisableScroll) {
+                        textbox.ScrollToEnd();
+                    }
+                });
+        }
+
         public void WriteLineText(string value) {
             textbox.Dispatcher.Invoke(
                 () => {
