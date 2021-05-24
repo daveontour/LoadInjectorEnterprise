@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.IO.Compression;
+using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Xml;
 
@@ -62,6 +64,20 @@ namespace LoadInjectorBase.Common {
             XmlDocument document = ExtractArchiveToDirectory(temmpArchiveFileName, archiveRoot, archiveFileName, addUniqueID);
             File.Delete(temmpArchiveFileName);
             return document;
+        }
+
+        public static int GetAvailablePort(int startingPort) {
+            if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
+            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
+
+            var connectionsEndpoints = ipGlobalProperties.GetActiveTcpConnections().Select(c => c.LocalEndPoint);
+            var tcpListenersEndpoints = ipGlobalProperties.GetActiveTcpListeners();
+            var udpListenersEndpoints = ipGlobalProperties.GetActiveUdpListeners();
+            var portsInUse = connectionsEndpoints.Concat(tcpListenersEndpoints)
+                .Concat(udpListenersEndpoints)
+                .Select(e => e.Port);
+
+            return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
 
         public static string FormatXML(string xml) {

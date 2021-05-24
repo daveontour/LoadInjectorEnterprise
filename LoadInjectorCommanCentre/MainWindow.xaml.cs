@@ -102,7 +102,8 @@ namespace LoadInjectorCommanCentre {
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
-                Application.Current.Dispatcher.Invoke(delegate {
+                Application.Current.Dispatcher.Invoke(delegate
+                {
                     ExecutionRecordClass r = RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
                     if (r != null) {
@@ -126,7 +127,8 @@ namespace LoadInjectorCommanCentre {
             this.filterNodeID = nodeID;
             this.filterConnectionID = ConnectionID;
 
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     RecordsCollection.Clear();
                     statusGrid.Items.Refresh();
@@ -193,6 +195,10 @@ namespace LoadInjectorCommanCentre {
 
         private void autoStartBtn_Click(object sender, RoutedEventArgs e) {
             AutoExecute = false;
+        }
+
+        private void completionReportBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.MessageHub.Hub.Clients.All.CompletionReport();
         }
     }
 }

@@ -151,8 +151,6 @@ namespace LoadInjector.Runtime.EngineComponents {
                     // Intentionally not doing anything
                 }
             }
-
-            //   _listener.BeginGetContext(Context, _listener);
         }
 
         private void Context(IAsyncResult result) {

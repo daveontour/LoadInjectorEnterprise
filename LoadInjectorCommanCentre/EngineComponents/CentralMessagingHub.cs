@@ -1,20 +1,17 @@
-﻿using System;
-using System.Diagnostics;
+﻿using LoadInjector.RunTime;
+using LoadInjectorCommanCentre;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.Owin;
-using Microsoft.Owin.Hosting;
-using Owin;
 using Microsoft.Owin.Cors;
-using System.Windows;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.Owin.Hosting;
 using NLog;
-using System.Net;
-using System.IO;
-using System.Text;
-using LoadInjector.RunTime;
-using LoadInjectorCommanCentre;
+using Owin;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows;
 
 [assembly: OwinStartup(typeof(LoadInjector.Runtime.EngineComponents.StartupHub))]
 
@@ -130,7 +127,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void SetSourceLineOutput(string executionnodeID, string uuid, string s) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     //  var ui = CentralMessagingHub.executionUI.SourceUIMap[uuid];
                     //     ui?.SetOutput(s);
@@ -148,8 +146,20 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, Context);
         }
 
+        public void CompletionReportResponse(string executionNodeID, string report) {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
+                try {
+                    CentralMessagingHub.iccController.SetCompletionReport(executionNodeID, report, Context);
+                } catch (Exception ex) {
+                    Debug.WriteLine("Setting Source Report error. " + ex.Message);
+                }
+            });
+        }
+
         public void SetExecutionNodeStatus(string executionNodeID, string message) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     CentralMessagingHub.iccController.SetExecutionNodeStatus(executionNodeID, message, Context);
                 } catch (Exception ex) {
@@ -159,7 +169,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void SourceReport(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     CentralMessagingHub.iccController.UpdateSourceLine(executionNodeID, uuid, message, messagesSent, currentRate, messagesPerMinute, Context);
                 } catch (Exception ex) {
@@ -169,7 +180,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void SetTriggerLabel(string executionnodeID, string node, string message) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     //      CentralMessagingHub.executionUI.TriggerLabel = message;
                 } catch (Exception ex) {
@@ -179,7 +191,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void ClearTriggerData(string executionnodeID, string node) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     //           CentralMessagingHub.executionUI.SchedTriggers.Clear();
                     //           CentralMessagingHub.executionUI.OnPropertyChanged("lvTriggers");
@@ -192,7 +205,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     CentralMessagingHub.iccController.UpdateDestinationLine(executionNodeID, uuid, messagesSent, Context);
                 } catch (Exception ex) {
@@ -202,7 +216,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
-            Task.Run(() => {
+            Task.Run(() =>
+            {
                 TriggerRecord remove = null;
 
                 //foreach (TriggerRecord r in CentralMessagingHub.executionUI.SchedTriggers) {
@@ -246,7 +261,8 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void SetSchedTrigger(string executionNodeUuid, List<TriggerRecord> sortedTriggers) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 //CentralMessagingHub.executionUI.SchedTriggers.Clear();
 
                 //foreach (TriggerRecord t in sortedTriggers) {

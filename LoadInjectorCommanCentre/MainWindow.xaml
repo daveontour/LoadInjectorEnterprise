@@ -6,7 +6,7 @@
         xmlns:scm="clr-namespace:System.ComponentModel;assembly=WindowsBase"
         xmlns:local="clr-namespace:LoadInjectorCommandCentre"
         mc:Ignorable="d"
-        Title="Load Injector Command Centre" Height="800" Width="1600"
+        Title="Load Injector Command Centre" Height="800" Width="1400"
         Closing="Window_Closing"
         ContentRendered="Window_ContentRendered">
 
@@ -90,14 +90,28 @@
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="40" />
+            <RowDefinition Height="70" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Grid  Grid.Row="0" Background="Aqua">
             <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="AliceBlue">
-                <Button FontSize="10" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Center"  VerticalAlignment="Center" Width="80" Height="30" Margin="10,0,0,0" />
-                <Button FontSize="10" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="DeepSkyBlue">
+                    <Grid Height="45" Width="174" >
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="15"/>
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="87"/>
+                            <ColumnDefinition Width="82"/>
+                        </Grid.ColumnDefinitions>
+                        <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Left"   Width="80" Height="26" Margin="5,0,0,0" />
+                        <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Left"   Width="80" Height="26"  Margin="2,0,0,0" />
+                        <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="44,0.5,24,-9" Width="101">Execution Control
+                        </Label>
+                    </Grid>
+                </Border>
                 <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
@@ -105,6 +119,7 @@
                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Disable Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="All Completion Report" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">

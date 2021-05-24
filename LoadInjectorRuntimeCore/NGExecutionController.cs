@@ -1,8 +1,13 @@
-﻿using LoadInjector.RunTime.ViewModels;
+﻿using LoadInjector.RunTime.EngineComponents;
+using LoadInjector.RunTime.ViewModels;
+using LoadInjector.RuntimeCore;
+using LoadInjectorBase;
+using LoadInjectorBase.Commom;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -11,12 +16,6 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
 using System.Xml.Linq;
-using LoadInjector.RunTime.EngineComponents;
-using LoadInjector.RuntimeCore;
-using LoadInjectorBase;
-using System.IO;
-using System.IO.Compression;
-using LoadInjectorBase.Commom;
 
 namespace LoadInjector.RunTime {
 
@@ -35,7 +34,6 @@ namespace LoadInjector.RunTime {
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
-
         public static readonly Logger sourceLogger = LogManager.GetLogger("sourceLogger");
 
         public readonly List<FlightNode> flights = new List<FlightNode>();
@@ -108,7 +106,6 @@ namespace LoadInjector.RunTime {
 
         public string executionNodeUuid;
         public bool slaveMode = false;
-        private int centralHubPort;
         private Timer executionTimer;
         private int repeatsExecuted = 0;
         private Timer repetitionTimer;
@@ -606,7 +603,8 @@ namespace LoadInjector.RunTime {
             bool prepareOK = true;
 
             if (Parameters.SITAAMS && requiresFlights) {
-                await Task.Run(() => {
+                await Task.Run(() =>
+                {
                     flights.Clear();
                     arrflights.Clear();
                     depflights.Clear();
@@ -1225,6 +1223,10 @@ namespace LoadInjector.RunTime {
 
         private void ClearTriggerData() {
             clientHub.ClearTriggerData(this.executionNodeUuid, null);
+        }
+
+        public void ProduceCompletionReport() {
+            clientHub.SendCompletionReport(this.executionNodeUuid, "Competion Report Requested");
         }
     }
 }
