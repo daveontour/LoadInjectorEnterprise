@@ -24,6 +24,7 @@ namespace LoadInjectorCommanCentre {
         private string webServerURL = "http://localhost:49152/";
         private string signalRURL = "http://localhost:6220/";
         private string autoArchiveFile;
+        private bool autoExecute = true;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._records; }
@@ -58,6 +59,8 @@ namespace LoadInjectorCommanCentre {
         public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
         public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
         public string AutoAssignArchive { get { return autoArchiveFile; } set { autoArchiveFile = value; OnPropertyChanged("AutoAssignArchive"); } }
+
+        public bool AutoExecute { get { return autoExecute; } set { autoExecute = value; OnPropertyChanged("AutoExecute"); } }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -186,6 +189,10 @@ namespace LoadInjectorCommanCentre {
 
             cccontroller = new CCController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
             _records = (ExecutionRecords)this.Resources["records"];
+        }
+
+        private void autoStartBtn_Click(object sender, RoutedEventArgs e) {
+            AutoExecute = false;
         }
     }
 }

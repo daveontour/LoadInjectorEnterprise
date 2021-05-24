@@ -68,7 +68,13 @@ namespace LoadInjector.RunTime.EngineComponents {
                     sendDetails = true;
 
                     // Send the accumulated Console Messages.
-                    ConsoleMsg(ngExecutionController.executionNodeUuid, null, consoleMessages.ToString());
+                    Task.Run(() => {
+                        try {
+                            this.hubProxy.Invoke("ConsoleMsg", ngExecutionController.executionNodeUuid, null, consoleMessages.ToString());
+                        } catch (Exception ex) {
+                            logger.Info($"Console Message Error. {ex.Message}");
+                        }
+                    });
                 });
 
                 hubProxy.On("PrepareAndExecute", () => {
@@ -233,16 +239,15 @@ namespace LoadInjector.RunTime.EngineComponents {
                 logger.Info(s);
             } else {
                 if (sendDetails) {
-                    //string message = $"[{DateTime.Now:HH:mm:ss.ffff}] {s}";
                     Task.Run(() => {
                         logger.Info($"ConsoleMag: {uuid}, {s}");
                         try {
-                            this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, s);
+                            this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, $"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
                         } catch (Exception ex) {
                             logger.Info($"Console Message Error. {ex.Message}");
                         }
                     });
-                    consoleMessages.AppendLine(s);
+                    consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
                 } else {
                     consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
                 }

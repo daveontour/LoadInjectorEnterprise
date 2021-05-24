@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Xml;
 using LoadInjector.Runtime.EngineComponents;
+using LoadInjectorBase.Commom;
 using LoadInjectorBase.Common;
 using LoadInjectorCommanCentre.Views;
 using LoadInjectorCommandCentre;
@@ -155,6 +156,7 @@ namespace LoadInjectorCommanCentre {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
                     View.RecordsCollection.Clear();
                     View.statusGrid.Items.Refresh();
+                    View.ShowDetailPanel = Visibility.Collapsed;
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -478,6 +480,15 @@ namespace LoadInjectorCommanCentre {
                     client.SetStatusText(message);
                 }
             });
+
+            if (message == ClientState.Assigned.Value && View.AutoExecute) {
+                MessageHub.Hub.Clients.Client(context.ConnectionId).ClearAndPrepare();
+            }
+
+            if (message == ClientState.Ready.Value && View.AutoExecute) {
+                SetRefreshRate(gridRefreshRate);
+                MessageHub.Hub.Clients.Client(context.ConnectionId).Execute();
+            }
         }
 
         public void SetConsoleMessage(string message) {

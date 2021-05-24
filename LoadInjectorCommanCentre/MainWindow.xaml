@@ -104,6 +104,7 @@
                 <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
                 <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
+                <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Disable Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
             </StackPanel>
         </Grid>
         <Grid Grid.Row="1">
