@@ -88,105 +88,124 @@
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
     </Window.Resources>
-    <Grid>
+    <Grid  Background="#252526">
         <Grid.RowDefinitions>
-            <RowDefinition Height="70" />
+            <RowDefinition Height="60" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="20" />
         </Grid.RowDefinitions>
 
-        <Grid  Grid.Row="0" Background="Aqua">
-            <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="AliceBlue">
-                <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="DeepSkyBlue">
-                    <Grid Height="45" Width="174" >
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="25"/>
-                            <RowDefinition Height="15"/>
-                        </Grid.RowDefinitions>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="87"/>
-                            <ColumnDefinition Width="82"/>
-                        </Grid.ColumnDefinitions>
-                        <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Left"   Width="80" Height="26" Margin="5,0,0,0" />
-                        <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Left"   Width="80" Height="26"  Margin="2,0,0,0" />
-                        <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" Margin="44,0.5,24,-9" Width="101">Execution Control
-                        </Label>
-                    </Grid>
-                </Border>
-                <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Disable Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-                <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="All Completion Report" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,0,0" />
-            </StackPanel>
+        <Grid  Grid.Row="0"  Background="#252526">
+            <Border BorderBrush="SlateBlue" Background="#252526">
+                <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="#252526">
+                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
+                                <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Left"   Width="80" Height="30" Margin="2,0,0,0" />
+                                <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Left"   Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Execution Control</Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
+                                <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Add Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Client Control</Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                            <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
+                                <Button FontSize="10" x:Name="autoAssignBtn" Click="autoStartBtn_Click"  Content="Auto Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="All Completion Report" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="statusBtn" Click="completionReportBtn_Click"  Content="Status" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Command Center Control</Label>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
         </Grid>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="365" />
-                <ColumnDefinition Width="6*" />
-            </Grid.ColumnDefinitions>
+        <Border Grid.Row="1" BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,2,2,2">
+            <Grid Margin="4,0,4,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="365" />
+                    <ColumnDefinition Width="6*" />
+                </Grid.ColumnDefinitions>
 
-            <Grid Grid.Column="0" Background="AliceBlue">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="35"></RowDefinition>
-                    <RowDefinition Height="*"></RowDefinition>
-                </Grid.RowDefinitions>
-                <Label Grid.Row="0" FontWeight="Bold" FontSize="14">Connected  Clients</Label>
-                <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                    <StackPanel FlowDirection="LeftToRight"  x:Name ="clientControlStack" Grid.Row="0" Orientation="Vertical"></StackPanel>
-                </ScrollViewer>
-            </Grid>
-            <DockPanel Grid.Column="1" LastChildFill="True" Background="AliceBlue">
-
-                <TabControl DockPanel.Dock="Bottom" Height="400" Visibility="{Binding Path=ShowDetailPanel}" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock Text="Output"  FontSize="14" />
-                        </TabItem.Header>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <TextBox x:Name="outputConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                            <CheckBox x:Name="scrollToBottonCheck" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0" IsChecked="{Binding Path=DisableScroll, Mode=TwoWay}"  Content="Disable Auto Scroll" Grid.Column="4"></CheckBox>
-                        </Grid>
-                    </TabItem>
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock Text="Configuration"  FontSize="14" />
-                        </TabItem.Header>
-                        <TextBox x:Name="configConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="2" />
-                    </TabItem>
-                    <TabItem>
-                        <TabItem.Header>
-                            <TextBlock Text="Completion Report"  FontSize="14" />
-                        </TabItem.Header>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <TextBox x:Name="completionReport"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                            <Button x:Name="saveReportBtn" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
-                        </Grid>
-                    </TabItem>
-                </TabControl>
-
-                <Grid Background="AliceBlue">
+                <Grid Grid.Column="0" Background="AliceBlue">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="35"></RowDefinition>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="30" />
+                        <RowDefinition Height="*"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <DockPanel  Grid.Row="0">
-                        <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
-                        <Button DockPanel.Dock="Right" FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Right"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,10,0" Visibility="{Binding Path=ShowDetailPanel}" />
-                    </DockPanel>
+                    <Label Grid.Row="0" FontWeight="Bold" FontSize="14">Connected  Clients</Label>
+                    <ScrollViewer Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+                        <StackPanel FlowDirection="LeftToRight"  x:Name ="clientControlStack" Grid.Row="0" Orientation="Vertical"></StackPanel>
+                    </ScrollViewer>
+                </Grid>
+                <DockPanel Grid.Column="1" LastChildFill="True" Background="AliceBlue">
 
-                    <DataGrid Grid.Row="1" Name="statusGrid"
+                    <TabControl DockPanel.Dock="Bottom" Height="400" Visibility="{Binding Path=ShowDetailPanel}" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
+                        <TabItem>
+                            <TabItem.Header>
+                                <TextBlock Text="Output"  FontSize="14" />
+                            </TabItem.Header>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="20"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBox x:Name="outputConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
+                                <CheckBox x:Name="scrollToBottonCheck" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0" IsChecked="{Binding Path=DisableScroll, Mode=TwoWay}"  Content="Disable Auto Scroll" Grid.Column="4"></CheckBox>
+                            </Grid>
+                        </TabItem>
+                        <TabItem>
+                            <TabItem.Header>
+                                <TextBlock Text="Configuration"  FontSize="14" />
+                            </TabItem.Header>
+                            <TextBox x:Name="configConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="2" />
+                        </TabItem>
+                        <TabItem>
+                            <TabItem.Header>
+                                <TextBlock Text="Completion Report"  FontSize="14" />
+                            </TabItem.Header>
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"></RowDefinition>
+                                    <RowDefinition Height="20"></RowDefinition>
+                                </Grid.RowDefinitions>
+                                <TextBox x:Name="completionReport"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
+                                <Button x:Name="saveReportBtn" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
+                            </Grid>
+                        </TabItem>
+                    </TabControl>
+
+                    <Grid Background="AliceBlue">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="35"></RowDefinition>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="30" />
+                        </Grid.RowDefinitions>
+                        <DockPanel  Grid.Row="0">
+                            <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                            <Button DockPanel.Dock="Right" FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Right"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,10,0" Visibility="{Binding Path=ShowDetailPanel}" />
+                        </DockPanel>
+
+                        <DataGrid Grid.Row="1" Name="statusGrid"
                           AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"
                           IsReadOnly="True"
@@ -195,97 +214,101 @@
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           CanUserAddRows="False" Grid.ColumnSpan="2"
                           Margin="0,0,2,0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Left" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Left" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                        <DataGrid.GroupStyle>
-                            <!-- Style for groups at top level. -->
-                            <GroupStyle>
-                                <GroupStyle.ContainerStyle>
-                                    <Style TargetType="{x:Type GroupItem}">
-                                        <Setter Property="Margin" Value="0,0,0,5" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                    <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
-                                                        <Expander.Header>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
-                                                                <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
-                                                            </StackPanel>
-                                                        </Expander.Header>
-                                                        <Expander.Content>
-                                                            <ItemsPresenter />
-                                                        </Expander.Content>
-                                                    </Expander>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </GroupStyle.ContainerStyle>
-                            </GroupStyle>
-                            <!-- Style for groups under the top level.-->
-                            <GroupStyle>
-                                <GroupStyle.HeaderTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Background="LightBlue">
-                                            <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GroupStyle.HeaderTemplate>
-                            </GroupStyle>
-                        </DataGrid.GroupStyle>
-                    </DataGrid>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
-                        <Label Margin="0,0,0,0">Update Frequency:</Label>
-                        <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
-                            <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
-                            <ComboBoxItem>3 seconds</ComboBoxItem>
-                            <ComboBoxItem>10 seconds</ComboBoxItem>
-                            <ComboBoxItem>Continuous</ComboBoxItem>
-                        </ComboBox>
-                    </StackPanel>
-                </Grid>
-            </DockPanel>
-        </Grid>
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Left" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Name" Binding="{Binding Name}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Left" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                            <Setter Property="Foreground" Value="Black" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                            <DataGrid.GroupStyle>
+                                <!-- Style for groups at top level. -->
+                                <GroupStyle>
+                                    <GroupStyle.ContainerStyle>
+                                        <Style TargetType="{x:Type GroupItem}">
+                                            <Setter Property="Margin" Value="0,0,0,5" />
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                        <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
+                                                            <Expander.Header>
+                                                                <StackPanel Orientation="Horizontal">
+                                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
+                                                                    <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
+                                                                </StackPanel>
+                                                            </Expander.Header>
+                                                            <Expander.Content>
+                                                                <ItemsPresenter />
+                                                            </Expander.Content>
+                                                        </Expander>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                        </Style>
+                                    </GroupStyle.ContainerStyle>
+                                </GroupStyle>
+                                <!-- Style for groups under the top level.-->
+                                <GroupStyle>
+                                    <GroupStyle.HeaderTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal" Background="LightBlue">
+                                                <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </GroupStyle.HeaderTemplate>
+                                </GroupStyle>
+                            </DataGrid.GroupStyle>
+                        </DataGrid>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
+                            <Label Margin="0,0,0,0">Update Frequency:</Label>
+                            <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
+                                <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
+                                <ComboBoxItem>3 seconds</ComboBoxItem>
+                                <ComboBoxItem>10 seconds</ComboBoxItem>
+                                <ComboBoxItem>Continuous</ComboBoxItem>
+                            </ComboBox>
+                        </StackPanel>
+                    </Grid>
+                </DockPanel>
+            </Grid>
+        </Border>
+        <Border Grid.Row="2" BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,0,0,0">
+            <StackPanel  Orientation="Horizontal" ></StackPanel>
+        </Border>
     </Grid>
 </Window>
