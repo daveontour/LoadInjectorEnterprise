@@ -88,59 +88,59 @@
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
     </Window.Resources>
-    <Grid  Background="#252526">
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="20" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
-        <Grid  Grid.Row="0"  Background="#252526">
-            <Border BorderBrush="SlateBlue" Background="#252526">
-                <StackPanel  Grid.Row="1" Orientation="Horizontal" Background="#252526">
-                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,2,2,2">
-                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+        <Grid  Grid.Row="0">
+            <Border>
+                <StackPanel  Grid.Row="1" Orientation="Horizontal">
+                    <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
                                 <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare All" HorizontalAlignment="Left"   Width="80" Height="30" Margin="2,0,0,0" />
                                 <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute All" HorizontalAlignment="Left"   Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign To All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Execution Control</Label>
+                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Execution Control</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
-                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
-                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                    <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
                                 <Button FontSize="10" x:Name="localClientBtn" Click="LocalClientBtn_OnClick"  Content="Add Local Client" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick"  Content="Disconnect All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Content="Reset All" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Client Control</Label>
+                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0">Client Control</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
-                    <Border BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
-                        <StackPanel Orientation="Vertical" VerticalAlignment="Top">
+                    <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="2,2,2,2">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
                                 <Button FontSize="10" x:Name="autoAssignBtn" Click="autoStartBtn_Click"  Content="Auto Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="All Completion Report" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="statusBtn" Click="completionReportBtn_Click"  Content="Status" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="statusBtn" Click="completionReportBtn_Click"  Content="Status" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="2" HorizontalAlignment="Center" >Command Center Control</Label>
+                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Command Center Control</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
                 </StackPanel>
             </Border>
         </Grid>
-        <Border Grid.Row="1" BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,2,2,2">
+        <Border Grid.Row="1" BorderThickness="1" CornerRadius="3" BorderBrush="Black" Background="AliceBlue" Margin="4,2,4,2">
             <Grid Margin="4,0,4,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="365" />
@@ -307,7 +307,7 @@
                 </DockPanel>
             </Grid>
         </Border>
-        <Border Grid.Row="2" BorderThickness="2" CornerRadius="5" BorderBrush="Black" Background="AliceBlue" Margin="4,0,0,0">
+        <Border Grid.Row="2" BorderThickness="1" CornerRadius="3" BorderBrush="Black" Background="AliceBlue" Margin="4,2,4,2">
             <StackPanel  Orientation="Horizontal" ></StackPanel>
         </Border>
     </Grid>

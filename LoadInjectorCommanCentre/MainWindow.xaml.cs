@@ -24,7 +24,7 @@ namespace LoadInjectorCommanCentre {
         private string webServerURL = "http://localhost:49152/";
         private string signalRURL = "http://localhost:6220/";
         private string autoArchiveFile;
-        private bool autoExecute = true;
+        private bool autoExecute = false;
 
         public ObservableCollection<ExecutionRecordClass> RecordsCollection {
             get { return this._records; }
@@ -102,8 +102,7 @@ namespace LoadInjectorCommanCentre {
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
-                Application.Current.Dispatcher.Invoke(delegate
-                {
+                Application.Current.Dispatcher.Invoke(delegate {
                     ExecutionRecordClass r = RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
                     if (r != null) {
@@ -127,8 +126,7 @@ namespace LoadInjectorCommanCentre {
             this.filterNodeID = nodeID;
             this.filterConnectionID = ConnectionID;
 
-            Application.Current.Dispatcher.Invoke(delegate
-            {
+            Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     RecordsCollection.Clear();
                     statusGrid.Items.Refresh();
