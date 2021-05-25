@@ -210,7 +210,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         internal void SetFilterCriteria(string executionNodeID, string ConnectionID) {
-            
+
             View.SetFilterCriteria(executionNodeID, ConnectionID);
 
             // Disable details from all clients
@@ -218,7 +218,7 @@ namespace LoadInjectorCommanCentre {
             ClientControl client = clients.Values.FirstOrDefault<ClientControl>(x => x.ExecutionNodeID == executionNodeID);
             SelectedClient = client;
 
-            if (client != null) {    
+            if (client != null) {
                 View.configConsole.Text = Utils.FormatXML(client.XML);
                 View.consoleWriter.Clear();
 
@@ -237,6 +237,7 @@ namespace LoadInjectorCommanCentre {
                     ClientControl client = new ClientControl(context.ConnectionId, MessageHub, this);
                     clients.Add(context.ConnectionId, client);
                     View.clientControlStack.Children.Add(client);
+                    View.nodeTabHolder.Items.Insert(View.nodeTabHolder.Items.Count - 1, new UserControl1());
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -492,7 +493,7 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
-        public void SetCompletionReport(string executionNodeID, string report, HubCallerContext context) {
+        public void SetCompletionReport(string executionNodeID, CompletionReport report, HubCallerContext context) {
             Application.Current.Dispatcher.Invoke(delegate
             {
                 if (clients.ContainsKey(context.ConnectionId)) {

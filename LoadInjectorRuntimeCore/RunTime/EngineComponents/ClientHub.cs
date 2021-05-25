@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNet.SignalR.Client;
+﻿using LoadInjectorBase.Common;
+using Microsoft.AspNet.SignalR.Client;
 using NLog;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Net;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -65,7 +64,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     logger.Info(message);
                 });
 
-                hubProxy.On("CompletionReport", (message) =>
+                hubProxy.On("CompletionReport", () =>
                 {
                     ngExecutionController.ProduceCompletionReport();
                 });
@@ -165,15 +164,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        public static string GetLocalIPAddress() {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList) {
-                if (ip.AddressFamily == AddressFamily.InterNetwork) {
-                    return ip.ToString();
-                }
-            }
-            throw new Exception("No network adapters with an IPv4 address in the system!");
-        }
 
         public async Task StartSignalRClientHub() {
             bool started = false;
@@ -199,7 +189,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 Task.Run(() =>
                 {
                     this.hubProxy.Invoke("RefreshResponse", currentProcess.Id.ToString(),
-                        GetLocalIPAddress(),
+                        Utils.GetLocalIPAddress(),
                         Environment.OSVersion.VersionString,
                         ngExecutionController.dataModel?.OuterXml,
                         ngExecutionController.state.Value,
@@ -217,7 +207,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 Task.Run(() =>
                 {
                     this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
-                        GetLocalIPAddress(),
+                        Utils.GetLocalIPAddress(),
                         Environment.OSVersion.VersionString,
                         ngExecutionController.dataModel?.OuterXml,
                         ngExecutionController.state.Value);
@@ -329,7 +319,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SendCompletionReport(string executionNodeID, string report) {
+        internal void SendCompletionReport(string executionNodeID, CompletionReport report) {
             if (localOnly) {
                 logger.Info("Completion Report");
                 logger.Info(report);

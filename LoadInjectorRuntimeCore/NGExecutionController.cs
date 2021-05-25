@@ -3,6 +3,7 @@ using LoadInjector.RunTime.ViewModels;
 using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
 using LoadInjectorBase.Commom;
+using LoadInjectorBase.Common;
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -1226,7 +1227,9 @@ namespace LoadInjector.RunTime {
         }
 
         public void ProduceCompletionReport() {
-            clientHub.SendCompletionReport(this.executionNodeUuid, "Competion Report Requested");
+            Process currentProcess = Process.GetCurrentProcess();
+            CompletionReport report = new CompletionReport(executionNodeUuid, Utils.GetLocalIPAddress(), currentProcess.Id.ToString());
+            clientHub.SendCompletionReport(executionNodeUuid, report);
         }
     }
 }

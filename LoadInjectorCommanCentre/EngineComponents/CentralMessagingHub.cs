@@ -1,4 +1,5 @@
 ﻿using LoadInjector.RunTime;
+using LoadInjectorBase.Common;
 using LoadInjectorCommanCentre;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
@@ -146,7 +147,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, Context);
         }
 
-        public void CompletionReportResponse(string executionNodeID, string report) {
+        public void CompletionReportResponse(string executionNodeID, CompletionReport report) {
             Application.Current.Dispatcher.Invoke(delegate
             {
                 try {

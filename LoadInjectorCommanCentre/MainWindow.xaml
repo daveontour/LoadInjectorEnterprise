@@ -92,7 +92,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="25" />
+            <RowDefinition Height="30" />
         </Grid.RowDefinitions>
 
         <Grid  Grid.Row="0">
@@ -157,55 +157,62 @@
                         <StackPanel FlowDirection="LeftToRight"  x:Name ="clientControlStack" Grid.Row="0" Orientation="Vertical"></StackPanel>
                     </ScrollViewer>
                 </Grid>
-                <DockPanel Grid.Column="1" LastChildFill="True" Background="AliceBlue">
+                <TabControl Grid.Column="1" 
+                            x:Name="nodeTabHolder"
+                            ItemsSource="{Binding TabDatas}" >
+                    <TabControl.ContentTemplate>
+                        <DataTemplate DataType="SummaryTab">
 
-                    <TabControl DockPanel.Dock="Bottom" Height="400" Visibility="{Binding Path=ShowDetailPanel}" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
-                        <TabItem>
-                            <TabItem.Header>
-                                <TextBlock Text="Output"  FontSize="14" />
-                            </TabItem.Header>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"></RowDefinition>
-                                    <RowDefinition Height="20"></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <TextBox x:Name="outputConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                                <CheckBox x:Name="scrollToBottonCheck" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0" IsChecked="{Binding Path=DisableScroll, Mode=TwoWay}"  Content="Disable Auto Scroll" Grid.Column="4"></CheckBox>
-                            </Grid>
-                        </TabItem>
-                        <TabItem>
-                            <TabItem.Header>
-                                <TextBlock Text="Configuration"  FontSize="14" />
-                            </TabItem.Header>
-                            <TextBox x:Name="configConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="2" />
-                        </TabItem>
-                        <TabItem>
-                            <TabItem.Header>
-                                <TextBlock Text="Completion Report"  FontSize="14" />
-                            </TabItem.Header>
-                            <Grid>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"></RowDefinition>
-                                    <RowDefinition Height="20"></RowDefinition>
-                                </Grid.RowDefinitions>
-                                <TextBox x:Name="completionReport"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                                <Button x:Name="saveReportBtn" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
-                            </Grid>
-                        </TabItem>
-                    </TabControl>
+     
+                                <DockPanel  LastChildFill="True" Background="AliceBlue">
 
-                    <Grid Background="AliceBlue">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="35"></RowDefinition>
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="30" />
-                        </Grid.RowDefinitions>
-                        <DockPanel  Grid.Row="0">
-                            <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
-                            <Button DockPanel.Dock="Right" FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Right"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,10,0" Visibility="{Binding Path=ShowDetailPanel}" />
-                        </DockPanel>
+                                    <TabControl DockPanel.Dock="Bottom" Height="400" Visibility="{Binding Path=ShowDetailPanel}" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
+                                        <TabItem>
+                                            <TabItem.Header>
+                                                <TextBlock Text="Output"  FontSize="14" />
+                                            </TabItem.Header>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"></RowDefinition>
+                                                    <RowDefinition Height="20"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <TextBox x:Name="outputConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
+                                                <CheckBox x:Name="scrollToBottonCheck" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0" IsChecked="{Binding Path=DisableScroll, Mode=TwoWay}"  Content="Disable Auto Scroll" Grid.Column="4"></CheckBox>
+                                            </Grid>
+                                        </TabItem>
+                                        <TabItem>
+                                            <TabItem.Header>
+                                                <TextBlock Text="Configuration"  FontSize="14" />
+                                            </TabItem.Header>
+                                            <TextBox x:Name="configConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="2" />
+                                        </TabItem>
+                                        <TabItem>
+                                            <TabItem.Header>
+                                                <TextBlock Text="Completion Report"  FontSize="14" />
+                                            </TabItem.Header>
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"></RowDefinition>
+                                                    <RowDefinition Height="20"></RowDefinition>
+                                                </Grid.RowDefinitions>
+                                                <TextBox x:Name="completionReport"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
+                                                <Button x:Name="saveReportBtn" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
+                                            </Grid>
+                                        </TabItem>
+                                    </TabControl>
 
-                        <DataGrid Grid.Row="1" Name="statusGrid"
+                                    <Grid Background="AliceBlue">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="35"></RowDefinition>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="30" />
+                                        </Grid.RowDefinitions>
+                                        <DockPanel  Grid.Row="0">
+                                            <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                                            <Button DockPanel.Dock="Right" FontSize="10" x:Name="viewAllBtn" Click="ViewAllBtn_OnClick"  Content="View All" HorizontalAlignment="Right"   VerticalAlignment="Center" Width="80" Height="30"  Margin="5,0,10,0" Visibility="{Binding Path=ShowDetailPanel}" />
+                                        </DockPanel>
+
+                                        <DataGrid Grid.Row="1" Name="statusGrid"
                           AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"
                           IsReadOnly="True"
@@ -214,101 +221,107 @@
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           CanUserAddRows="False" Grid.ColumnSpan="2"
                           Margin="0,0,2,0">
-                            <DataGrid.Columns>
-                                <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Left" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Name" Binding="{Binding Name}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Left" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                                <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
-                                    <DataGridTextColumn.ElementStyle>
-                                        <Style TargetType="TextBlock">
-                                            <Setter Property="HorizontalAlignment" Value="Center" />
-                                            <Setter Property="Foreground" Value="Black" />
-                                        </Style>
-                                    </DataGridTextColumn.ElementStyle>
-                                </DataGridTextColumn>
-                            </DataGrid.Columns>
-                            <DataGrid.GroupStyle>
-                                <!-- Style for groups at top level. -->
-                                <GroupStyle>
-                                    <GroupStyle.ContainerStyle>
-                                        <Style TargetType="{x:Type GroupItem}">
-                                            <Setter Property="Margin" Value="0,0,0,5" />
-                                            <Setter Property="Template">
-                                                <Setter.Value>
-                                                    <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                        <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
-                                                            <Expander.Header>
-                                                                <StackPanel Orientation="Horizontal">
-                                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
-                                                                    <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
-                                                                </StackPanel>
-                                                            </Expander.Header>
-                                                            <Expander.Content>
-                                                                <ItemsPresenter />
-                                                            </Expander.Content>
-                                                        </Expander>
-                                                    </ControlTemplate>
-                                                </Setter.Value>
-                                            </Setter>
-                                        </Style>
-                                    </GroupStyle.ContainerStyle>
-                                </GroupStyle>
-                                <!-- Style for groups under the top level.-->
-                                <GroupStyle>
-                                    <GroupStyle.HeaderTemplate>
-                                        <DataTemplate>
-                                            <StackPanel Orientation="Horizontal" Background="LightBlue">
-                                                <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
-                                            </StackPanel>
-                                        </DataTemplate>
-                                    </GroupStyle.HeaderTemplate>
-                                </GroupStyle>
-                            </DataGrid.GroupStyle>
-                        </DataGrid>
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Grid.Row="2">
-                            <Label Margin="0,0,0,0">Update Frequency:</Label>
-                            <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
-                                <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
-                                <ComboBoxItem>3 seconds</ComboBoxItem>
-                                <ComboBoxItem>10 seconds</ComboBoxItem>
-                                <ComboBoxItem>Continuous</ComboBoxItem>
-                            </ComboBox>
-                        </StackPanel>
-                    </Grid>
-                </DockPanel>
+                                            <DataGrid.Columns>
+                                                <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="HorizontalAlignment" Value="Left" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Header="Name" Binding="{Binding Name}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="HorizontalAlignment" Value="Left" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                                <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
+                                                    <DataGridTextColumn.ElementStyle>
+                                                        <Style TargetType="TextBlock">
+                                                            <Setter Property="HorizontalAlignment" Value="Center" />
+                                                            <Setter Property="Foreground" Value="Black" />
+                                                        </Style>
+                                                    </DataGridTextColumn.ElementStyle>
+                                                </DataGridTextColumn>
+                                            </DataGrid.Columns>
+                                            <DataGrid.GroupStyle>
+                                                <!-- Style for groups at top level. -->
+                                                <GroupStyle>
+                                                    <GroupStyle.ContainerStyle>
+                                                        <Style TargetType="{x:Type GroupItem}">
+                                                            <Setter Property="Margin" Value="0,0,0,5" />
+                                                            <Setter Property="Template">
+                                                                <Setter.Value>
+                                                                    <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                                        <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
+                                                                            <Expander.Header>
+                                                                                <StackPanel Orientation="Horizontal">
+                                                                                    <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
+                                                                                    <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
+                                                                                </StackPanel>
+                                                                            </Expander.Header>
+                                                                            <Expander.Content>
+                                                                                <ItemsPresenter />
+                                                                            </Expander.Content>
+                                                                        </Expander>
+                                                                    </ControlTemplate>
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </Style>
+                                                    </GroupStyle.ContainerStyle>
+                                                </GroupStyle>
+                                                <!-- Style for groups under the top level.-->
+                                                <GroupStyle>
+                                                    <GroupStyle.HeaderTemplate>
+                                                        <DataTemplate>
+                                                            <StackPanel Orientation="Horizontal" Background="LightBlue">
+                                                                <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
+                                                            </StackPanel>
+                                                        </DataTemplate>
+                                                    </GroupStyle.HeaderTemplate>
+                                                </GroupStyle>
+                                            </DataGrid.GroupStyle>
+                                        </DataGrid>
+                                    </Grid>
+                                </DockPanel>
+
+
+                        </DataTemplate>
+                        
+                        
+                    </TabControl.ContentTemplate>
+                </TabControl>
             </Grid>
         </Border>
         <Border Grid.Row="2" BorderThickness="1" CornerRadius="3" BorderBrush="Black" Background="AliceBlue" Margin="4,2,4,2">
-            <StackPanel  Orientation="Horizontal" ></StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Label Margin="0,0,0,0">Update Frequency:</Label>
+                <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
+                    <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
+                    <ComboBoxItem>3 seconds</ComboBoxItem>
+                    <ComboBoxItem>10 seconds</ComboBoxItem>
+                    <ComboBoxItem>Continuous</ComboBoxItem>
+                </ComboBox>
+            </StackPanel>
         </Border>
     </Grid>
 </Window>

@@ -1,5 +1,6 @@
 ﻿using LoadInjector.Runtime.EngineComponents;
 using LoadInjectorBase.Commom;
+using LoadInjectorBase.Common;
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
@@ -87,13 +88,19 @@ namespace LoadInjectorCommanCentre.Views {
             }
         }
 
-        private string completionReport;
-        public string CompletionReport {
+        private CompletionReport completionReport;
+        public CompletionReport CompletionReport {
             get { return completionReport; }
             set {
                 completionReport = value;
                 OnPropertyChanged("CompletionReport");
+                Console.WriteLine(completionReport.ToString());
+                OnPropertyChanged("CompletionReportString");
             }
+        }
+
+        public string CompletionReportString {
+            get { return CompletionReport.ToString(); }
         }
 
         private string ip;
@@ -182,7 +189,7 @@ namespace LoadInjectorCommanCentre.Views {
             StatusText = message;
         }
 
-        internal void SetCompletionReportText(string report) {
+        internal void SetCompletionReportText(CompletionReport report) {
             Application.Current.Dispatcher.Invoke((Action)delegate
             {
                 CompletionReport = report;
