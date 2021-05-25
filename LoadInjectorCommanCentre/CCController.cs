@@ -7,6 +7,7 @@ using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -156,11 +157,10 @@ namespace LoadInjectorCommanCentre {
         internal void DisconnectAll() {
             MessageHub.Hub.Clients.All.Disconnect();
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
                     SelectedClient = null;
                     View.RecordsCollection.Clear();
-                    View.statusGrid.Items.Refresh();
+                    //View.statusGrid.Items.Refresh();
                     View.ShowDetailPanel = Visibility.Collapsed;
                 });
             } catch (Exception ex) {
@@ -173,8 +173,7 @@ namespace LoadInjectorCommanCentre {
             MessageHub.Hub.Clients.Client(id).Disconnect();
 
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
                     // The client control for the disconnecting
                     ClientControl client = clients.Values.FirstOrDefault<ClientControl>(x => x.ConnectionID == id);
                     //Remove it from the list of execution nodes.
@@ -192,7 +191,7 @@ namespace LoadInjectorCommanCentre {
                         View.SetFilterCriteria(null);
                     }
                     MessageHub.Hub.Clients.All.Refresh();
-                    View.statusGrid.Items.Refresh();
+                    //View.statusGrid.Items.Refresh();
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -201,7 +200,7 @@ namespace LoadInjectorCommanCentre {
 
         internal void RefreshClients(bool clear = true) {
             View.RecordsCollection.Clear();
-            View.statusGrid.Items.Refresh();
+            //View.statusGrid.Items.Refresh();
             if (clear) {
                 View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
             }
@@ -210,7 +209,6 @@ namespace LoadInjectorCommanCentre {
         }
 
         internal void SetFilterCriteria(string executionNodeID, string ConnectionID) {
-
             View.SetFilterCriteria(executionNodeID, ConnectionID);
 
             // Disable details from all clients
@@ -219,7 +217,7 @@ namespace LoadInjectorCommanCentre {
             SelectedClient = client;
 
             if (client != null) {
-                View.configConsole.Text = Utils.FormatXML(client.XML);
+                //   View.configConsole.Text = Utils.FormatXML(client.XML);
                 View.consoleWriter.Clear();
 
                 // Enable details for the selected client
@@ -232,12 +230,18 @@ namespace LoadInjectorCommanCentre {
             Console.Write("New Client Connection" + context.ConnectionId);
 
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
                     ClientControl client = new ClientControl(context.ConnectionId, MessageHub, this);
                     clients.Add(context.ConnectionId, client);
                     View.clientControlStack.Children.Add(client);
-                    View.nodeTabHolder.Items.Insert(View.nodeTabHolder.Items.Count - 1, new UserControl1());
+                    ObservableCollection<object> newCollection = new ObservableCollection<object>();
+                    foreach (object o in View.ClientTabDatas) {
+                        newCollection.Add(o);
+                    }
+                    newCollection.Add(new ClientTabData("New Tab") { IsSummary = false });
+
+                    View.ClientTabDatas = newCollection;
+                    View.OnPropertyChanged("ClientTabDatas");
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -264,13 +268,19 @@ namespace LoadInjectorCommanCentre {
         public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
             if (!clients.ContainsKey(context.ConnectionId)) {
                 try {
-                    Application.Current.Dispatcher.Invoke((Action)delegate
-                    {
+                    Application.Current.Dispatcher.Invoke((Action)delegate {
                         ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this) { StatusText = status };
                         clients.Add(context.ConnectionId, cl);
 
+                        ObservableCollection<object> newCollection = new ObservableCollection<object>();
+                        foreach (object o in View.ClientTabDatas) {
+                            newCollection.Add(o);
+                        }
+                        newCollection.Add(new ClientTabData(cl.ExecutionNodeID) { IsSummary = false });
+
+                        View.ClientTabDatas = newCollection;
+                        View.OnPropertyChanged("ClientTabDatas");
                         View.clientControlStack.Children.Add(cl);
-                        View.OnPropertyChanged("ShowDetailPanel");
                     });
                 } catch (Exception ex) {
                     Console.WriteLine(ex.Message);
@@ -370,8 +380,7 @@ namespace LoadInjectorCommanCentre {
 
         public void UpdateSourceLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context, bool forceUpdate = false) {
             if (clients.ContainsKey(context.ConnectionId)) {
-                Application.Current.Dispatcher.Invoke(delegate
-                {
+                Application.Current.Dispatcher.Invoke(delegate {
                     try {
                         ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
 
@@ -379,7 +388,7 @@ namespace LoadInjectorCommanCentre {
                             r.MM = currentRate.ToString();
                             r.Sent = messagesSent;
                             if (this.gridRefreshRate == 0 || forceUpdate) {
-                                View.statusGrid.Items.Refresh();
+                                //     View.statusGrid.Items.Refresh();
                             }
                         } else {
                             ExecutionRecordClass rec = new ExecutionRecordClass() {
@@ -390,7 +399,7 @@ namespace LoadInjectorCommanCentre {
                                 ConnectionID = context.ConnectionId
                             };
                             View.RecordsCollection.Add(rec);
-                            View.statusGrid.Items.Refresh();
+                            //    View.statusGrid.Items.Refresh();
                         }
                     } catch (Exception ex) {
                         Debug.WriteLine(ex.Message);
@@ -402,13 +411,12 @@ namespace LoadInjectorCommanCentre {
         public void UpdateDestinationLine(string executionNodeID, string uuid, int messagesSent, HubCallerContext context, bool forceUpdate = false) {
             if (clients.ContainsKey(context.ConnectionId)) {
                 try {
-                    Application.Current.Dispatcher.Invoke(delegate
-                    {
+                    Application.Current.Dispatcher.Invoke(delegate {
                         ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
                         if (r != null) {
                             r.Sent = messagesSent;
                             if (this.gridRefreshRate == 0 || forceUpdate) {
-                                View.statusGrid.Items.Refresh();
+                                //     View.statusGrid.Items.Refresh();
                             }
                         } else {
                             ExecutionRecordClass rec = new ExecutionRecordClass() {
@@ -418,7 +426,7 @@ namespace LoadInjectorCommanCentre {
                                 ConnectionID = context.ConnectionId
                             };
                             View.RecordsCollection.Add(rec);
-                            View.statusGrid.Items.Refresh();
+                            //  View.statusGrid.Items.Refresh();
                         }
                     });
                 } catch (Exception ex) {
@@ -449,10 +457,9 @@ namespace LoadInjectorCommanCentre {
         }
 
         private void OnRefreshGridEvent(object sender, ElapsedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(delegate
-            {
+            Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    View.statusGrid.Items.Refresh();
+                    //  View.statusGrid.Items.Refresh();
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);
                 }
@@ -463,8 +470,7 @@ namespace LoadInjectorCommanCentre {
             if (clients.ContainsKey(context.ConnectionId)) {
                 ClientControl client = clients[context.ConnectionId];
                 clients.Remove(context.ConnectionId);
-                Application.Current.Dispatcher.Invoke(delegate
-                {
+                Application.Current.Dispatcher.Invoke(delegate {
                     try {
                         View.clientControlStack.Children.Remove(client);
                     } catch (Exception ex) {
@@ -475,8 +481,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         public void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context) {
-            Application.Current.Dispatcher.Invoke(delegate
-            {
+            Application.Current.Dispatcher.Invoke(delegate {
                 if (clients.ContainsKey(context.ConnectionId)) {
                     ClientControl client = clients[context.ConnectionId];
                     client.SetStatusText(message);
@@ -494,8 +499,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         public void SetCompletionReport(string executionNodeID, CompletionReport report, HubCallerContext context) {
-            Application.Current.Dispatcher.Invoke(delegate
-            {
+            Application.Current.Dispatcher.Invoke(delegate {
                 if (clients.ContainsKey(context.ConnectionId)) {
                     ClientControl client = clients[context.ConnectionId];
                     client.SetCompletionReportText(report);
@@ -504,8 +508,7 @@ namespace LoadInjectorCommanCentre {
         }
 
         public void SetConsoleMessage(string message) {
-            Application.Current.Dispatcher.Invoke(delegate
-            {
+            Application.Current.Dispatcher.Invoke(delegate {
                 View.consoleWriter.WriteLineNoDate(message);
             });
         }

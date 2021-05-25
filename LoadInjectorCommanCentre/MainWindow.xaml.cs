@@ -1,4 +1,5 @@
 ﻿using LoadInjector.RunTime.Views;
+using LoadInjectorCommanCentre;
 using LoadInjectorCommanCentre.Views;
 using LoadInjectorCommandCentre;
 using System;
@@ -10,7 +11,33 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace LoadInjectorCommanCentre {
+namespace LoadInjectorCommandCentre {
+
+    public class TabContentSelector : DataTemplateSelector {
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container) {
+            Window win = Application.Current.MainWindow;
+
+            if (item is ClientTabData) {
+                return win.FindResource("ClientTabContentTemplate") as DataTemplate;
+            }
+
+            return win.FindResource("SummaryTabContentTemplate") as DataTemplate;
+        }
+    }
+
+    public class TabItemSelector : DataTemplateSelector {
+
+        public override DataTemplate SelectTemplate(object item, DependencyObject container) {
+            Window win = Application.Current.MainWindow;
+
+            if (item is ClientTabData) {
+                return win.FindResource("ClientTabItemTemplate") as DataTemplate;
+            }
+
+            return win.FindResource("SummaryTabItemTemplate") as DataTemplate;
+        }
+    }
 
     public partial class MainWindow : Window, INotifyPropertyChanged {
         private CCController cccontroller;
@@ -33,6 +60,13 @@ namespace LoadInjectorCommanCentre {
         public MainWindow() {
             InitializeComponent();
             DataContext = this;
+
+            this.ClientTabDatas = new ObservableCollection<object>();
+            this.ClientTabDatas.Add("Summary Tab");
+            this.ClientTabDatas.Add(new ClientTabData("Tab 1") { IsSummary = false });
+            this.ClientTabDatas.Add(new ClientTabData("Tab 2") { IsSummary = false });
+            this.ClientTabDatas.Add(new ClientTabData("Tab 3") { IsSummary = false });
+            this.ClientTabDatas.Add(new ClientTabData("Tab 4") { IsSummary = false });
         }
 
         public void OnPropertyChanged(string propName) {
@@ -55,6 +89,8 @@ namespace LoadInjectorCommanCentre {
             }
         }
 
+        public ObservableCollection<object> ClientTabDatas { get; set; }
+
         public int NumClients { get { return numClients; } set { numClients = value; } }
         public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
         public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
@@ -65,7 +101,7 @@ namespace LoadInjectorCommanCentre {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OutputConsole_Initialized(object sender, EventArgs e) {
-            consoleWriter = new ControlWriter(outputConsole);
+            //consoleWriter = new ControlWriter(outputConsole);
         }
 
         private void PrepAllBtn_OnClick(object sender, RoutedEventArgs e) {
@@ -114,7 +150,7 @@ namespace LoadInjectorCommanCentre {
                     } else {
                         RecordsCollection.Add(rec);
                         OnPropertyChanged("RecordsCollection");
-                        statusGrid.Items.Refresh();
+                        //   statusGrid.Items.Refresh();
                     }
                 });
             } catch (Exception ex) {
@@ -129,7 +165,7 @@ namespace LoadInjectorCommanCentre {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     RecordsCollection.Clear();
-                    statusGrid.Items.Refresh();
+                    //   statusGrid.Items.Refresh();
                     if (ConnectionID != null) {
                         cccontroller.MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
                     }
