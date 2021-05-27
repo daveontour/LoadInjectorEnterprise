@@ -18,7 +18,7 @@ namespace LoadInjectorCommandCentre {
         public override DataTemplate SelectTemplate(object item, DependencyObject container) {
             Window win = Application.Current.MainWindow;
 
-            if (item is ClientTabData) {
+            if (item is ClientTabControl) {
                 return win.FindResource("ClientTabContentTemplate") as DataTemplate;
             }
 
@@ -31,7 +31,7 @@ namespace LoadInjectorCommandCentre {
         public override DataTemplate SelectTemplate(object item, DependencyObject container) {
             Window win = Application.Current.MainWindow;
 
-            if (item is ClientTabData) {
+            if (item is ClientTabControl) {
                 return win.FindResource("ClientTabItemTemplate") as DataTemplate;
             }
 
@@ -47,7 +47,7 @@ namespace LoadInjectorCommandCentre {
         private ExecutionRecords _records;
         private int gridRefreshRate = 1;
         public ControlWriter consoleWriter;
-        private int numClients = 1;
+        private int numClients = 0;
         private string webServerURL = "http://localhost:49152/";
         private string signalRURL = "http://localhost:6220/";
         private string autoArchiveFile;
@@ -63,10 +63,6 @@ namespace LoadInjectorCommandCentre {
 
             this.ClientTabDatas = new ObservableCollection<object>();
             this.ClientTabDatas.Add("Summary Tab");
-            this.ClientTabDatas.Add(new ClientTabData("Tab 1") { IsSummary = false });
-            this.ClientTabDatas.Add(new ClientTabData("Tab 2") { IsSummary = false });
-            this.ClientTabDatas.Add(new ClientTabData("Tab 3") { IsSummary = false });
-            this.ClientTabDatas.Add(new ClientTabData("Tab 4") { IsSummary = false });
         }
 
         public void OnPropertyChanged(string propName) {
@@ -233,6 +229,40 @@ namespace LoadInjectorCommandCentre {
 
         private void completionReportBtn_Click(object sender, RoutedEventArgs e) {
             cccontroller.MessageHub.Hub.Clients.All.CompletionReport();
+        }
+
+        public void AddClientTab(ClientTabControl clientTabData) {
+            ObservableCollection<object> newCollection = new ObservableCollection<object>();
+            foreach (object o in ClientTabDatas) {
+                newCollection.Add(o);
+            }
+            newCollection.Add(clientTabData);
+
+            ClientTabDatas = newCollection;
+            OnPropertyChanged("ClientTabDatas");
+        }
+
+        public void AddClientControl(ClientControl clientControl) {
+            clientControlStack.Children.Add(clientControl);
+        }
+
+        public void RemoveClientControl(ClientControl clientControl) {
+            clientControlStack.Children.Remove(clientControl);
+        }
+
+        public void RemoveClientTab(string connectionID) {
+            ObservableCollection<object> newCollection = new ObservableCollection<object>();
+            foreach (object o in ClientTabDatas) {
+                if (o is ClientTabControl) {
+                    if (((ClientTabControl)o).ConnectionID == connectionID) {
+                        continue;
+                    }
+                }
+                newCollection.Add(o);
+            }
+
+            ClientTabDatas = newCollection;
+            OnPropertyChanged("ClientTabDatas");
         }
     }
 }

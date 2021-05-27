@@ -2,9 +2,11 @@
 
 namespace LoadInjectorCommanCentre.Views {
 
-    public class ClientTabData : INotifyPropertyChanged {
+    public class ClientTabControl : INotifyPropertyChanged {
         public string Header { get; set; }
         public bool IsSummary { get; set; }
+
+        public string ConnectionID { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -12,7 +14,7 @@ namespace LoadInjectorCommanCentre.Views {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ClientTabData(string tabTitle) {
+        public ClientTabControl(string tabTitle) {
             this.Header = tabTitle;
         }
     }

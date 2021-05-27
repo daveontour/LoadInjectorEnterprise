@@ -173,7 +173,7 @@
     <Compile Include="Views\ClientControl.xaml.cs">
       <DependentUpon>ClientControl.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Views\ClientTabData.cs" />
+    <Compile Include="Views\ClientTabControl.cs" />
     <Compile Include="Views\ControlWriter.cs" />
     <Compile Include="Views\LoadInjectorCommandCentreWelcome.xaml.cs">
       <DependentUpon>LoadInjectorCommandCentreWelcome.xaml</DependentUpon>
