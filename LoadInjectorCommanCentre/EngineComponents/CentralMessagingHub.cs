@@ -1,6 +1,6 @@
 ﻿using LoadInjector.RunTime;
 using LoadInjectorBase.Common;
-using LoadInjectorCommanCentre;
+using LoadInjectorCommandCentre;
 using Microsoft.AspNet.SignalR;
 using Microsoft.AspNet.SignalR.Hubs;
 using Microsoft.Owin;
@@ -21,7 +21,7 @@ namespace LoadInjector.Runtime.EngineComponents {
     public class CentralMessagingHub {
 
         // Need to fix for new structure
-        public static CCController iccController;
+        public static MainCommandCenterController iccController;
 
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
 
@@ -31,7 +31,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             get => GlobalHost.ConnectionManager.GetHubContext<MyHub>();
         }
 
-        public CentralMessagingHub(CCController iccController) {
+        public CentralMessagingHub(MainCommandCenterController iccController) {
             CentralMessagingHub.iccController = iccController;
         }
 
@@ -39,7 +39,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             this.port = port;
         }
 
-        public void SetExecutionUI(CCController iccController) {
+        public void SetExecutionUI(MainCommandCenterController iccController) {
             CentralMessagingHub.iccController = iccController;
         }
 
@@ -114,7 +114,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public override Task OnConnected() {
-            CentralMessagingHub.iccController.InitialInterrogation(Context);
+            CentralMessagingHub.iccController.ClientConnectionInitiated(Context);
             return base.OnConnected();
         }
 

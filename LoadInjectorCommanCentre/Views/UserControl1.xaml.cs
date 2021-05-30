@@ -13,11 +13,13 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace LoadInjectorCommanCentre.Views {
+namespace LoadInjectorCommandCentre.Views {
+
     /// <summary>
     /// Interaction logic for UserControl1.xaml
     /// </summary>
     public partial class UserControl1 : UserControl {
+
         public UserControl1() {
             InitializeComponent();
         }

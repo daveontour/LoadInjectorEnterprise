@@ -14,7 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
-namespace LoadInjectorCommanCentre.Views {
+namespace LoadInjectorCommandCentre.Views {
 
     /// <summary>
     /// Interaction logic for Window1.xaml

@@ -1,7 +1,9 @@
 ﻿using LoadInjector.RunTime.Views;
-using LoadInjectorCommanCentre;
-using LoadInjectorCommanCentre.Views;
 using LoadInjectorCommandCentre;
+using LoadInjectorCommandCentre.Views;
+
+using LoadInjectorCommandCentre;
+
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -40,7 +42,7 @@ namespace LoadInjectorCommandCentre {
     }
 
     public partial class MainWindow : Window, INotifyPropertyChanged {
-        private CCController cccontroller;
+        private MainCommandCenterController cccontroller;
 
         private string filterNodeID;
         public string filterConnectionID;
@@ -53,7 +55,7 @@ namespace LoadInjectorCommandCentre {
         private string autoArchiveFile;
         private bool autoExecute = false;
 
-        public ObservableCollection<ExecutionRecordClass> RecordsCollection {
+        public ExecutionRecords RecordsCollection {
             get { return this._records; }
         }
 
@@ -62,7 +64,7 @@ namespace LoadInjectorCommandCentre {
             DataContext = this;
 
             this.ClientTabDatas = new ObservableCollection<object>();
-            this.ClientTabDatas.Add("Summary Tab");
+            this.ClientTabDatas.Add(new SummaryTabControl("Summary", null));
         }
 
         public void OnPropertyChanged(string propName) {
@@ -219,7 +221,7 @@ namespace LoadInjectorCommandCentre {
             };
             welcome.ShowDialog();
 
-            cccontroller = new CCController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
+            cccontroller = new MainCommandCenterController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
             _records = (ExecutionRecords)this.Resources["records"];
         }
 
@@ -263,6 +265,18 @@ namespace LoadInjectorCommandCentre {
 
             ClientTabDatas = newCollection;
             OnPropertyChanged("ClientTabDatas");
+        }
+
+        private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) {
+            if (e.Source is TabControl) {
+                TabControl tabControl = e.Source as TabControl;
+                if (tabControl.SelectedValue is ClientTabControl) {
+                    ((ClientTabControl)tabControl.SelectedValue).TabSelected();
+                }
+                if (tabControl.SelectedValue is SummaryTabControl) {
+                    ((SummaryTabControl)tabControl.SelectedValue).TabSelected();
+                }
+            }
         }
     }
 }

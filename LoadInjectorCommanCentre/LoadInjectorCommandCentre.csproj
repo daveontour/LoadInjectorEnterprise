@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4FCD0242-6009-473B-A27B-D74FBA009C37}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>LoadInjectorCommanCentre</RootNamespace>
-    <AssemblyName>LoadInjectorCommanCentre</AssemblyName>
+    <RootNamespace>LoadInjectorCommandCentre</RootNamespace>
+    <AssemblyName>LoadInjectorCommandCentre</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{60dc8134-eba5-43b8-bcc9-bb4bc16c2548};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -173,6 +173,7 @@
     <Compile Include="Views\ClientControl.xaml.cs">
       <DependentUpon>ClientControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\SummaryTabControl.cs" />
     <Compile Include="Views\ClientTabControl.cs" />
     <Compile Include="Views\ControlWriter.cs" />
     <Compile Include="Views\LoadInjectorCommandCentreWelcome.xaml.cs">
@@ -189,7 +190,7 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="CCController.cs" />
+    <Compile Include="MainCommandCenterController.cs" />
     <Compile Include="EngineComponents\CentralMessagingHub.cs" />
     <Compile Include="EngineComponents\SimpleHTTPServer.cs" />
     <Compile Include="MainWindow.xaml.cs">

@@ -95,7 +95,6 @@
         <DataTemplate x:Key="ClientTabItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding Path=Header}" />
-                <TextBlock Text="    x" />
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="SummaryTabItemTemplate">
@@ -119,7 +118,8 @@
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                          CanUserAddRows="False" Grid.ColumnSpan="2"
+                          CanUserAddRows="False"
+
                           Margin="0,0,2,0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
@@ -208,25 +208,35 @@
 
             <DockPanel  LastChildFill="True" Background="AliceBlue">
 
-                <TabControl DockPanel.Dock="Bottom" Height="400" Visibility="{Binding Path=ShowDetailPanel}" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
+                <TabControl DockPanel.Dock="Bottom" Height="400" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Output"  FontSize="14" />
                         </TabItem.Header>
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="*"></RowDefinition>
-                                <RowDefinition Height="20"></RowDefinition>
-                            </Grid.RowDefinitions>
-                            <TextBox x:Name="outputConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                            <CheckBox x:Name="scrollToBottonCheck" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0" IsChecked="{Binding Path=DisableScroll, Mode=TwoWay}"  Content="Disable Auto Scroll" Grid.Column="4"></CheckBox>
-                        </Grid>
+                        <TextBox x:Name="outputConsole"
+                                     TextWrapping="NoWrap"
+                                     IsReadOnly="True"
+                                     ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                     Background="WhiteSmoke"
+                                     Foreground="Black"
+                                     FontFamily="Consolas"
+                                     FontSize="12" />
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Configuration"  FontSize="14" />
                         </TabItem.Header>
-                        <TextBox x:Name="configConsole"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="2" />
+                        <TextBox x:Name="configConsole"
+                                 TextWrapping="NoWrap"
+                                 IsReadOnly="True"
+                                 ScrollViewer.VerticalScrollBarVisibility="Visible"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Visible"
+                                 Background="WhiteSmoke"
+                                 Foreground="Black"
+                                 FontFamily="Consolas"
+                                 FontSize="12"
+                                 Text="{Binding Path=XML}" />
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
@@ -254,13 +264,13 @@
                     </DockPanel>
 
                     <DataGrid Grid.Row="1" Name="statusGrid"
-                          AutoGenerateColumns="False"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"
+                          AutoGenerateColumns="False"
                           IsReadOnly="True"
                           ScrollViewer.CanContentScroll="True"
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                          CanUserAddRows="False" Grid.ColumnSpan="2"
+                          CanUserAddRows="False"
                           Margin="0,0,2,0">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
@@ -419,7 +429,8 @@
                             x:Name="nodeTabHolder"
                             ItemsSource="{Binding ClientTabDatas}"
                             ContentTemplateSelector="{StaticResource myDataTemplateSelector}"
-                            ItemTemplateSelector="{StaticResource myItemTemplateSelector}">
+                            ItemTemplateSelector="{StaticResource myItemTemplateSelector}"
+                            SelectionChanged="tabControl_SelectionChanged">
                 </TabControl>
             </Grid>
         </Border>

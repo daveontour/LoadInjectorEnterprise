@@ -1,6 +1,8 @@
 ﻿using LoadInjector.Runtime.EngineComponents;
-using LoadInjectorBase.Commom;
 using LoadInjectorBase.Common;
+
+using LoadInjectorBase.Common;
+
 using Microsoft.Win32;
 using System;
 using System.ComponentModel;
@@ -8,7 +10,7 @@ using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 
-namespace LoadInjectorCommanCentre.Views {
+namespace LoadInjectorCommandCentre.Views {
 
     public partial class ClientControl : UserControl, INotifyPropertyChanged {
         public string ConnectionID { get; set; }
@@ -46,8 +48,7 @@ namespace LoadInjectorCommanCentre.Views {
             }
             set {
                 statusText = value;
-                Application.Current.Dispatcher.Invoke((Action)delegate
-                {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
                     if (statusText == ClientState.UnAssigned.Value) {
                         assignBtn.IsEnabled = true;
                         prepBtn.IsEnabled = false;
@@ -89,6 +90,7 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         private CompletionReport completionReport;
+
         public CompletionReport CompletionReport {
             get { return completionReport; }
             set {
@@ -131,7 +133,7 @@ namespace LoadInjectorCommanCentre.Views {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private CCController cCController;
+        private MainCommandCenterController cCController;
 
         public void OnPropertyChanged(string propName) {
             try {
@@ -141,7 +143,7 @@ namespace LoadInjectorCommanCentre.Views {
             }
         }
 
-        public ClientControl(string connectionID, CentralMessagingHub messageHub, CCController cCController) {
+        public ClientControl(string connectionID, CentralMessagingHub messageHub, MainCommandCenterController cCController) {
             InitializeComponent();
             DataContext = this;
             ConnectionID = connectionID;
@@ -190,8 +192,7 @@ namespace LoadInjectorCommanCentre.Views {
         }
 
         internal void SetCompletionReportText(CompletionReport report) {
-            Application.Current.Dispatcher.Invoke((Action)delegate
-            {
+            Application.Current.Dispatcher.Invoke((Action)delegate {
                 CompletionReport = report;
             });
         }

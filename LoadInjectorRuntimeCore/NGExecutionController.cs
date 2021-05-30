@@ -2,8 +2,10 @@
 using LoadInjector.RunTime.ViewModels;
 using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
-using LoadInjectorBase.Commom;
 using LoadInjectorBase.Common;
+
+using LoadInjectorBase.Common;
+
 using NLog;
 using System;
 using System.Collections.Generic;
@@ -604,8 +606,7 @@ namespace LoadInjector.RunTime {
             bool prepareOK = true;
 
             if (Parameters.SITAAMS && requiresFlights) {
-                await Task.Run(() =>
-                {
+                await Task.Run(() => {
                     flights.Clear();
                     arrflights.Clear();
                     depflights.Clear();

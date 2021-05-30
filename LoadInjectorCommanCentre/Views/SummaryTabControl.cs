@@ -7,7 +7,7 @@ using System.Windows;
 
 namespace LoadInjectorCommandCentre.Views {
 
-    public class ClientTabControl : INotifyPropertyChanged {
+    public class SummaryTabControl : INotifyPropertyChanged {
         private ExecutionRecords tabRecords = new ExecutionRecords();
 
         public ExecutionRecords TabRecords {
@@ -30,7 +30,7 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
-        public MainCommandCenterController MainController { get; private set; }
+        public MainCommandCenterController MainController { get; set; }
 
         private string ip;
 
@@ -114,7 +114,7 @@ namespace LoadInjectorCommandCentre.Views {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public ClientTabControl(string tabTitle, MainCommandCenterController mainCommandCenterController) {
+        public SummaryTabControl(string tabTitle, MainCommandCenterController mainCommandCenterController) {
             this.Header = tabTitle;
             this.MainController = mainCommandCenterController;
         }
@@ -141,7 +141,7 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         internal void TabSelected() {
-            Console.WriteLine($"Process ID {processID} tab selected");
+            Console.WriteLine($"Summry tab selected");
             MainController.View.RecordsCollection.Clear();
             foreach (ExecutionRecordClass rec in this.TabRecords) {
                 MainController.View.RecordsCollection.Add(rec);

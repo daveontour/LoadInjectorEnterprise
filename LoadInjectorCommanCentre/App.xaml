@@ -1,9 +1,8 @@
-﻿<Application x:Class="LoadInjectorCommanCentre.App"
+﻿<Application x:Class="LoadInjectorCommandCentre.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:LoadInjectorCommanCentre"
+             xmlns:local="clr-namespace:LoadInjectorCommandCentre"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
     </Application.Resources>
 </Application>

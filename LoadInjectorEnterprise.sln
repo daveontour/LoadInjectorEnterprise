@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorDestinations", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorRuntimeExecutive", "LoadInjectorRuntimeExecutive\LoadInjectorRuntimeExecutive.csproj", "{196ADDF5-66B6-4B2F-9154-9A9076E285A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorCommanCentre", "LoadInjectorCommanCentre\LoadInjectorCommanCentre.csproj", "{4FCD0242-6009-473B-A27B-D74FBA009C37}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorCommandCentre", "LoadInjectorCommanCentre\LoadInjectorCommandCentre.csproj", "{4FCD0242-6009-473B-A27B-D74FBA009C37}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
