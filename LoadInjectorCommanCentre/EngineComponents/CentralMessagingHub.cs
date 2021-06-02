@@ -124,7 +124,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         }
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {
-            CentralMessagingHub.iccController.SetConsoleMessage(message);
+            CentralMessagingHub.iccController.SetConsoleMessage(message, Context);
         }
 
         public void SetSourceLineOutput(string executionnodeID, string uuid, string s) {

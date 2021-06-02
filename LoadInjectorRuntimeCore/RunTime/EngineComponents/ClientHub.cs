@@ -30,8 +30,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             hubURL = hostURL;
             this.ConfigureHub(hostURL);
 
-            Task.Run(async delegate
-            {
+            Task.Run(async delegate {
                 StartSignalRClientHub();
             });
         }
@@ -46,40 +45,33 @@ namespace LoadInjector.RunTime.EngineComponents {
                 hubConnection = new HubConnection(hostURL);
                 hubProxy = hubConnection.CreateHubProxy("MyHub");
 
-                hubProxy.On("ClearAndPrepare", () =>
-                {
+                hubProxy.On("ClearAndPrepare", () => {
                     try {
                         ngExecutionController.PrepareAsync().Wait();
                     } catch (Exception ex) {
                         logger.Info("Error in client Prepare Aync " + ex.Message);
                     }
                 });
-                hubProxy.On("Execute", () =>
-                {
+                hubProxy.On("Execute", () => {
                     ngExecutionController.RunLocal();
                 });
 
-                hubProxy.On("WaitForNextExecute", (message) =>
-                {
+                hubProxy.On("WaitForNextExecute", (message) => {
                     logger.Info(message);
                 });
 
-                hubProxy.On("CompletionReport", () =>
-                {
+                hubProxy.On("CompletionReport", () => {
                     ngExecutionController.ProduceCompletionReport();
                 });
 
-                hubProxy.On("DisableDetails", () =>
-                {
+                hubProxy.On("DisableDetails", () => {
                     sendDetails = false;
                 });
-                hubProxy.On("EnableDetails", () =>
-                {
+                hubProxy.On("EnableDetails", () => {
                     sendDetails = true;
 
                     // Send the accumulated Console Messages.
-                    Task.Run(() =>
-                    {
+                    Task.Run(() => {
                         try {
                             this.hubProxy.Invoke("ConsoleMsg", ngExecutionController.executionNodeUuid, null, consoleMessages.ToString());
                         } catch (Exception ex) {
@@ -88,8 +80,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     });
                 });
 
-                hubProxy.On("PrepareAndExecute", () =>
-                {
+                hubProxy.On("PrepareAndExecute", () => {
                     logger.Info("PrepareAndExecute Received");
                     bool okToRun = ngExecutionController.PrepareAsync().Result;
                     if (okToRun) {
@@ -99,8 +90,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                     }
                 });
 
-                hubProxy.On("RetrieveStandAlone", (url) =>
-                {
+                hubProxy.On("RetrieveStandAlone", (url) => {
                     try {
                         ngExecutionController.RetrieveStandAlone(url);
                     } catch (Exception ex) {
@@ -108,54 +98,45 @@ namespace LoadInjector.RunTime.EngineComponents {
                     }
                 });
 
-                hubProxy.On("Refresh", () =>
-                {
+                hubProxy.On("Refresh", () => {
                     RefreshResponse();
                 });
-                hubProxy.On("RetrieveArchive", (url) =>
-                {
+                hubProxy.On("RetrieveArchive", (url) => {
                     logger.Warn($"Requested to retrieve archive {url}");
                     ngExecutionController.RetrieveArchive(url);
                     InterrogateResponse();
                 });
 
-                hubProxy.On("Stop", () =>
-                {
+                hubProxy.On("Stop", () => {
                     ngExecutionController.Stop();
                 });
 
-                hubProxy.On("Reset", () =>
-                {
+                hubProxy.On("Reset", () => {
                     ngExecutionController.Reset();
                 });
 
-                hubProxy.On("Disconnect", () =>
-                {
+                hubProxy.On("Disconnect", () => {
                     hubConnection.Stop();
                     ngExecutionController.ProgramStop();
                     logger.Warn("Disconnection requested by host");
                     System.Environment.Exit(1);
                 });
 
-                hubProxy.On("Cancel", (mode) =>
-                {
+                hubProxy.On("Cancel", (mode) => {
                     ngExecutionController.Cancel();
                 });
 
-                hubProxy.On("LocalOnly", (mode) =>
-                {
+                hubProxy.On("LocalOnly", (mode) => {
                     localOnly = mode;
                 });
 
-                hubProxy.On("InitModel", (model) =>
-                {
+                hubProxy.On("InitModel", (model) => {
                     XmlDocument doc = new XmlDocument();
                     doc.LoadXml(model);
                     ngExecutionController.InitModel(doc);
                 });
 
-                hubProxy.On("Interrogate", () =>
-                {
+                hubProxy.On("Interrogate", () => {
                     Process currentProcess = Process.GetCurrentProcess();
                     InterrogateResponse();
                 });
@@ -163,7 +144,6 @@ namespace LoadInjector.RunTime.EngineComponents {
                 logger.Info(ex.Message);
             }
         }
-
 
         public async Task StartSignalRClientHub() {
             bool started = false;
@@ -186,8 +166,7 @@ namespace LoadInjector.RunTime.EngineComponents {
         internal void RefreshResponse() {
             try {
                 Process currentProcess = Process.GetCurrentProcess();
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     this.hubProxy.Invoke("RefreshResponse", currentProcess.Id.ToString(),
                         Utils.GetLocalIPAddress(),
                         Environment.OSVersion.VersionString,
@@ -204,8 +183,7 @@ namespace LoadInjector.RunTime.EngineComponents {
         internal void InterrogateResponse() {
             try {
                 Process currentProcess = Process.GetCurrentProcess();
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     this.hubProxy.Invoke("InterrogateResponse", currentProcess.Id.ToString(),
                         Utils.GetLocalIPAddress(),
                         Environment.OSVersion.VersionString,
@@ -253,9 +231,8 @@ namespace LoadInjector.RunTime.EngineComponents {
             if (localOnly) {
                 logger.Info(s);
             } else {
-                if (sendDetails) {
-                    Task.Run(() =>
-                    {
+                if (true) {
+                    Task.Run(() => {
                         logger.Info($"ConsoleMag: {uuid}, {s}");
                         try {
                             this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, $"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
@@ -289,8 +266,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             if (localOnly) {
                 sourceLogger.Info($"{v} Messages Sent: {messagesSent}, Current Rate: {currentRate}, Messages Per Minute: {messagesPerMinute}");
             } else {
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     this.hubProxy.Invoke("SourceReport", executionNodeID, uuid, v, messagesSent, currentRate, messagesPerMinute);
                 });
             }
@@ -308,8 +284,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             if (localOnly) {
                 destLogger.Info($"Client Side Destination Report {uuid}, sent {messagesSent}, rate {rate}");
             } else {
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     try {
                         this.hubProxy.Invoke("SendDestinationReport", executionNodeID, uuid, messagesSent, rate);
                     } catch (Exception ex) {
@@ -324,8 +299,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 logger.Info("Completion Report");
                 logger.Info(report);
             } else {
-                Task.Run(() =>
-                {
+                Task.Run(() => {
                     this.hubProxy.Invoke("CompletionReportResponse", executionNodeID, report);
                 });
             }
@@ -334,8 +308,7 @@ namespace LoadInjector.RunTime.EngineComponents {
         internal void SetStatus(string executionNodeID) {
             logger.Info($"Node Status:  {ngExecutionController.state.Value}");
 
-            Task.Run(() =>
-            {
+            Task.Run(() => {
                 this.hubProxy.Invoke("SetExecutionNodeStatus", executionNodeID, ngExecutionController.state.Value);
             });
         }

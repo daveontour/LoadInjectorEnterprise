@@ -64,7 +64,7 @@ namespace LoadInjectorCommandCentre {
             DataContext = this;
 
             this.ClientTabDatas = new ObservableCollection<object>();
-            this.ClientTabDatas.Add(new SummaryTabControl("Summary", null));
+            // this.ClientTabDatas.Add(new SummaryTabControl("Summary", null));
         }
 
         public void OnPropertyChanged(string propName) {
@@ -230,9 +230,6 @@ namespace LoadInjectorCommandCentre {
                 if (tabControl.SelectedValue is ClientTabControl control) {
                     control.TabSelected();
                 }
-                if (tabControl.SelectedValue is SummaryTabControl control1) {
-                    control1.TabSelected();
-                }
             }
 
             EnumVisual(nodeTabHolder);
@@ -256,6 +253,10 @@ namespace LoadInjectorCommandCentre {
                 // Enumerate children of the child visual object.
                 EnumVisual(childVisual);
             }
+        }
+
+        private void outputConsole_TextChanged(object sender, TextChangedEventArgs e) {
+            (sender as TextBox).ScrollToEnd();
         }
     }
 }

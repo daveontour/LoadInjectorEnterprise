@@ -92,6 +92,16 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
+        public Visibility DetailVisibility {
+            get {
+                if (IsSummary) {
+                    return Visibility.Collapsed;
+                } else {
+                    return Visibility.Visible;
+                }
+            }
+        }
+
         public bool IsSummary { get; set; }
 
         public string ConnectionID { get; set; }
@@ -105,6 +115,16 @@ namespace LoadInjectorCommandCentre.Views {
             set {
                 xml = Utils.FormatXML(value);
                 OnPropertyChanged("XML");
+            }
+        }
+
+        private string consoleText;
+
+        public string ConsoleText {
+            get { return consoleText; }
+            set {
+                consoleText = value;
+                OnPropertyChanged("ConsoleText");
             }
         }
 

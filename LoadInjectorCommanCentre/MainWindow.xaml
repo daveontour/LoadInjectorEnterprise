@@ -96,123 +96,17 @@
                 <TextBlock Text="{Binding Path=Header}" />
             </StackPanel>
         </DataTemplate>
-        <DataTemplate x:Key="SummaryTabItemTemplate">
-            <StackPanel Orientation="Horizontal">
-                <TextBlock Text="Summary" />
-            </StackPanel>
-        </DataTemplate>
-        <DataTemplate x:Key="SummaryTabContentTemplate">
-
-            <DockPanel  LastChildFill="True" Background="AliceBlue">
-
-                <Grid Background="AliceBlue">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-
-                    <DataGrid Grid.Row="0" Name="statusGrid"
-                          AutoGenerateColumns="False"
-                          ItemsSource="{Binding Source={StaticResource executionLines}}"
-                          IsReadOnly="True"
-                          ScrollViewer.CanContentScroll="True"
-                          ScrollViewer.VerticalScrollBarVisibility="Auto"
-                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
-                          CanUserAddRows="False"
-
-                          Margin="0,0,2,0">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Left" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Left" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Msgs/min" Binding="{Binding MM}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center" />
-                                        <Setter Property="Foreground" Value="Black" />
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                        <DataGrid.GroupStyle>
-                            <!-- Style for groups at top level. -->
-                            <GroupStyle>
-                                <GroupStyle.ContainerStyle>
-                                    <Style TargetType="{x:Type GroupItem}">
-                                        <Setter Property="Margin" Value="0,0,0,5" />
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type GroupItem}">
-                                                    <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
-                                                        <Expander.Header>
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
-                                                                <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
-                                                            </StackPanel>
-                                                        </Expander.Header>
-                                                        <Expander.Content>
-                                                            <ItemsPresenter />
-                                                        </Expander.Content>
-                                                    </Expander>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </Style>
-                                </GroupStyle.ContainerStyle>
-                            </GroupStyle>
-                            <!-- Style for groups under the top level.-->
-                            <GroupStyle>
-                                <GroupStyle.HeaderTemplate>
-                                    <DataTemplate>
-                                        <StackPanel Orientation="Horizontal" Background="LightBlue">
-                                            <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
-                                        </StackPanel>
-                                    </DataTemplate>
-                                </GroupStyle.HeaderTemplate>
-                            </GroupStyle>
-                        </DataGrid.GroupStyle>
-                    </DataGrid>
-                </Grid>
-            </DockPanel>
-        </DataTemplate>
         <DataTemplate x:Key="ClientTabContentTemplate">
 
             <DockPanel  LastChildFill="True" Background="AliceBlue">
 
-                <TabControl DockPanel.Dock="Bottom" Height="300" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
+                <TabControl DockPanel.Dock="Bottom" Height="300" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl" Visibility="{Binding Path=DetailVisibility}">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Output"  FontSize="14" />
                         </TabItem.Header>
                         <TextBox x:Name="outputConsole"
+                                     Text="{Binding Path=ConsoleText}"
                                      TextWrapping="NoWrap"
                                      IsReadOnly="True"
                                      ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -220,6 +114,7 @@
                                      Background="WhiteSmoke"
                                      Foreground="Black"
                                      FontFamily="Consolas"
+                                 TextChanged="outputConsole_TextChanged"
                                      FontSize="12" />
                     </TabItem>
                     <TabItem>

@@ -584,10 +584,10 @@ namespace LoadInjector.RunTime {
         }
 
         public async Task<bool> PrepareAsync(bool resetRepeats = false) {
-            if (state.Value != ClientState.Assigned.Value) {
-                clientHub.ConsoleMsg(executionNodeUuid, null, "Prepare requested, but no package assigned");
-                return false;
-            }
+            //if (state.Value != ClientState.Assigned.Value) {
+            //    clientHub.ConsoleMsg(executionNodeUuid, null, "Prepare requested, but no package assigned");
+            //    return false;
+            //}
 
             if (resetRepeats) {
                 executedRepeats = 0;

@@ -32,7 +32,7 @@ namespace LoadInjectorCommandCentre {
         public ClientControl SelectedClient { get; set; }
 
         private Dictionary<string, ClientControl> clientControls = new Dictionary<string, ClientControl>();
-        private Dictionary<string, ClientTabControl> clientTabControls = new Dictionary<string, ClientTabControl>();
+        public Dictionary<string, ClientTabControl> clientTabControls = new Dictionary<string, ClientTabControl>();
 
         private int gridRefreshRate = 1;
         private Timer refreshTimer;
@@ -43,7 +43,11 @@ namespace LoadInjectorCommandCentre {
             ServerURL = serverURL;
 
             View = mainWindow;
-            ((SummaryTabControl)View.ClientTabDatas[0]).MainController = this;
+            // ((SummaryTabControl)View.ClientTabDatas[0]).MainController = this;
+
+            ClientTabControl tabControl = new ClientTabControl("New Summary", this) { IsSummary = true, ConnectionID = "summary" };
+            clientTabControls.Add("summary", tabControl);
+            View.AddClientTab(tabControl);
 
             ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
 
@@ -129,7 +133,7 @@ namespace LoadInjectorCommandCentre {
 
             ClientControl client = clientControls[context.ConnectionId];
             ClientTabControl clientTabControl = clientTabControls[context.ConnectionId];
-            SummaryTabControl summaryTabControl = (SummaryTabControl)View.ClientTabDatas[0];
+            ClientTabControl summaryTabControl = clientTabControls["summary"];
 
             clientTabControl.Header = $"PID:{processID}";
             clientTabControl.IP = ipAddress;
@@ -284,6 +288,7 @@ namespace LoadInjectorCommandCentre {
 
             if (open.ShowDialog() == true) {
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
+                View.nodeTabHolder.SelectedIndex = 0;
                 MessageHub.Hub.Clients.All.RetrieveArchive(WebServerURL + "/" + open.SafeFileName);
             }
         }
@@ -459,9 +464,10 @@ namespace LoadInjectorCommandCentre {
             });
         }
 
-        public void SetConsoleMessage(string message) {
+        public void SetConsoleMessage(string message, HubCallerContext context) {
+            ClientTabControl clientTabControl = clientTabControls[context.ConnectionId];
             Application.Current.Dispatcher.Invoke(delegate {
-                View.consoleWriter.WriteLineNoDate(message);
+                clientTabControl.ConsoleText = clientTabControl.ConsoleText + message + "\n";
             });
         }
     }
