@@ -76,8 +76,7 @@
 
         <local:ExecutionRecords x:Key="records" />
         <CollectionViewSource x:Key="executionLines"
-                              Source="{StaticResource records}"
-                              Filter="CollectionViewSource_Filter">
+                              Source="{StaticResource records}">
             <CollectionViewSource.GroupDescriptions>
                 <PropertyGroupDescription PropertyName="GroupID" />
                 <PropertyGroupDescription PropertyName="SourceDestination" />
@@ -208,7 +207,7 @@
 
             <DockPanel  LastChildFill="True" Background="AliceBlue">
 
-                <TabControl DockPanel.Dock="Bottom" Height="400" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
+                <TabControl DockPanel.Dock="Bottom" Height="300" Margin="0,0,0,0" Grid.Row="0" x:Name="tabControl">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Output"  FontSize="14" />

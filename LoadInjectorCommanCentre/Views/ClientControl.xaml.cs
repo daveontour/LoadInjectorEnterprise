@@ -164,7 +164,7 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         private void Status_OnClick(object sender, RoutedEventArgs e) {
-            this.cCController.SetFilterCriteria(ExecutionNodeID, ConnectionID);
+            // this.cCController.SetFilterCriteria(ExecutionNodeID, ConnectionID);
             MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
         }
 

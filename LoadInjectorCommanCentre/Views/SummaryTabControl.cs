@@ -141,7 +141,6 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         internal void TabSelected() {
-            Console.WriteLine($"Summry tab selected");
             MainController.View.RecordsCollection.Clear();
             foreach (ExecutionRecordClass rec in this.TabRecords) {
                 MainController.View.RecordsCollection.Add(rec);

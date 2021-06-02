@@ -12,6 +12,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Collections.Generic;
+using System.Windows.Media;
 
 namespace LoadInjectorCommandCentre {
 
@@ -44,8 +46,6 @@ namespace LoadInjectorCommandCentre {
     public partial class MainWindow : Window, INotifyPropertyChanged {
         private MainCommandCenterController cccontroller;
 
-        private string filterNodeID;
-        public string filterConnectionID;
         private ExecutionRecords _records;
         private int gridRefreshRate = 1;
         public ControlWriter consoleWriter;
@@ -75,17 +75,7 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
-        private Visibility vis = Visibility.Collapsed;
-
-        public Visibility ShowDetailPanel {
-            get {
-                return vis;
-            }
-            set {
-                vis = value;
-                OnPropertyChanged("ShowDetailPanel");
-            }
-        }
+        public DataGrid VisibleDataGrid { get; set; }
 
         public ObservableCollection<object> ClientTabDatas { get; set; }
 
@@ -153,39 +143,6 @@ namespace LoadInjectorCommandCentre {
                 });
             } catch (Exception ex) {
                 Console.WriteLine("Unmanaged error.   " + ex.Message);
-            }
-        }
-
-        public void SetFilterCriteria(string nodeID, string ConnectionID = null) {
-            this.filterNodeID = nodeID;
-            this.filterConnectionID = ConnectionID;
-
-            Application.Current.Dispatcher.Invoke(delegate {
-                try {
-                    RecordsCollection.Clear();
-                    //   statusGrid.Items.Refresh();
-                    if (ConnectionID != null) {
-                        cccontroller.MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
-                    }
-                    if (nodeID != null) {
-                        ShowDetailPanel = Visibility.Visible;
-                    }
-                } catch (Exception ex) {
-                    Debug.WriteLine("Updating Grid Error. " + ex.Message);
-                }
-            });
-        }
-
-        private void CollectionViewSource_Filter(object sender, FilterEventArgs e) {
-            if (filterNodeID == null) {
-                e.Accepted = true;
-            } else {
-                ExecutionRecordClass rec = e.Item as ExecutionRecordClass;
-                if (rec.ExecutionNodeID == filterNodeID) {
-                    e.Accepted = true;
-                } else {
-                    e.Accepted = false;
-                }
             }
         }
 
@@ -270,12 +227,34 @@ namespace LoadInjectorCommandCentre {
         private void tabControl_SelectionChanged(object sender, SelectionChangedEventArgs e) {
             if (e.Source is TabControl) {
                 TabControl tabControl = e.Source as TabControl;
-                if (tabControl.SelectedValue is ClientTabControl) {
-                    ((ClientTabControl)tabControl.SelectedValue).TabSelected();
+                if (tabControl.SelectedValue is ClientTabControl control) {
+                    control.TabSelected();
                 }
-                if (tabControl.SelectedValue is SummaryTabControl) {
-                    ((SummaryTabControl)tabControl.SelectedValue).TabSelected();
+                if (tabControl.SelectedValue is SummaryTabControl control1) {
+                    control1.TabSelected();
                 }
+            }
+
+            EnumVisual(nodeTabHolder);
+            VisibleDataGrid?.Items.Refresh();
+        }
+
+        public void EnumVisual(Visual myVisual) {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(myVisual); i++) {
+                // Retrieve child visual at specified index value.
+                Visual childVisual = (Visual)VisualTreeHelper.GetChild(myVisual, i);
+
+                if (childVisual is DataGrid) {
+                    if (((DataGrid)childVisual).Name == "statusGrid") {
+                        VisibleDataGrid = childVisual as DataGrid;
+                        break;
+                    }
+                }
+
+                // Do processing of the child visual object.
+
+                // Enumerate children of the child visual object.
+                EnumVisual(childVisual);
             }
         }
     }

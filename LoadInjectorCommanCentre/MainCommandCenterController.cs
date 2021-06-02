@@ -248,9 +248,7 @@ namespace LoadInjectorCommandCentre {
         }
 
         internal void ViewAll() {
-            View.SetFilterCriteria(null);
             RefreshClients(true);
-            View.ShowDetailPanel = Visibility.Collapsed;
         }
 
         public void ExecuteAll() {
@@ -296,8 +294,6 @@ namespace LoadInjectorCommandCentre {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
                     SelectedClient = null;
                     View.RecordsCollection.Clear();
-                    //View.statusGrid.Items.Refresh();
-                    View.ShowDetailPanel = Visibility.Collapsed;
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -321,13 +317,8 @@ namespace LoadInjectorCommandCentre {
                         View.RecordsCollection.Remove(x);
                     }
 
-                    // Close the detail panel if it was open for this connection
-                    if (View.filterConnectionID == id) {
-                        View.ShowDetailPanel = Visibility.Collapsed;
-                        View.SetFilterCriteria(null);
-                    }
                     MessageHub.Hub.Clients.All.Refresh();
-                    //View.statusGrid.Items.Refresh();
+                    View.VisibleDataGrid.Items.Refresh();
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -342,23 +333,6 @@ namespace LoadInjectorCommandCentre {
             }
             clientControls.Clear();
             MessageHub.Hub.Clients.All.Refresh();
-        }
-
-        internal void SetFilterCriteria(string executionNodeID, string ConnectionID) {
-            View.SetFilterCriteria(executionNodeID, ConnectionID);
-
-            // Disable details from all clients
-            MessageHub.Hub.Clients.All.DisableDetails();
-            ClientControl client = clientControls.Values.FirstOrDefault<ClientControl>(x => x.ExecutionNodeID == executionNodeID);
-            SelectedClient = client;
-
-            if (client != null) {
-                //   View.configConsole.Text = Utils.FormatXML(client.XML);
-                View.consoleWriter.Clear();
-
-                // Enable details for the selected client
-                MessageHub.Hub.Clients.Client(ConnectionID).EnableDetails();
-            }
         }
 
         public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, double>> latestDestinationReport, HubCallerContext context) {
@@ -384,18 +358,8 @@ namespace LoadInjectorCommandCentre {
                             r.MM = currentRate.ToString();
                             r.Sent = messagesSent;
                             if (this.gridRefreshRate == 0 || forceUpdate) {
-                                View.statusGrid.Items.Refresh();
+                                View.VisibleDataGrid?.Items.Refresh();
                             }
-                        } else {
-                            ExecutionRecordClass rec = new ExecutionRecordClass() {
-                                Sent = messagesSent,
-                                MM = currentRate.ToString(),
-                                ExecutionLineID = uuid,
-                                ExecutionNodeID = executionNodeID,
-                                ConnectionID = context.ConnectionId
-                            };
-                            View.RecordsCollection.Add(rec);
-                            View.statusGrid.Items.Refresh();
                         }
                     } catch (Exception ex) {
                         Debug.WriteLine(ex.Message);
@@ -412,17 +376,8 @@ namespace LoadInjectorCommandCentre {
                         if (r != null) {
                             r.Sent = messagesSent;
                             if (this.gridRefreshRate == 0 || forceUpdate) {
-                                View.statusGrid.Items.Refresh();
+                                View.VisibleDataGrid?.Items.Refresh();
                             }
-                        } else {
-                            ExecutionRecordClass rec = new ExecutionRecordClass() {
-                                Sent = messagesSent,
-                                ExecutionLineID = uuid,
-                                ExecutionNodeID = executionNodeID,
-                                ConnectionID = context.ConnectionId
-                            };
-                            View.RecordsCollection.Add(rec);
-                            View.statusGrid.Items.Refresh();
                         }
                     });
                 } catch (Exception ex) {
@@ -455,7 +410,7 @@ namespace LoadInjectorCommandCentre {
         private void OnRefreshGridEvent(object sender, ElapsedEventArgs e) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
-                    //  View.statusGrid.Items.Refresh();
+                    View.VisibleDataGrid?.Items.Refresh();
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);
                 }
