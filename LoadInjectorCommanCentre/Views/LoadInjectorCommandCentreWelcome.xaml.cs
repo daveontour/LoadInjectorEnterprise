@@ -44,6 +44,8 @@ namespace LoadInjectorCommandCentre.Views {
 
             if (open.ShowDialog() == true) {
                 MainWindow.AutoAssignArchive = open.FileName;
+            } else {
+                MainWindow.AutoAssignArchive = null;
             }
         }
 

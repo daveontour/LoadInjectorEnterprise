@@ -190,8 +190,9 @@ namespace LoadInjector.RunTime {
             flightSets.Clear();
             clientHub?.consoleMessages?.Clear();
             clientHub?.consoleMessages.Clear();
-            this.state = ClientState.Reset;
+            this.state = ClientState.UnAssigned;
             clientHub.SetStatus(executionNodeUuid);
+            clientHub.RefreshResponse();
         }
 
         public void InitModel(XmlDocument model) {

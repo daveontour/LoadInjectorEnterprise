@@ -56,6 +56,8 @@ namespace LoadInjectorCommandCentre {
                 string safeName = a[a.Length - 1];
                 File.Copy(AutoAssignArchive, ArchiveRoot + "\\" + safeName, true);
                 AutoAssignArchive = safeName;
+            } else {
+                AutoAssignArchive = null;
             }
 
             MessageHub = new CentralMessagingHub(this);
@@ -342,7 +344,20 @@ namespace LoadInjectorCommandCentre {
             if (res != MessageBoxResult.Yes) {
                 return;
             }
-            ClearClientData();
+            Application.Current.Dispatcher.Invoke((Action)delegate {
+                ClearClientData();
+                View.VisibleDataGrid?.Items.Refresh();
+            });
+
+            try {
+                Application.Current.Dispatcher.Invoke((Action)delegate {
+                    View.RecordsCollection.Clear();
+                    View.VisibleDataGrid?.Items?.Refresh();
+                });
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
             MessageHub.Hub.Clients.All.Reset();
         }
 

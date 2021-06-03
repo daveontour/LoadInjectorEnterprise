@@ -83,6 +83,10 @@ namespace LoadInjectorBase.Common {
         }
 
         public static string FormatXML(string xml) {
+            if (xml == null) {
+                return null;
+            }
+
             try {
                 StringBuilder sb = new StringBuilder();
                 TextWriter tr = new StringWriter(sb);
