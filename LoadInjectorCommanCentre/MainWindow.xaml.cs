@@ -14,6 +14,8 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Collections.Generic;
 using System.Windows.Media;
+using System.Xml;
+using System.IO;
 
 namespace LoadInjectorCommandCentre {
 
@@ -62,9 +64,20 @@ namespace LoadInjectorCommandCentre {
         public MainWindow() {
             InitializeComponent();
             DataContext = this;
-
             this.ClientTabDatas = new ObservableCollection<object>();
-            // this.ClientTabDatas.Add(new SummaryTabControl("Summary", null));
+
+            try {
+                XmlDocument doc = new XmlDocument();
+                doc.Load("Config.xml");
+
+                NumClients = Int32.Parse(doc.SelectSingleNode(".//initialClient")?.InnerText);
+                SignalRURL = doc.SelectSingleNode(".//hubURL")?.InnerText;
+                ServerURL = doc.SelectSingleNode(".//webserverURL")?.InnerText;
+                AutoExecute = bool.Parse(doc.SelectSingleNode(".//autoStart")?.InnerText);
+                AutoAssignArchive = doc.SelectSingleNode(".//autoAssignFile")?.InnerText;
+            } catch (Exception ex) {
+                // NO-OP
+            }
         }
 
         public void OnPropertyChanged(string propName) {
@@ -168,7 +181,7 @@ namespace LoadInjectorCommandCentre {
         }
 
         private void resetAllBtn_Click(object sender, RoutedEventArgs e) {
-            cccontroller.MessageHub.Hub.Clients.All.Reset();
+            cccontroller.ResetAll();
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
@@ -177,6 +190,39 @@ namespace LoadInjectorCommandCentre {
                 DataContext = this
             };
             welcome.ShowDialog();
+
+            //try {
+            //    XmlDocument doc = new XmlDocument();
+
+            //    XmlElement elem = doc.CreateElement("initialClient");
+            //    XmlText text = doc.CreateTextNode(NumClients.ToString());
+            //    doc.DocumentElement.AppendChild(elem);
+            //    doc.DocumentElement.LastChild.AppendChild(text);
+
+            //    XmlElement elem1 = doc.CreateElement("hubURL");
+            //    XmlText text1 = doc.CreateTextNode(SignalRURL);
+            //    doc.DocumentElement.AppendChild(elem1);
+            //    doc.DocumentElement.LastChild.AppendChild(text1);
+
+            //    XmlElement elem2 = doc.CreateElement("webserverURL");
+            //    XmlText text2 = doc.CreateTextNode(ServerURL);
+            //    doc.DocumentElement.AppendChild(elem2);
+            //    doc.DocumentElement.LastChild.AppendChild(text2);
+
+            //    XmlElement elem3 = doc.CreateElement("autoStart");
+            //    XmlText text3 = doc.CreateTextNode(AutoExecute.ToString());
+            //    doc.DocumentElement.AppendChild(elem3);
+            //    doc.DocumentElement.LastChild.AppendChild(text3);
+
+            //    XmlElement elem4 = doc.CreateElement("autoAssignFile");
+            //    XmlText text4 = doc.CreateTextNode(AutoAssignArchive);
+            //    doc.DocumentElement.AppendChild(elem4);
+            //    doc.DocumentElement.LastChild.AppendChild(text4);
+
+            //    File.WriteAllText("Config.xml", doc.OuterXml);
+            //} catch (Exception ex) {
+            //    Console.WriteLine(ex.Message);
+            //}
 
             cccontroller = new MainCommandCenterController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
             _records = (ExecutionRecords)this.Resources["records"];

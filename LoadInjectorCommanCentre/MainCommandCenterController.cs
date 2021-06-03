@@ -43,7 +43,6 @@ namespace LoadInjectorCommandCentre {
             ServerURL = serverURL;
 
             View = mainWindow;
-            // ((SummaryTabControl)View.ClientTabDatas[0]).MainController = this;
 
             ClientTabControl tabControl = new ClientTabControl("New Summary", this) { IsSummary = true, ConnectionID = "summary" };
             clientTabControls.Add("summary", tabControl);
@@ -52,7 +51,7 @@ namespace LoadInjectorCommandCentre {
             ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
 
             this.AutoAssignArchive = autoAssignArchive;
-            if (AutoAssignArchive != null) {
+            if (AutoAssignArchive != null && AutoAssignArchive != "") {
                 string[] a = AutoAssignArchive.Split('\\');
                 string safeName = a[a.Length - 1];
                 File.Copy(AutoAssignArchive, ArchiveRoot + "\\" + safeName, true);
@@ -243,6 +242,32 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
+        private void ClearClientData() {
+            foreach (ClientTabControl tabControl in clientTabControls.Values) {
+                tabControl.TabRecords.Clear();
+                tabControl.OnPropertyChanged("TabRecords");
+                tabControl.ConsoleText = null;
+            }
+            View.VisibleDataGrid?.Items.Refresh();
+        }
+
+        private void ClearTabs(string connectionID = null) {
+            ObservableCollection<object> newCollection = new ObservableCollection<object>();
+            newCollection.Add(View.ClientTabDatas[0]);
+
+            if (connectionID != null) {
+                foreach (var client in View.ClientTabDatas) {
+                    if ((client as ClientTabControl).ConnectionID == connectionID || (client as ClientTabControl).ConnectionID == "summary") {
+                        continue;
+                    }
+                    newCollection.Add(client);
+                }
+            }
+
+            View.ClientTabDatas = newCollection;
+            View.OnPropertyChanged("ClientTabDatas");
+        }
+
         public void PrepAll() {
             View.prepAllBtn.IsEnabled = true;
             View.execAllBtn.IsEnabled = true;
@@ -294,6 +319,13 @@ namespace LoadInjectorCommandCentre {
         }
 
         internal void DisconnectAll() {
+            MessageBoxResult res = MessageBox.Show($"Do you really want to disconnect and shutdown all the connected clients?", "Disconnet Client", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (res != MessageBoxResult.Yes) {
+                return;
+            }
+
+            ClearTabs();
+
             MessageHub.Hub.Clients.All.Disconnect();
             try {
                 Application.Current.Dispatcher.Invoke((Action)delegate {
@@ -305,8 +337,19 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
+        public void ResetAll() {
+            MessageBoxResult res = MessageBox.Show($"Do you really want to reset all the connected clients?", "Reset Clients", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (res != MessageBoxResult.Yes) {
+                return;
+            }
+            ClearClientData();
+            MessageHub.Hub.Clients.All.Reset();
+        }
+
         internal void DisconnectClient(string id) {
             //Tell the client to disconnect
+
+            ClearTabs(id);
             MessageHub.Hub.Clients.Client(id).Disconnect();
 
             try {
@@ -323,7 +366,7 @@ namespace LoadInjectorCommandCentre {
                     }
 
                     MessageHub.Hub.Clients.All.Refresh();
-                    View.VisibleDataGrid.Items.Refresh();
+                    View.VisibleDataGrid?.Items?.Refresh();
                 });
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
@@ -335,6 +378,8 @@ namespace LoadInjectorCommandCentre {
             //View.statusGrid.Items.Refresh();
             if (clear) {
                 View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
+                ClearClientData();
+                ClearTabs();
             }
             clientControls.Clear();
             MessageHub.Hub.Clients.All.Refresh();

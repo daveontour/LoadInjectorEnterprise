@@ -152,10 +152,12 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         private void Prep_OnClick(object sender, RoutedEventArgs e) {
+            cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
             MessageHub.Hub.Clients.Client(ConnectionID).ClearAndPrepare();
         }
 
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
+            cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
             this.cCController.ExecuteClient(ConnectionID);
         }
 

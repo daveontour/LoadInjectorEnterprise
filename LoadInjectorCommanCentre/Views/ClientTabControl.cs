@@ -130,7 +130,7 @@ namespace LoadInjectorCommandCentre.Views {
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        protected virtual void OnPropertyChanged(string propertyName = null) {
+        public virtual void OnPropertyChanged(string propertyName = null) {
             this.PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 

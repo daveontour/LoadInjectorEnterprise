@@ -38,8 +38,10 @@ namespace LoadInjectorCommandCentre.Views {
         private void SelectAutoArchive_Click(object sender, RoutedEventArgs e) {
             OpenFileDialog open = new OpenFileDialog {
                 Filter = "Load Injector Archive Files(*.lia)|*.lia",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop),
+                FileName = MainWindow.AutoAssignArchive
             };
+
             if (open.ShowDialog() == true) {
                 MainWindow.AutoAssignArchive = open.FileName;
             }
