@@ -139,6 +139,9 @@ namespace LoadInjectorCommandCentre {
                     ClientControl client = new ClientControl(context.ConnectionId, MessageHub, this);
                     clientControls.Add(context.ConnectionId, client);
                     ClientTabControl tabControl = new ClientTabControl("PID Pending", this) { IsSummary = false, ConnectionID = context.ConnectionId };
+                    if (AutoAssignArchive != null) {
+                        tabControl.WorkPackage = AutoAssignArchive;
+                    }
                     clientTabControls.Add(context.ConnectionId, tabControl);
 
                     View.AddClientControl(client);
@@ -153,6 +156,10 @@ namespace LoadInjectorCommandCentre {
             if (AutoAssignArchive != null) {
                 MessageHub.Hub.Clients.Client(context.ConnectionId).RetrieveArchive(WebServerURL + "/" + AutoAssignArchive);
             }
+        }
+
+        internal void ShowTab(string connectionID) {
+            View.nodeTabHolder.SelectedItem = this.clientTabControls[connectionID];
         }
 
         public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, HubCallerContext context) {
@@ -294,9 +301,23 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void PrepAll() {
-            View.prepAllBtn.IsEnabled = true;
-            View.execAllBtn.IsEnabled = true;
-            View.stopAllBtn.IsEnabled = false;
+            int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.Assigned.Value);
+            if (ready == 0) {
+                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are ready for preparation", "Prepare All", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            int notready = clientControls.Values.Count<ClientControl>(x => x.StatusText != ClientState.Assigned.Value);
+            if (notready > 0) {
+                MessageBoxResult res = MessageBox.Show($"{notready} Execution Nodes have not been assigned work packages. Prepare nodes that have been assigned?", "Prepare All", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (res == MessageBoxResult.Yes) {
+                    foreach (ClientControl c in clientControls.Values) {
+                        if (c.StatusText == ClientState.Assigned.Value) {
+                            MessageHub.Hub.Clients.Client(c.ConnectionID).ClearAndPrepare();
+                        }
+                    }
+                }
+                return;
+            }
 
             MessageHub.Hub.Clients.All.ClearAndPrepare();
         }
@@ -305,14 +326,25 @@ namespace LoadInjectorCommandCentre {
             ClearGridData();
         }
 
-        internal void ViewAll() {
-            RefreshClients(true);
-        }
-
         public void ExecuteAll() {
-            View.prepAllBtn.IsEnabled = false;
-            View.execAllBtn.IsEnabled = false;
-            View.stopAllBtn.IsEnabled = true;
+            int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.Ready.Value);
+            if (ready == 0) {
+                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are ready for execution", "Execute All", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            int notready = clientControls.Values.Count<ClientControl>(x => x.StatusText != ClientState.Ready.Value);
+            if (notready > 0) {
+                MessageBoxResult res = MessageBox.Show($"{notready} Execution Nodes are not ready to execute. Execute nodes that are ready?", "Execute All", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (res == MessageBoxResult.Yes) {
+                    foreach (ClientControl c in clientControls.Values) {
+                        if (c.StatusText == ClientState.Ready.Value) {
+                            MessageHub.Hub.Clients.Client(c.ConnectionID).Execute();
+                        }
+                    }
+                }
+                return;
+            }
 
             MessageHub.Hub.Clients.All.Execute();
             SetRefreshRate(gridRefreshRate);
@@ -324,10 +356,6 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void StopAll() {
-            View.prepAllBtn.IsEnabled = true;
-            View.execAllBtn.IsEnabled = false;
-            View.stopAllBtn.IsEnabled = false;
-
             MessageHub.Hub.Clients.All.Stop();
         }
 
@@ -349,6 +377,11 @@ namespace LoadInjectorCommandCentre {
                 }
 
                 View.VisibleDataGrid.Items.Refresh();
+
+                foreach (ClientTabControl tabControl in clientTabControls.Values) {
+                    tabControl.WorkPackage = open.SafeFileName;
+                    tabControl.OnPropertyChanged("WorkPackage");
+                }
                 MessageHub.Hub.Clients.All.RetrieveArchive(WebServerURL + "/" + open.SafeFileName);
             }
         }
@@ -360,6 +393,7 @@ namespace LoadInjectorCommandCentre {
             }
 
             ClearTabs();
+            ClearGridData();
 
             MessageHub.Hub.Clients.All.Disconnect();
             try {

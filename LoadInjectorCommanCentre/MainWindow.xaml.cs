@@ -148,10 +148,6 @@ namespace LoadInjectorCommandCentre {
             cccontroller.RefreshClients();
         }
 
-        private void ViewAllBtn_OnClick(object sender, RoutedEventArgs e) {
-            cccontroller.ViewAll();
-        }
-
         private void DisconnectAllBtn_OnClick(object sender, RoutedEventArgs e) {
             cccontroller.DisconnectAll();
         }

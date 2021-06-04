@@ -166,8 +166,7 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         private void Status_OnClick(object sender, RoutedEventArgs e) {
-            // this.cCController.SetFilterCriteria(ExecutionNodeID, ConnectionID);
-            MessageHub.Hub.Clients.Client(ConnectionID).Refresh();
+            this.cCController.ShowTab(ConnectionID);
         }
 
         private void Disconnect_OnClick(object sender, RoutedEventArgs e) {
@@ -187,6 +186,11 @@ namespace LoadInjectorCommandCentre.Views {
                 cCController.ClearGridData(ConnectionID);
                 cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
+
+                ClientTabControl tabControl = cCController.clientTabControls[ConnectionID];
+                tabControl.WorkPackage = open.SafeFileName;
+                tabControl.OnPropertyChanged("WorkPackage");
+
                 MessageHub.Hub.Clients.Client(ConnectionID).RetrieveArchive(cCController.WebServerURL + "/" + open.SafeFileName);
             }
         }

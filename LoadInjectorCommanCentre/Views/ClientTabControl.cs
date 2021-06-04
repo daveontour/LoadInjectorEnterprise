@@ -107,7 +107,7 @@ namespace LoadInjectorCommandCentre.Views {
                 if (IsSummary) {
                     return "All Connect Nodes";
                 } else {
-                    return $"Execution Node: {IP}, {ProcessID}";
+                    return $"Execution Node: {IP}, {ProcessID}.  Work Package:  {WorkPackage}";
                 }
             }
         }
@@ -137,6 +137,8 @@ namespace LoadInjectorCommandCentre.Views {
                 OnPropertyChanged("ConsoleText");
             }
         }
+
+        public object WorkPackage { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
