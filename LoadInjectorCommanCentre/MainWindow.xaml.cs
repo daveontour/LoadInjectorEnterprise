@@ -75,6 +75,8 @@ namespace LoadInjectorCommandCentre {
                 ServerURL = doc.SelectSingleNode(".//webserverURL")?.InnerText;
                 AutoExecute = bool.Parse(doc.SelectSingleNode(".//autoStart")?.InnerText);
                 AutoAssignArchive = doc.SelectSingleNode(".//autoAssignFile")?.InnerText;
+
+                OnPropertyChanged("NoAutoAssign");
             } catch (Exception ex) {
                 // NO-OP
             }
@@ -88,21 +90,42 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
-        public DataGrid VisibleDataGrid { get; set; }
+        private DataGrid _visdataGrid;
+
+        public DataGrid VisibleDataGrid {
+            get {
+                return _visdataGrid;
+            }
+            set { _visdataGrid = value; }
+        }
 
         public ObservableCollection<object> ClientTabDatas { get; set; }
+
+        public bool NoAutoAssign {
+            get {
+                if (AutoAssignArchive == null || AutoAssignArchive == "") {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        }
 
         public int NumClients { get { return numClients; } set { numClients = value; } }
         public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
         public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
         public string AutoAssignArchive { get { return autoArchiveFile; } set { autoArchiveFile = value; OnPropertyChanged("AutoAssignArchive"); } }
-
         public bool AutoExecute { get { return autoExecute; } set { autoExecute = value; OnPropertyChanged("AutoExecute"); } }
+
+        public int NumConnectedClients {
+            get {
+                return clientControlStack.Children.Count;
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OutputConsole_Initialized(object sender, EventArgs e) {
-            //consoleWriter = new ControlWriter(outputConsole);
         }
 
         private void PrepAllBtn_OnClick(object sender, RoutedEventArgs e) {
@@ -227,12 +250,9 @@ namespace LoadInjectorCommandCentre {
                 Console.WriteLine(ex.Message);
             }
 
+            OnPropertyChanged("NoAutoAssign");
             cccontroller = new MainCommandCenterController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
             _records = (ExecutionRecords)this.Resources["records"];
-        }
-
-        private void autoStartBtn_Click(object sender, RoutedEventArgs e) {
-            AutoExecute = false;
         }
 
         private void completionReportBtn_Click(object sender, RoutedEventArgs e) {
@@ -248,23 +268,29 @@ namespace LoadInjectorCommandCentre {
 
             ClientTabDatas = newCollection;
             OnPropertyChanged("ClientTabDatas");
+
+            if (clientTabData.ConnectionID == "summary") {
+                nodeTabHolder.SelectedIndex = 0;
+                EnumVisual(nodeTabHolder);
+            }
         }
 
         public void AddClientControl(ClientControl clientControl) {
             clientControlStack.Children.Add(clientControl);
+            OnPropertyChanged("NumConnectedClients");
         }
 
         public void RemoveClientControl(ClientControl clientControl) {
             clientControlStack.Children.Remove(clientControl);
+            OnPropertyChanged("NumConnectedClients");
         }
 
         public void RemoveClientTab(string connectionID) {
+            nodeTabHolder.SelectedIndex = 0;
             ObservableCollection<object> newCollection = new ObservableCollection<object>();
             foreach (object o in ClientTabDatas) {
-                if (o is ClientTabControl) {
-                    if (((ClientTabControl)o).ConnectionID == connectionID) {
-                        continue;
-                    }
+                if (o is ClientTabControl control && control.ConnectionID == connectionID) {
+                    continue;
                 }
                 newCollection.Add(o);
             }
@@ -306,6 +332,56 @@ namespace LoadInjectorCommandCentre {
 
         private void outputConsole_TextChanged(object sender, TextChangedEventArgs e) {
             (sender as TextBox).ScrollToEnd();
+        }
+
+        private void statusBtn_Click(object sender, RoutedEventArgs e) {
+            LoadInjectorCommandCentreStatus welcome = new LoadInjectorCommandCentreStatus(this) {
+                Owner = this,
+                DataContext = this
+            };
+            welcome.ShowDialog();
+
+            try {
+                XmlDocument doc = new XmlDocument();
+
+                XmlElement root = doc.CreateElement("config");
+                doc.AppendChild(root);
+
+                XmlElement elem = doc.CreateElement("initialClient");
+                XmlText text = doc.CreateTextNode(NumClients.ToString());
+                root.AppendChild(elem);
+                root.LastChild.AppendChild(text);
+
+                XmlElement elem1 = doc.CreateElement("hubURL");
+                XmlText text1 = doc.CreateTextNode(SignalRURL);
+                root.AppendChild(elem1);
+                root.LastChild.AppendChild(text1);
+
+                XmlElement elem2 = doc.CreateElement("webserverURL");
+                XmlText text2 = doc.CreateTextNode(ServerURL);
+                root.AppendChild(elem2);
+                root.LastChild.AppendChild(text2);
+
+                XmlElement elem3 = doc.CreateElement("autoStart");
+                XmlText text3 = doc.CreateTextNode(AutoExecute.ToString());
+                root.AppendChild(elem3);
+                root.LastChild.AppendChild(text3);
+
+                XmlElement elem4 = doc.CreateElement("autoAssignFile");
+                XmlText text4 = doc.CreateTextNode(AutoAssignArchive);
+                root.AppendChild(elem4);
+                root.LastChild.AppendChild(text4);
+
+                File.WriteAllText("Config.xml", doc.OuterXml);
+            } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
+            }
+
+            OnPropertyChanged("NoAutoAssign");
+        }
+
+        private void clearBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.ClearGrid();
         }
     }
 }

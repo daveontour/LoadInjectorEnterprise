@@ -99,6 +99,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 });
 
                 hubProxy.On("Refresh", () => {
+                    logger.Info("Refresh Command Received");
                     RefreshResponse();
                 });
                 hubProxy.On("RetrieveArchive", (url) => {

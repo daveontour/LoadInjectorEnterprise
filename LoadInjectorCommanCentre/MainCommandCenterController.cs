@@ -39,18 +39,15 @@ namespace LoadInjectorCommandCentre {
 
         public MainCommandCenterController(MainWindow mainWindow, int numClients, string signalRURL, string serverURL, string autoAssignArchive) {
             NumClients = numClients;
-
             ServerURL = serverURL;
-
             View = mainWindow;
+            ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
+            this.AutoAssignArchive = autoAssignArchive;
 
-            ClientTabControl tabControl = new ClientTabControl("New Summary", this) { IsSummary = true, ConnectionID = "summary" };
+            ClientTabControl tabControl = new ClientTabControl("Summary", this) { IsSummary = true, ConnectionID = "summary" };
             clientTabControls.Add("summary", tabControl);
             View.AddClientTab(tabControl);
 
-            ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
-
-            this.AutoAssignArchive = autoAssignArchive;
             if (AutoAssignArchive != null && AutoAssignArchive != "") {
                 string[] a = AutoAssignArchive.Split('\\');
                 string safeName = a[a.Length - 1];
@@ -64,17 +61,61 @@ namespace LoadInjectorCommandCentre {
             MessageHub.StartHub(signalRURL);
 
             int webport = Utils.GetAvailablePort(49152);
-            // WebServerURL = $"http://localhost:{webport}/";
             WebServerURL = serverURL;
 
             WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
-            //Console.WriteLine("Webserver Port: " + webport);
-
             StartClients(NumClients);
         }
 
         public void Close() {
             WebServer.Stop();
+            MessageHub.StoptHub();
+        }
+
+        public void ClearGridData(string connectionID = null) {
+            View.RecordsCollection.Clear();
+            View.OnPropertyChanged("RecordsCollection");
+
+            foreach (ClientTabControl tabControl in clientTabControls.Values) {
+                if (connectionID == null || tabControl.ConnectionID == connectionID) {
+                    tabControl.TabExecutionRecords.Clear();
+                    tabControl.OnPropertyChanged("TabExecutionRecords");
+                    tabControl.ConsoleText = null;
+                }
+
+                if (tabControl.ConnectionID == "summary" && connectionID != null) {
+                    ExecutionRecords newCollection = new ExecutionRecords();
+                    foreach (ExecutionRecordClass rec in tabControl.TabExecutionRecords) {
+                        if (rec.ConnectionID != connectionID) {
+                            newCollection.Add(rec);
+                        }
+                    }
+
+                    tabControl.TabExecutionRecords = newCollection;
+                    tabControl.OnPropertyChanged("TabExecutionRecords");
+                }
+            }
+            if (View.VisibleDataGrid == null) {
+                View.EnumVisual(View.nodeTabHolder);
+            }
+            View.VisibleDataGrid?.Items.Refresh();
+        }
+
+        private void ClearTabs(string connectionID = null) {
+            ObservableCollection<object> newCollection = new ObservableCollection<object>();
+            newCollection.Add(View.ClientTabDatas[0]);
+
+            if (connectionID != null) {
+                foreach (var client in View.ClientTabDatas) {
+                    if ((client as ClientTabControl).ConnectionID == connectionID || (client as ClientTabControl).ConnectionID == "summary") {
+                        continue;
+                    }
+                    newCollection.Add(client);
+                }
+            }
+
+            View.ClientTabDatas = newCollection;
+            View.OnPropertyChanged("ClientTabDatas");
         }
 
         public void StartClients(int num) {
@@ -119,11 +160,19 @@ namespace LoadInjectorCommandCentre {
                 try {
                     Application.Current.Dispatcher.Invoke((Action)delegate {
                         ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this) { StatusText = status };
-                        clientControls.Add(context.ConnectionId, cl);
+                        if (clientControls.ContainsKey(context.ConnectionId)) {
+                            clientControls[context.ConnectionId] = cl;
+                        } else {
+                            clientControls.Add(context.ConnectionId, cl);
+                        }
 
                         ClientTabControl tabControl = new ClientTabControl($"PID:{processID}", this) { IsSummary = false, ConnectionID = context.ConnectionId };
-                        clientTabControls.Add(context.ConnectionId, tabControl);
 
+                        if (clientTabControls.ContainsKey(context.ConnectionId)) {
+                            clientTabControls[context.ConnectionId] = tabControl;
+                        } else {
+                            clientTabControls.Add(context.ConnectionId, tabControl);
+                        }
                         View.AddClientControl(cl);
                         View.AddClientTab(tabControl);
                     });
@@ -244,38 +293,16 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
-        private void ClearClientData() {
-            foreach (ClientTabControl tabControl in clientTabControls.Values) {
-                tabControl.TabRecords.Clear();
-                tabControl.OnPropertyChanged("TabRecords");
-                tabControl.ConsoleText = null;
-            }
-            View.VisibleDataGrid?.Items.Refresh();
-        }
-
-        private void ClearTabs(string connectionID = null) {
-            ObservableCollection<object> newCollection = new ObservableCollection<object>();
-            newCollection.Add(View.ClientTabDatas[0]);
-
-            if (connectionID != null) {
-                foreach (var client in View.ClientTabDatas) {
-                    if ((client as ClientTabControl).ConnectionID == connectionID || (client as ClientTabControl).ConnectionID == "summary") {
-                        continue;
-                    }
-                    newCollection.Add(client);
-                }
-            }
-
-            View.ClientTabDatas = newCollection;
-            View.OnPropertyChanged("ClientTabDatas");
-        }
-
         public void PrepAll() {
             View.prepAllBtn.IsEnabled = true;
             View.execAllBtn.IsEnabled = true;
             View.stopAllBtn.IsEnabled = false;
 
             MessageHub.Hub.Clients.All.ClearAndPrepare();
+        }
+
+        internal void ClearGrid() {
+            ClearGridData();
         }
 
         internal void ViewAll() {
@@ -316,6 +343,12 @@ namespace LoadInjectorCommandCentre {
             if (open.ShowDialog() == true) {
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
                 View.nodeTabHolder.SelectedIndex = 0;
+                ClearGridData();
+                if (View.VisibleDataGrid == null) {
+                    View.EnumVisual(View.nodeTabHolder);
+                }
+
+                View.VisibleDataGrid.Items.Refresh();
                 MessageHub.Hub.Clients.All.RetrieveArchive(WebServerURL + "/" + open.SafeFileName);
             }
         }
@@ -345,7 +378,7 @@ namespace LoadInjectorCommandCentre {
                 return;
             }
             Application.Current.Dispatcher.Invoke((Action)delegate {
-                ClearClientData();
+                ClearGridData();
                 View.VisibleDataGrid?.Items.Refresh();
             });
 
@@ -365,6 +398,7 @@ namespace LoadInjectorCommandCentre {
             //Tell the client to disconnect
 
             ClearTabs(id);
+            ClearGridData(id);
             MessageHub.Hub.Clients.Client(id).Disconnect();
 
             try {
@@ -373,6 +407,7 @@ namespace LoadInjectorCommandCentre {
                     ClientControl client = clientControls.Values.FirstOrDefault<ClientControl>(x => x.ConnectionID == id);
                     //Remove it from the list of execution nodes.
                     View.clientControlStack.Children.Remove(client);
+                    View.OnPropertyChanged("NumConnectedClients");
 
                     //Remove any entries from the messaging grid
                     var query = View.RecordsCollection.ToList<ExecutionRecordClass>().Where(rec => rec.ConnectionID == id);
@@ -393,7 +428,8 @@ namespace LoadInjectorCommandCentre {
             //View.statusGrid.Items.Refresh();
             if (clear) {
                 View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
-                ClearClientData();
+                View.OnPropertyChanged("NumConnectedClients");
+                ClearGridData();
                 ClearTabs();
             }
             clientControls.Clear();
@@ -410,8 +446,6 @@ namespace LoadInjectorCommandCentre {
                 UpdateDestinationLine(rec.Item1, rec.Item2, rec.Item3, context, true);
             }
         }
-
-        // Called after a client makes a connection
 
         public void UpdateSourceLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context, bool forceUpdate = false) {
             if (clientControls.ContainsKey(context.ConnectionId)) {
@@ -475,6 +509,9 @@ namespace LoadInjectorCommandCentre {
         private void OnRefreshGridEvent(object sender, ElapsedEventArgs e) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
+                    if (View.VisibleDataGrid == null) {
+                        View.EnumVisual(View.nodeTabHolder);
+                    }
                     View.VisibleDataGrid?.Items.Refresh();
                 } catch (Exception ex) {
                     Debug.WriteLine("Updating Grid Error. " + ex.Message);

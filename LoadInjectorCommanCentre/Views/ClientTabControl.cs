@@ -10,13 +10,13 @@ namespace LoadInjectorCommandCentre.Views {
     public class ClientTabControl : INotifyPropertyChanged {
         private ExecutionRecords tabRecords = new ExecutionRecords();
 
-        public ExecutionRecords TabRecords {
+        public ExecutionRecords TabExecutionRecords {
             get {
                 return tabRecords;
             }
             set {
                 tabRecords = value;
-                OnPropertyChanged("TabRecords");
+                OnPropertyChanged("TabExecutionRecords");
             }
         }
 
@@ -102,6 +102,16 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
+        public string Title {
+            get {
+                if (IsSummary) {
+                    return "All Connect Nodes";
+                } else {
+                    return $"Execution Node: {IP}, {ProcessID}";
+                }
+            }
+        }
+
         public bool IsSummary { get; set; }
 
         public string ConnectionID { get; set; }
@@ -142,17 +152,17 @@ namespace LoadInjectorCommandCentre.Views {
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
                 Application.Current.Dispatcher.Invoke(delegate {
-                    ExecutionRecordClass r = TabRecords.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
+                    ExecutionRecordClass r = TabExecutionRecords.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
                     if (r != null) {
                         r.MM = rec.MM;
                         r.Sent = rec.Sent;
                         r.Name = rec.Name;
                         r.Type = rec.Type;
-                        OnPropertyChanged("TabRecords");
+                        OnPropertyChanged("TabExecutionRecords");
                     } else {
-                        TabRecords.Add(rec);
-                        OnPropertyChanged("TabRecords");
+                        TabExecutionRecords.Add(rec);
+                        OnPropertyChanged("TabExecutionRecords");
                     }
                 });
             } catch (Exception ex) {
@@ -161,11 +171,13 @@ namespace LoadInjectorCommandCentre.Views {
         }
 
         internal void TabSelected() {
-            MainController.View.RecordsCollection.Clear();
-            foreach (ExecutionRecordClass rec in this.TabRecords) {
-                MainController.View.RecordsCollection.Add(rec);
+            if (MainController?.View.RecordsCollection != null) {
+                MainController?.View?.RecordsCollection.Clear();
+                foreach (ExecutionRecordClass rec in this.TabExecutionRecords) {
+                    MainController?.View?.RecordsCollection.Add(rec);
+                }
+                MainController?.View?.OnPropertyChanged("ExecutionRecords");
             }
-            MainController.View.OnPropertyChanged("ExecutionRecords");
         }
     }
 }

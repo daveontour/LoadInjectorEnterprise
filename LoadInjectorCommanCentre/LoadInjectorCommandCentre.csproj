@@ -175,6 +175,9 @@
     </Compile>
     <Compile Include="Views\ClientTabControl.cs" />
     <Compile Include="Views\ControlWriter.cs" />
+    <Compile Include="Views\LoadInjectorCommandCentreStatus.xaml.cs">
+      <DependentUpon>LoadInjectorCommandCentreStatus.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LoadInjectorCommandCentreWelcome.xaml.cs">
       <DependentUpon>LoadInjectorCommandCentreWelcome.xaml</DependentUpon>
     </Compile>
@@ -199,6 +202,10 @@
     <Page Include="Views\ClientControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\LoadInjectorCommandCentreStatus.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\LoadInjectorCommandCentreWelcome.xaml">
       <SubType>Designer</SubType>

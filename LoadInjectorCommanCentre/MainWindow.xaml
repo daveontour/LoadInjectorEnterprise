@@ -114,7 +114,7 @@
                                      Background="WhiteSmoke"
                                      Foreground="Black"
                                      FontFamily="Consolas"
-                                 TextChanged="outputConsole_TextChanged"
+                                     TextChanged="outputConsole_TextChanged"
                                      FontSize="12" />
                     </TabItem>
                     <TabItem>
@@ -153,8 +153,9 @@
                         <RowDefinition Height="*" />
                         <!--  <RowDefinition Height="30" />-->
                     </Grid.RowDefinitions>
-                    <DockPanel  Grid.Row="0">
+                    <DockPanel LastChildFill="True" Grid.Row="0">
                         <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                        <Label HorizontalAlignment="Center" FontWeight="DemiBold" FontSize="14" Content="{Binding Path=Title}" />
                     </DockPanel>
 
                     <DataGrid Grid.Row="1" Name="statusGrid"
@@ -167,7 +168,7 @@
                           CanUserAddRows="False"
                           Margin="0,0,2,0">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Type" Binding="{Binding Protocol}">
+                            <DataGridTextColumn Header="Type" Binding="{Binding Protocol}" Width="200">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Left" />
@@ -175,7 +176,7 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTextColumn Header="Name" Binding="{Binding Name}">
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="300">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
                                         <Setter Property="HorizontalAlignment" Value="Left" />
@@ -264,7 +265,7 @@
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
                                 <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Background="Pink" Content="Reset" HorizontalAlignment="Center" ToolTip="Reset the client to initial state and clear any assigned work package"  VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
+                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Background="Pink" Content="Reset" HorizontalAlignment="Center" ToolTip="Reset the client to initial state and clear any assigned work package"  VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick" Background="Pink" Content="Disconnect" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -275,11 +276,12 @@
                     <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="PaleGreen" Margin="4,2,2,2">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
+                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" IsEnabled="{Binding Path=NoAutoAssign}" />
                                 <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare" HorizontalAlignment="Left"   Width="80" Height="30" Margin="2,0,0,0" />
                                 <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute" HorizontalAlignment="Left"   Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                                 <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="Completion Reports" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="100" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="10" x:Name="clearBtn" Click="clearBtn_Click"  Content="Clear Grid" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="100" Height="30"  Margin="2,0,0,0"  Visibility="Collapsed" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Execution Control - All Connected Client</Label>
@@ -290,9 +292,7 @@
                     <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="PaleTurquoise" Margin="2,2,2,2">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                                <Button FontSize="10" x:Name="autoAssignBtn" Click="autoStartBtn_Click"  Content="Auto Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="autoStartBtn" Click="autoStartBtn_Click"  Content="Auto Start" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="statusBtn" Click="completionReportBtn_Click"  Content="Status" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,2,0" />
+                                <Button FontSize="10" x:Name="statusBtn" Click="statusBtn_Click"  Content="Status and Control" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="130" Height="30"  Margin="2,0,2,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                 <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Command Center Control</Label>
@@ -336,15 +336,30 @@
             </Grid>
         </Border>
         <Border Grid.Row="2" BorderThickness="1" CornerRadius="3" BorderBrush="Black" Background="AliceBlue" Margin="4,2,4,2">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                <Label Margin="0,0,0,0">Update Frequency:</Label>
-                <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
-                    <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
-                    <ComboBoxItem>3 seconds</ComboBoxItem>
-                    <ComboBoxItem>10 seconds</ComboBoxItem>
-                    <ComboBoxItem>Continuous</ComboBoxItem>
-                </ComboBox>
-            </StackPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="220" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0"  Orientation="Horizontal">
+                    <Label FontWeight="DemiBold" Margin="5,0,0,0">Connected Clients:</Label>
+                    <Label Margin="-8,0,0,0" Content="{Binding Path=NumConnectedClients}" />
+                    <Label FontWeight="DemiBold" Margin="5,0,0,0">Auto Assign:</Label>
+                    <Label FontStyle="Italic" Margin="-8,0,0,0" Content="{Binding Path=AutoAssignArchive}" />
+                    <Label FontWeight="DemiBold" Margin="5,0,0,0">Auto Start:</Label>
+                    <Label Margin="-8,0,0,0" Content="{Binding Path=AutoExecute}" />
+                </StackPanel>
+                <StackPanel Grid.Column="6" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Label Margin="0,0,0,0">Update Frequency:</Label>
+                    <ComboBox x:Name="refreshRate" SelectionChanged="ComboBox_SelectionChanged" Width="90" Margin="5,2,2,2">
+                        <ComboBoxItem  IsSelected="True">1 second</ComboBoxItem>
+                        <ComboBoxItem>3 seconds</ComboBoxItem>
+                        <ComboBoxItem>10 seconds</ComboBoxItem>
+                        <ComboBoxItem>Continuous</ComboBoxItem>
+                    </ComboBox>
+                </StackPanel>
+            </Grid>
         </Border>
     </Grid>
 </Window>

@@ -26,6 +26,7 @@ namespace LoadInjector.Runtime.EngineComponents {
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
 
         public int port = 6220;
+        private IDisposable hubServer;
 
         public IHubContext Hub {
             get => GlobalHost.ConnectionManager.GetHubContext<MyHub>();
@@ -50,7 +51,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             // for more information.
             string url = $"http://localhost:{port}";
             try {
-                WebApp.Start<StartupHub>(url);
+                hubServer = WebApp.Start<StartupHub>(url);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -66,7 +67,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             this.port = port;
             string url = $"http://localhost:{port}";
             try {
-                WebApp.Start<StartupHub>(url);
+                hubServer = WebApp.Start<StartupHub>(url);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -80,12 +81,17 @@ namespace LoadInjector.Runtime.EngineComponents {
             // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
             // for more information.
             try {
-                WebApp.Start<StartupHub>(url);
+                hubServer = WebApp.Start<StartupHub>(url);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
 
             Console.WriteLine("Hub Started On" + url);
+        }
+
+        public void StoptHub() {
+            hubServer.Dispose();
+            Console.WriteLine("Hub Stopped");
         }
     }
 

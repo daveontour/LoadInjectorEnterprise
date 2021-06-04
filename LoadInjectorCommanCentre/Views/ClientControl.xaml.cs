@@ -184,6 +184,7 @@ namespace LoadInjectorCommandCentre.Views {
             };
 
             if (open.ShowDialog() == true) {
+                cCController.ClearGridData(ConnectionID);
                 cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
                 File.Copy(open.FileName, archiveRoot + "\\" + open.SafeFileName, true);
                 MessageHub.Hub.Clients.Client(ConnectionID).RetrieveArchive(cCController.WebServerURL + "/" + open.SafeFileName);
