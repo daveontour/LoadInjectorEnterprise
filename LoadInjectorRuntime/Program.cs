@@ -1,27 +1,26 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using Topshelf;
 
 namespace LoadInjectorRuntime {
 
     // -execute:C:\Users\dave_\Desktop\pulse15sec.xml
     // -server:http://localhost:6220
-    internal class Program {
+    public class Program {
 
         private static void Main(string[] args) {
             NLog.Logger logger = NLog.LogManager.GetLogger("LoadInjectorClient");
 
             try {
-                var exitCode = HostFactory.Run(x => {
+                var exitCode = HostFactory.Run(x =>
+                {
                     string executeFile = null;
                     string server = null;
                     x.AddCommandLineDefinition("execute", f => { executeFile = f; });
                     x.AddCommandLineDefinition("server", srv => { server = srv; });
                     x.ApplyCommandLine();
                     try {
-                        x.Service<LoadInjectorRuntimeClient>(s => {
+                        x.Service<LoadInjectorRuntimeClient>(s =>
+                        {
                             s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile, server));
                             s.WhenStarted(core => core.OnStart());
                             s.WhenStopped(core => core.OnStop());

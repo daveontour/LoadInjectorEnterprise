@@ -64,7 +64,7 @@
     <Win32Resource>
     </Win32Resource>
   </PropertyGroup>
-  <PropertyGroup>
+<!--  <PropertyGroup>
     <ManifestCertificateThumbprint>E4637A20FFAF712709D48E8E6B7A656959B2853C</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup>
@@ -75,7 +75,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <SignManifests>true</SignManifests>
-  </PropertyGroup>
+  </PropertyGroup> -->
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.ComponentModel" />

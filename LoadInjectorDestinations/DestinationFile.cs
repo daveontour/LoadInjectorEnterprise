@@ -30,7 +30,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             /*
              *  Check behaviour if directory does not exist. Create it if it does not exist.
              */
@@ -54,12 +54,16 @@ namespace LoadInjector.Destinations {
                         File.WriteAllText(fullPath, val);
                     } catch (DirectoryNotFoundException ex) {
                         Console.WriteLine($"Directory not found  {ex.Message}");
+                        return false;
                     }
                 }
             } catch (Exception ex) {
                 logger.Error($"Unable to write file to {fullPath}");
                 logger.Error(ex.Message);
+                return false;
             }
+
+            return true;
         }
     }
 }

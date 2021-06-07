@@ -15,6 +15,7 @@ namespace LoadInjectorCommandCentre {
         private string configMM;
         private string mM;
         private int sent;
+        private int fail;
         private string protocol;
         private string connectionID;
 
@@ -126,6 +127,14 @@ namespace LoadInjectorCommandCentre {
             set {
                 sent = value;
                 NotifyPropertyChanged("Sent");
+            }
+        }
+
+        public int Fail {
+            get { return fail; }
+            set {
+                fail = value;
+                NotifyPropertyChanged("Fail");
             }
         }
     }

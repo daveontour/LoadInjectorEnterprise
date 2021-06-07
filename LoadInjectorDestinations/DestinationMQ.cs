@@ -136,23 +136,23 @@ namespace LoadInjector.Destinations {
             }
         }
 
-        public override void Send(String val, List<Variable> vars) {
+        public override bool Send(String val, List<Variable> vars) {
             string messageXML = val;
 
             if (useSendLocking) {
                 lock (sendLock) {
                     Console.WriteLine($"MQ Begin sending with locking enabled: {qMgr}, {queueName}");
                     logger.Trace($"MQ Begin sendinng with locking enabled: {qMgr}, {queueName}");
-                    SendInternal(messageXML);
+                    return SendInternal(messageXML);
                 }
             } else {
                 Console.WriteLine($"MQ Begin sending with locking NOT enabled: {qMgr}, {queueName}");
                 logger.Trace($"MQ Begin sendinng with locking NOT enabled: {qMgr}, {queueName}");
-                SendInternal(messageXML);
+                return SendInternal(messageXML);
             }
         }
 
-        public void SendInternal(string mess) {
+        public bool SendInternal(string mess) {
             string messageXML = mess;
             bool sent = false;
 
@@ -190,10 +190,13 @@ namespace LoadInjector.Destinations {
             } catch (Exception ex) {
                 Console.WriteLine($"Error sending MQ Message: {ex.Message}");
                 logger.Trace($"Error sending MQ Message: {ex.Message}");
+                return false;
             }
             if (!sent) {
                 logger.Trace($"Warning: Message NOT Sent to  {queueName}");
+                return false;
             }
+            return true;
         }
 
         public override void Stop() {
