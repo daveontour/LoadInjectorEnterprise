@@ -298,6 +298,8 @@ namespace LoadInjectorCommandCentre {
                     Console.WriteLine(ex.Message);
                 }
             }
+
+            clientTabControl.OnPropertyChanged("Title");
         }
 
         public void PrepAll() {

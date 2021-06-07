@@ -21,7 +21,8 @@ namespace LoadInjectorBase {
             return true;
         }
 
-        public virtual void Send(string val, List<Variable> vars) {
+        public virtual bool Send(string val, List<Variable> vars) {
+            return false;
         }
 
         public virtual async Task<bool> SendAsync(string message, List<Variable> vars) {

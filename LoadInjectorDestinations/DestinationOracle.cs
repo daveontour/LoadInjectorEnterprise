@@ -30,7 +30,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             foreach (Variable v in vars) {
                 try {
                     connStr = connStr.Replace(v.token, v.value);
@@ -39,14 +39,10 @@ namespace LoadInjector.Destinations {
                 }
             }
 
-            var result = SendData(val);
-
-            if (showResults) {
-                Console.WriteLine($"{result}\n");
-            }
+            return SendData(val);
         }
 
-        public string SendData(string sql) {
+        public bool SendData(string sql) {
             OracleConnection cnn = new OracleConnection(connStr);
 
             try {
@@ -61,10 +57,13 @@ namespace LoadInjector.Destinations {
 
                 cnn.Close();
 
-                return sbld.ToString();
+                if (showResults) {
+                    Console.WriteLine($"{sbld.ToString()}\n");
+                }
+                return true;
             } catch (Exception ex) {
                 Console.WriteLine($"Send Data Error: {ex.Message}");
-                return $"Send Data Error: {ex.Message}";
+                return false;
             }
         }
     }

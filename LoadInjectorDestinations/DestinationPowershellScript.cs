@@ -25,11 +25,12 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             var result = RunScript(val);
             if (showResults) {
                 Console.WriteLine(result);
             }
+            return true;
         }
 
         public string RunScript(string scriptText) {

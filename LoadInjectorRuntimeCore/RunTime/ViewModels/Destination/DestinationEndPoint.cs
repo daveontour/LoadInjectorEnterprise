@@ -40,11 +40,11 @@ namespace LoadInjector.RunTime {
             OK_TO_RUN = true;
         }
 
-        public void Send(string val, List<Variable> vars) {
+        public bool Send(string val, List<Variable> vars) {
             if (endPointDestination.USE_ASYNC_SEND) {
-                _ = endPointDestination.SendAsync(val, vars);
+                return endPointDestination.SendAsync(val, vars).Result;
             } else {
-                endPointDestination.Send(val, vars);
+                return endPointDestination.Send(val, vars);
             }
         }
 

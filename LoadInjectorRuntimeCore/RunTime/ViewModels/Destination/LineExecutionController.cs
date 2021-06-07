@@ -59,13 +59,15 @@ namespace LoadInjector.RunTime {
 
         public new bool PrePrepare() {
             messagesSent = 0;
-            Report(0, 0);
+            messagesFail = 0;
+            Report(0, 0, 0);
             return base.PrePrepare();
         }
 
         public new bool Prepare() {
             messagesSent = 0;
-            Report(0, 0);
+            messagesFail = 0;
+            Report(0, 0, 0);
             stopwatch.Stop();
             destinationEndPoint.Prepare();
             return base.Prepare();
@@ -73,7 +75,8 @@ namespace LoadInjector.RunTime {
 
         public override void Execute() {
             messagesSent = 0;
-            Report(0, 0);
+            messagesFail = 0;
+            Report(0, 0, 0);
             foreach (string trigger in triggerIDs) {
                 eventDistributor.AddLineHandler(trigger, this);
             }
@@ -109,14 +112,18 @@ namespace LoadInjector.RunTime {
 
             logger.Trace($"Message to be sent: \n{message}\n");
 
-            destinationEndPoint.Send(message, vars);
+            if (destinationEndPoint.Send(message, vars)) {
+                messagesSent += 1;
+            } else {
+                messagesFail += 1;
+            }
 
             messagesSent += 1;
 
             avg = stopwatch.Elapsed.TotalMilliseconds / messagesSent;
             double rate = RoundToSignificantDigits(60000 / avg, 2);
 
-            Report(messagesSent, rate);
+            Report(messagesSent, messagesFail, rate);
 
             if (saveMessageFile != null) {
                 string fullPath = saveMessageFile.Replace(".", $"{messagesSent}.");

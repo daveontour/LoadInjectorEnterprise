@@ -37,7 +37,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             string uri = string.Copy(ftpURL);
 
             foreach (Variable v in vars) {
@@ -48,10 +48,16 @@ namespace LoadInjector.Destinations {
                 }
             }
 
-            using (var client = new WebClient()) {
-                client.Credentials = new NetworkCredential(ftpUser, ftpPass);
-                client.UploadString(uri, WebRequestMethods.Ftp.UploadFile, val);
+            try {
+                using (var client = new WebClient()) {
+                    client.Credentials = new NetworkCredential(ftpUser, ftpPass);
+                    client.UploadString(uri, WebRequestMethods.Ftp.UploadFile, val);
+                }
+            } catch (Exception ex) {
+                return false;
             }
+
+            return true;
         }
     }
 }

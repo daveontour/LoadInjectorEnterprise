@@ -40,7 +40,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             var config = new ProducerConfig { BootstrapServers = bootStrapServers };
             foreach (Variable v in vars) {
                 try {
@@ -61,10 +61,12 @@ namespace LoadInjector.Destinations {
                         logger.Error(e.Message);
                         logger.Error(e);
                         logger.Error($"Unable to deliver to Kafka Server on topic {Topic}");
+                        return false;
                     }
                     logger.Info($"Kafka sent message to {Topic}");
                 }
             }
+            return true;
         }
     }
 }

@@ -55,7 +55,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             MqttApplicationMessage msg = new MqttApplicationMessageBuilder()
             .WithTopic(topic)
             .WithPayload(val)
@@ -80,7 +80,10 @@ namespace LoadInjector.Destinations {
 
             if (result.ReasonCode != MqttClientPublishReasonCode.Success) {
                 Console.WriteLine($"MQTT Send Failure {result.ReasonString}");
+                return false;
             }
+
+            return true;
         }
     }
 }

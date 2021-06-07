@@ -26,7 +26,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             try {
                 using (MessageQueue msgQueue = new MessageQueue(queueName)) {
                     try {
@@ -36,11 +36,14 @@ namespace LoadInjector.Destinations {
                     } catch (Exception ex) {
                         logger.Error(ex.Message);
                         logger.Error(ex.StackTrace);
+                        return false;
                     }
                 }
             } catch (Exception ex) {
                 logger.Error(ex, $"MSMQ Error Sending to {queueName}");
+                return false;
             }
+            return true;
         }
 
         public override string Listen() {

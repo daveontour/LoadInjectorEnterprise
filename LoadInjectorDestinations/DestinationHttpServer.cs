@@ -53,8 +53,14 @@ namespace LoadInjector.Destinations {
             listener.Abort();
         }
 
-        public override void Send(string val, List<Variable> vars) {
-            messageQueue.Enqueue(val);
+        public override bool Send(string val, List<Variable> vars) {
+            try {
+                messageQueue.Enqueue(val);
+                return true;
+            } catch (Exception ex) {
+                logger.Error(ex);
+                return false;
+            }
         }
 
         public async Task<string> StartSimpleListener() {

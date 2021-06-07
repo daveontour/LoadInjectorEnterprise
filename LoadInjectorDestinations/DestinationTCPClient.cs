@@ -31,7 +31,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string message, List<Variable> vars) {
+        public override bool Send(string message, List<Variable> vars) {
             try {
                 TcpClient client = new TcpClient(tcpServerIP, tcpServerPort);
 
@@ -52,9 +52,12 @@ namespace LoadInjector.Destinations {
                 client.Close();
             } catch (ArgumentNullException e) {
                 Console.WriteLine($"ArgumentNullException: {e.Message}");
+                return false;
             } catch (SocketException e) {
                 Console.WriteLine($"SocketException: {e.Message}");
+                return false;
             }
+            return true;
         }
     }
 }

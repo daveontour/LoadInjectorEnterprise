@@ -49,6 +49,7 @@ namespace LoadInjector.RunTime {
         public string dataFile;
         public Random rand = new Random();
         public int messagesSent;
+        public int messagesFail;
         public double avg;
         public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         public static readonly Logger destLogger = LogManager.GetLogger("destLogger");
@@ -143,13 +144,13 @@ namespace LoadInjector.RunTime {
                 destinationEndPoint?.Stop();
                 Monitor.Pulse(_locker);
             }
-            Report(messagesSent, 0);
+            Report(messagesSent, messagesFail, 0);
             SetOutput("Test Run Complete");
         }
 
-        public void Report(int messagesSent, double rate) {
+        public void Report(int messagesSent, int messageFail, double rate) {
             if (rate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
-                clientHub.SendDestinationReport(executionNodeID, uuid, messagesSent, rate);
+                clientHub.SendDestinationReport(executionNodeID, uuid, messagesSent, messageFail, rate);
             }
         }
 

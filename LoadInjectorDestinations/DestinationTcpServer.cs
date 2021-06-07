@@ -66,12 +66,14 @@ namespace LoadInjector.Destinations {
             sockListner.Stop();
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             try {
                 sockListner.SendTCPServer(val, closeConnection);
             } catch (Exception e) {
                 logger.Error($"Error Sending TCP Message to Clients. {e.Message}");
+                return false;
             }
+            return true;
         }
     }
 

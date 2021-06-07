@@ -273,7 +273,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, double rate) {
+        internal void SendDestinationReport(string executionNodeID, string uuid, int messagesSent, int messageFail, double rate) {
             Tuple<string, string, int, double> rec = new Tuple<string, string, int, double>(executionNodeID, uuid, messagesSent, rate);
 
             if (latsetDestinationReport.ContainsKey(uuid)) {

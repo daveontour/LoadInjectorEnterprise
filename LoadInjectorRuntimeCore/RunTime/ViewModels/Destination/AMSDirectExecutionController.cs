@@ -120,7 +120,8 @@ namespace LoadInjector.RunTime {
 
         public override async void Execute() {
             this.messagesSent = 0;
-            Report(0, 0);
+            this.messagesFail = 0;
+            Report(0, 0, 0);
             stopwatch.Restart();
             foreach (string trigger in triggerIDs) {
                 eventDistributor.AddAMSLineHandler(trigger, this);
@@ -130,7 +131,8 @@ namespace LoadInjector.RunTime {
 
         public new bool PrePrepare() {
             messagesSent = 0;
-            Report(0, 0);
+            messagesFail = 0;
+            Report(0, 0, 0);
             stopwatch.Stop();
             return base.PrePrepare();
         }
@@ -264,7 +266,7 @@ namespace LoadInjector.RunTime {
             messagesSent++;
             this.avg = stopwatch.Elapsed.TotalMilliseconds / messagesSent;
             double rate = RoundToSignificantDigits(60000 / avg, 2);
-            Report(messagesSent, rate);
+            Report(messagesSent, messagesFail, rate);
         }
 
         public async Task ProcessResponse(HttpResponseMessage response) {

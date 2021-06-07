@@ -55,7 +55,7 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override void Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars) {
             foreach (Variable v in vars) {
                 try {
                     queueName = queueName.Replace(v.token, v.value);
@@ -84,7 +84,7 @@ namespace LoadInjector.Destinations {
                         } catch (Exception ex) {
                             logger.Error(ex.Message);
                             logger.Error(ex.StackTrace);
-                            return;
+                            return false;
                         }
                         var body = Encoding.UTF8.GetBytes(val);
 
@@ -96,13 +96,16 @@ namespace LoadInjector.Destinations {
                         } catch (Exception ex) {
                             logger.Error(ex.Message);
                             logger.Error(ex.StackTrace);
+                            return false;
                         }
                     }
                 }
             } catch (Exception ex) {
                 logger.Error(ex.Message);
                 logger.Error(ex.StackTrace);
+                return false;
             }
+            return true;
         }
     }
 }
