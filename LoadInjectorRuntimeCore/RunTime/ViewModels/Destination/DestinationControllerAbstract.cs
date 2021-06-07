@@ -74,10 +74,6 @@ namespace LoadInjector.RunTime {
 
         public abstract Task<bool> ProcessIteration(Tuple<Dictionary<string, string>, FlightNode> record);
 
-        //public void SetLineProgress(IProgress<ControllerStatusReport> lineProgress) {
-        //    this.lineProgress = lineProgress;
-        //}
-
         protected DestinationControllerAbstract(XmlNode node, NgExecutionController executionController) {
             this.config = node;
             this.executionController = executionController;
@@ -107,7 +103,6 @@ namespace LoadInjector.RunTime {
             this.amsTimeout = SetVar("amstimeout", null);
 
             this.ConfigOK = true;
-            //SetOutput($"Configured OK ({config.SelectNodes(".//variable").Count} variables defined)");
         }
 
         public bool Prepare() {

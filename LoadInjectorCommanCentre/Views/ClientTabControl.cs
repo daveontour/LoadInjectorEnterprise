@@ -105,7 +105,7 @@ namespace LoadInjectorCommandCentre.Views {
         public string Title {
             get {
                 if (IsSummary) {
-                    return "All Connect Nodes";
+                    return "All Connected Nodes";
                 } else {
                     return $"Execution Node: {IP}, {ProcessID}.  Work Package:  {WorkPackage}";
                 }
@@ -138,7 +138,17 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
-        public object WorkPackage { get; set; }
+        private string workPackage;
+
+        public string WorkPackage {
+            get {
+                return workPackage;
+            }
+            set {
+                workPackage = value;
+                OnPropertyChanged("WorkPackage");
+            }
+        }
 
         public event PropertyChangedEventHandler PropertyChanged;
 

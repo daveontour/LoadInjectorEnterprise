@@ -53,7 +53,7 @@ namespace LoadInjector.Destinations {
                     client.Credentials = new NetworkCredential(ftpUser, ftpPass);
                     client.UploadString(uri, WebRequestMethods.Ftp.UploadFile, val);
                 }
-            } catch (Exception ex) {
+            } catch (Exception) {
                 return false;
             }
 

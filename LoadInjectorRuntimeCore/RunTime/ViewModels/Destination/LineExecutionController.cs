@@ -114,11 +114,11 @@ namespace LoadInjector.RunTime {
 
             if (destinationEndPoint.Send(message, vars)) {
                 messagesSent += 1;
+                destLogger.Info("Message Sent " + messagesSent);
             } else {
                 messagesFail += 1;
+                destLogger.Error("Message Failed " + messagesFail);
             }
-
-            messagesSent += 1;
 
             avg = stopwatch.Elapsed.TotalMilliseconds / messagesSent;
             double rate = RoundToSignificantDigits(60000 / avg, 2);

@@ -114,6 +114,7 @@ namespace LoadInjector.RunTime {
         private Timer repetitionTimer;
 
         private string archiveDirectory;
+        public string archName = "-Not Assigned-";
 
         public string ArchiveDirectory {
             get {
@@ -173,6 +174,8 @@ namespace LoadInjector.RunTime {
 
             repetitionTimer?.Stop();
             repetitionTimer = null;
+
+            archName = "-Not Assigned-";
 
             flights.Clear();
             arrflights.Clear();
@@ -937,11 +940,12 @@ namespace LoadInjector.RunTime {
         public void RetrieveArchive(string remoteUri) {
             Reset();
 
+            archName = remoteUri.Substring(remoteUri.LastIndexOf('/') + 1);
             Directory.Delete(ArchiveDirectory, true);
             WebClient myWebClient = new WebClient();
             // Download home page data.
             string archiveRoot = ArchiveDirectory;
-            logger.Warn("Downloading " + remoteUri + " to " + ArchiveDirectory);            // Download the Web resource and save it into a data buffer.
+            logger.Warn("Downloading " + archName + " to " + ArchiveDirectory);            // Download the Web resource and save it into a data buffer.
             byte[] myDataBuffer = myWebClient.DownloadData(remoteUri);
             dataModel = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(myDataBuffer, archiveRoot, "lia.lia", true);
             this.InitModel(dataModel);
