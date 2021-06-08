@@ -4,16 +4,17 @@ using System.Text;
 namespace LoadInjectorBase.Common {
 
     public class CompletionReport {
-
         private List<IterationCompletionReport> iteratiopnReports = new List<IterationCompletionReport>();
         private string executionNodeID;
         private string connectionID;
         private string processID;
         private string IP;
+        private IterationRecords iterationRecords;
 
         public List<IterationCompletionReport> IteratiopnReports { get => iteratiopnReports; set => iteratiopnReports = value; }
         public string ExecutionNodeID { get => executionNodeID; set => executionNodeID = value; }
         public string ConnectionID { get => connectionID; set => connectionID = value; }
+        public IterationRecords IterationRecords { get; set; }
 
         public CompletionReport(string nodeID, string IP, string processID) {
             this.ExecutionNodeID = nodeID;
@@ -22,14 +23,11 @@ namespace LoadInjectorBase.Common {
         }
 
         public override string ToString() {
-
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node ID:", ExecutionNodeID));
             sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node IP:", IP));
             sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node Process ID:", processID));
-
-
 
             return sb.ToString();
         }
@@ -45,6 +43,7 @@ namespace LoadInjectorBase.Common {
         public int messagesSent;
         public List<SourceReport> chainedSources = new List<SourceReport>();
     }
+
     public class DestinationReport {
         public string name;
         public string type;
@@ -53,12 +52,10 @@ namespace LoadInjectorBase.Common {
         public double actualMessageRate;
         public int messagesSent;
     }
+
     public class IterationCompletionReport {
         public int iterationNumber;
         public List<SourceReport> sourceReports = new List<SourceReport>();
         public List<DestinationReport> destinationReports = new List<DestinationReport>();
-
     }
-
-
 }

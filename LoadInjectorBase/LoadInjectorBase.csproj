@@ -50,6 +50,7 @@
     <Compile Include="Common\DocumentLoadedEventArgs.cs" />
     <Compile Include="Common\CompletionReport.cs" />
     <Compile Include="Common\RelayCommand.cs" />
+    <Compile Include="Common\Structures.cs" />
     <Compile Include="Common\Utils.cs" />
     <Compile Include="Filters\Expression.cs" />
     <Compile Include="Filters\FilterBool.cs" />

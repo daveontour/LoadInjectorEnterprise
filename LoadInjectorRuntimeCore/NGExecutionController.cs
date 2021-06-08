@@ -93,6 +93,7 @@ namespace LoadInjector.RunTime {
         private XmlNodeList destinations;
 
         public ClientHub clientHub;
+        public IterationRecords iterationRecords = new IterationRecords();
 
         private readonly string getFlightsTemplate = @"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:ams6=""http://www.sita.aero/ams6-xml-api-webservice"">
    <soapenv:Header/>
@@ -158,6 +159,7 @@ namespace LoadInjector.RunTime {
             Stop();
             dataModel = null;
 
+            iterationRecords.Clear();
             repeatsExecuted = 0;
             repeatRest = 0;
             repeats = 0;
@@ -192,10 +194,9 @@ namespace LoadInjector.RunTime {
             rateDrivenLines.Clear();
             flightSets.Clear();
             clientHub?.consoleMessages?.Clear();
-            clientHub?.consoleMessages.Clear();
             this.state = ClientState.UnAssigned;
-            clientHub.SetStatus(executionNodeUuid);
-            clientHub.RefreshResponse();
+            clientHub?.SetStatus(executionNodeUuid);
+            clientHub?.RefreshResponse();
         }
 
         public void InitModel(XmlDocument model) {
@@ -929,6 +930,7 @@ namespace LoadInjector.RunTime {
 
         public void RetrieveStandAlone(string remoteUri) {
             Reset();
+            archName = remoteUri.Substring(remoteUri.LastIndexOf('/') + 1);
             WebClient myWebClient = new WebClient();
             // Download home page data.
             string archiveRoot = ArchiveDirectory;
@@ -1235,6 +1237,7 @@ namespace LoadInjector.RunTime {
         public void ProduceCompletionReport() {
             Process currentProcess = Process.GetCurrentProcess();
             CompletionReport report = new CompletionReport(executionNodeUuid, Utils.GetLocalIPAddress(), currentProcess.Id.ToString());
+            report.IterationRecords = this.iterationRecords;
             clientHub.SendCompletionReport(executionNodeUuid, report);
         }
     }
