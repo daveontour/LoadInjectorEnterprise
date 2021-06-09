@@ -14,6 +14,7 @@ namespace LoadInjectorBase.Common {
 
         public string Value { get; set; }
 
+        public static ClientState IterationComplete { get { return new ClientState("Execution Iteration Complete"); } }
         public static ClientState Reset { get { return new ClientState("Reset"); } }
         public static ClientState UnAssigned { get { return new ClientState("Un Assigned"); } }
         public static ClientState NoActive { get { return new ClientState("No Active Destination"); } }

@@ -61,6 +61,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 });
 
                 hubProxy.On("CompletionReport", () => {
+                    logger.Info("Completion report requested");
                     ngExecutionController.ProduceCompletionReport();
                 });
 
@@ -298,11 +299,13 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SendCompletionReport(string executionNodeID, CompletionReport report) {
+        internal void SendCompletionReport(string executionNodeID, IterationRecords report) {
             if (localOnly) {
                 logger.Info("Completion Report");
                 logger.Info(report);
             } else {
+                logger.Info("Completion Report");
+                logger.Info(report.ToString());
                 Task.Run(() => {
                     this.hubProxy.Invoke("CompletionReportResponse", executionNodeID, report);
                 });

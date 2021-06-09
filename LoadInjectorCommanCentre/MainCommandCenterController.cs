@@ -590,10 +590,10 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
-        public void SetCompletionReport(string executionNodeID, CompletionReport report, HubCallerContext context) {
+        public void SetCompletionReport(string executionNodeID, IterationRecords report, HubCallerContext context) {
             Application.Current.Dispatcher.Invoke(delegate {
-                if (clientControls.ContainsKey(context.ConnectionId)) {
-                    ClientControl client = clientControls[context.ConnectionId];
+                if (clientTabControls.ContainsKey(context.ConnectionId)) {
+                    ClientTabControl client = clientTabControls[context.ConnectionId];
                     client.SetCompletionReportText(report);
                 }
             });

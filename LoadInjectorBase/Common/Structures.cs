@@ -8,7 +8,7 @@ namespace LoadInjectorBase.Common {
 
     public struct LineRecord {
         public bool IsDestination, IsRateDriven, IsDataDriven, IsChained, IsSource;
-        public string UUID, ExecutionNodeUUID, Name, DestinationType, SourceType;
+        public string UUID, ExecutionNodeUUID, Name, DestinationType, SourceType, Description;
         public int MessagesSent, MessagesFailed, ExecutionElapsedTime;
         public DateTime ExecutionStart, ExecutionEnd;
     }
@@ -39,11 +39,22 @@ namespace LoadInjectorBase.Common {
         public string WorkPacakage { get; set; }
 
         private List<IterationRecord> iterationRecords = new List<IterationRecord>();
-        public List<IterationRecord> Records { get; set; }
+        public List<IterationRecord> Records { get { return iterationRecords; } set { iterationRecords = value; } }
 
         public void Clear() {
             iterationRecords.Clear();
             WorkPacakage = null;
+        }
+
+        public override string ToString() {
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node ID:", ExecutionNodeID));
+            sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node IP:", IPAddress));
+            sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node Process ID:", ProcessID));
+            sb.AppendLine(string.Format("{0,27}{1,15}", "Work Package:", WorkPacakage));
+
+            return sb.ToString();
         }
     }
 }

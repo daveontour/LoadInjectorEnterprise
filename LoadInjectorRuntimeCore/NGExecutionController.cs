@@ -116,6 +116,7 @@ namespace LoadInjector.RunTime {
 
         private string archiveDirectory;
         public string archName = "-Not Assigned-";
+        private DateTime executionStarted;
 
         public string ArchiveDirectory {
             get {
@@ -316,6 +317,33 @@ namespace LoadInjector.RunTime {
             state = ClientState.ExecutionComplete;
             clientHub.SetStatus(this.executionNodeUuid);
 
+            // Collect the data for the Completion Report
+            try {
+                IterationRecord itRecord = new IterationRecord() {
+                    UUID = this.executionNodeUuid,
+                    ExecutionStart = this.executionStarted,
+                    ExecutionEnd = DateTime.Now,
+                    IterationNumber = repeatsExecuted,
+                };
+                logger.Warn("Iteration record Created");
+
+                foreach (LineExecutionController line in destLines) {
+                    LineRecord lr = new LineRecord();
+                    lr.DestinationType = line.LineType;
+                    lr.Name = line.name;
+                    lr.MessagesSent = line.messagesSent;
+                    lr.MessagesFailed = line.messagesFail;
+                    logger.Warn("Line record Created");
+                    itRecord.DestinationLineRecords.Add(lr);
+                    logger.Warn("Line Record Added");
+                }
+
+                iterationRecords.Records.Add(itRecord);
+                logger.Warn("iteratoin Record Added");
+            } catch (Exception ex) {
+                logger.Error(ex, $"Iteration records{ex.Message}");
+            }
+
             if (repeatsExecuted < repeats) {
                 repetitionTimer = new Timer {
                     Interval = repeatRest * 1000,
@@ -328,12 +356,58 @@ namespace LoadInjector.RunTime {
             }
         }
 
+        //private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
+        //    // This is an Event Handler that handles the action when the timer goes off
+        //    // signalling the end of the test.
+        //    repeatsExecuted++;
+        //    Stop();
+
+        //    logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
+        //    state = ClientState.Stopped;
+        //    clientHub.SetStatus(this.executionNodeUuid);
+
+        //    // Collect the data for the Completion Report
+        //    IterationRecord itRecord = new IterationRecord() {
+        //        UUID = this.executionNodeUuid,
+        //        ExecutionStart = this.executionStarted,
+        //        ExecutionEnd = DateTime.Now,
+        //        IterationNumber = repeatsExecuted,
+        //    };
+
+        //    foreach (LineExecutionController line in destLines) {
+        //        LineRecord lr = new LineRecord();
+        //        lr.DestinationType = line.LineType;
+        //        lr.Name = line.name;
+        //        lr.MessagesSent = line.messagesSent;
+        //        lr.MessagesFailed = line.messagesFail;
+
+        //        itRecord.DestinationLineRecords.Add(lr);
+        //    }
+
+        //    iterationRecords.Records.Add(itRecord);
+
+        //    if (repeatsExecuted < repeats) {
+        //        repetitionTimer = new Timer {
+        //            Interval = repeatRest * 1000,
+        //            AutoReset = false,
+        //            Enabled = true
+        //        };
+        //        repetitionTimer.Elapsed += NextExecution;
+        //        state = ClientState.WaitingNextIteration;
+        //        clientHub.SetStatus(this.executionNodeUuid);
+        //    } else {
+        //        state = ClientState.ExecutionComplete;
+        //        clientHub.SetStatus(this.executionNodeUuid);
+        //    }
+        //}
+
         private void NextExecution(object sender, ElapsedEventArgs e) {
             try {
                 // Sent Seq Numbers keep track of the highest messageSent, so we dont process out of sequence messages
                 ConsoleMsg("Start of NextExecution() called");
                 Stop();
                 PrepareAsync().Wait();
+                this.executionStarted = DateTime.Now;
                 Run();
 
                 stopWatch.Reset();
@@ -995,7 +1069,7 @@ namespace LoadInjector.RunTime {
 
             ConsoleMsg("Shutting down lines");
             StopLines();
-            logger.Info("Test Execution Complete");
+            logger.Info("Test Iteration Complete");
             state = ClientState.Stopped;
             clientHub.SetStatus(this.executionNodeUuid);
         }
@@ -1235,10 +1309,17 @@ namespace LoadInjector.RunTime {
         }
 
         public void ProduceCompletionReport() {
-            Process currentProcess = Process.GetCurrentProcess();
-            CompletionReport report = new CompletionReport(executionNodeUuid, Utils.GetLocalIPAddress(), currentProcess.Id.ToString());
-            report.IterationRecords = this.iterationRecords;
-            clientHub.SendCompletionReport(executionNodeUuid, report);
+            try {
+                Process currentProcess = Process.GetCurrentProcess();
+                //CompletionReport report = new CompletionReport(executionNodeUuid, Utils.GetLocalIPAddress(), currentProcess.Id.ToString());
+                this.iterationRecords.IPAddress = Utils.GetLocalIPAddress();
+                this.iterationRecords.ProcessID = currentProcess.Id.ToString();
+                this.iterationRecords.WorkPacakage = this.archName;
+                this.iterationRecords = this.iterationRecords;
+                clientHub.SendCompletionReport(executionNodeUuid, iterationRecords);
+            } catch (Exception ex) {
+                logger.Warn($"Produce completion report error {ex.Message}");
+            }
         }
     }
 }

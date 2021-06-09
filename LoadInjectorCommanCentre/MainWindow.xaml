@@ -134,14 +134,16 @@
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
-                            <TextBlock Text="Completion Report"  FontSize="14" />
+                            <TextBlock Text="Completion Report"
+                                       FontSize="14"
+ />
                         </TabItem.Header>
                         <Grid>
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"></RowDefinition>
                                 <RowDefinition Height="20"></RowDefinition>
                             </Grid.RowDefinitions>
-                            <TextBox x:Name="completionReport"  Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
+                            <TextBox x:Name="completionReport"  Text="{Binding Path=CompletionReportString, Mode=OneWay}" Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
                             <Button x:Name="saveReportBtn" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
                         </Grid>
                     </TabItem>

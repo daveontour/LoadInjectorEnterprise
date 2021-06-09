@@ -152,7 +152,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, archName, Context);
         }
 
-        public void CompletionReportResponse(string executionNodeID, CompletionReport report) {
+        public void CompletionReportResponse(string executionNodeID, IterationRecords report) {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     CentralMessagingHub.iccController.SetCompletionReport(executionNodeID, report, Context);

@@ -150,6 +150,28 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
+        private IterationRecords completionReport;
+
+        public IterationRecords CompletionReport {
+            get { return completionReport; }
+            set {
+                completionReport = value;
+                OnPropertyChanged("CompletionReport");
+                Console.WriteLine(completionReport.ToString());
+                OnPropertyChanged("CompletionReportString");
+            }
+        }
+
+        public string CompletionReportString {
+            get {
+                if (CompletionReport != null) {
+                    return CompletionReport.ToString();
+                } else {
+                    return "-Pending-";
+                }
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         public virtual void OnPropertyChanged(string propertyName = null) {
@@ -190,6 +212,12 @@ namespace LoadInjectorCommandCentre.Views {
                 }
                 MainController?.View?.OnPropertyChanged("ExecutionRecords");
             }
+        }
+
+        internal void SetCompletionReportText(IterationRecords report) {
+            Application.Current.Dispatcher.Invoke((Action)delegate {
+                CompletionReport = report;
+            });
         }
     }
 }
