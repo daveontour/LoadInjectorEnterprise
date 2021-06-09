@@ -60,7 +60,7 @@ namespace LoadInjectorCommandCentre {
             int webport = Utils.GetAvailablePort(49152);
             WebServerURL = serverURL;
 
-            WebServer = new SimpleHTTPServer(ArchiveRoot, WebServerURL);
+            WebServer = new SimpleHTTPServer(ArchiveRoot, View.SignalRIP, View.ServerPort);
             StartClients(NumClients);
         }
 
@@ -124,7 +124,7 @@ namespace LoadInjectorCommandCentre {
                     string lir = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug\LoadInjectorRuntime.exe";
                     process.StartInfo.WorkingDirectory = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug";
                     process.StartInfo.FileName = lir;
-                    process.StartInfo.Arguments = $"-server:http://localhost:6220/";
+                    process.StartInfo.Arguments = $"-server:http://{View.SignalRIP}:{View.SignalRPort}/";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 
                     process.Start();
@@ -135,7 +135,8 @@ namespace LoadInjectorCommandCentre {
 
         public void ClientConnectionInitiated(HubCallerContext context) {
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
                     ClientControl client = new ClientControl(context.ConnectionId, MessageHub, this);
                     clientControls.Add(context.ConnectionId, client);
                     ClientTabControl tabControl = new ClientTabControl("PID Pending", this) { IsSummary = false, ConnectionID = context.ConnectionId };
@@ -165,7 +166,8 @@ namespace LoadInjectorCommandCentre {
         public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, string archName, HubCallerContext context) {
             if (!clientControls.ContainsKey(context.ConnectionId)) {
                 try {
-                    Application.Current.Dispatcher.Invoke((Action)delegate {
+                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    {
                         ClientControl cl = new ClientControl(context.ConnectionId, MessageHub, this) { StatusText = status };
                         if (clientControls.ContainsKey(context.ConnectionId)) {
                             clientControls[context.ConnectionId] = cl;
@@ -400,7 +402,8 @@ namespace LoadInjectorCommandCentre {
 
             MessageHub.Hub.Clients.All.Disconnect();
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
                     SelectedClient = null;
                     View.RecordsCollection.Clear();
                 });
@@ -414,13 +417,15 @@ namespace LoadInjectorCommandCentre {
             if (res != MessageBoxResult.Yes) {
                 return;
             }
-            Application.Current.Dispatcher.Invoke((Action)delegate {
+            Application.Current.Dispatcher.Invoke((Action)delegate
+            {
                 ClearGridData();
                 View.VisibleDataGrid?.Items.Refresh();
             });
 
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
                     View.RecordsCollection.Clear();
                     View.VisibleDataGrid?.Items?.Refresh();
                 });
@@ -439,7 +444,8 @@ namespace LoadInjectorCommandCentre {
             MessageHub.Hub.Clients.Client(id).Disconnect();
 
             try {
-                Application.Current.Dispatcher.Invoke((Action)delegate {
+                Application.Current.Dispatcher.Invoke((Action)delegate
+                {
                     // The client control for the disconnecting
                     ClientControl client = clientControls.Values.FirstOrDefault<ClientControl>(x => x.ConnectionID == id);
                     //Remove it from the list of execution nodes.
@@ -486,7 +492,8 @@ namespace LoadInjectorCommandCentre {
 
         public void UpdateSourceLine(string executionNodeID, string uuid, string message, int messagesSent, double currentRate, double messagesPerMinute, HubCallerContext context, bool forceUpdate = false) {
             if (clientControls.ContainsKey(context.ConnectionId)) {
-                Application.Current.Dispatcher.Invoke(delegate {
+                Application.Current.Dispatcher.Invoke(delegate
+                {
                     try {
                         ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
 
@@ -507,7 +514,8 @@ namespace LoadInjectorCommandCentre {
         public void UpdateDestinationLine(string executionNodeID, string uuid, int messagesSent, int messageFail, HubCallerContext context, bool forceUpdate = false) {
             if (clientControls.ContainsKey(context.ConnectionId)) {
                 try {
-                    Application.Current.Dispatcher.Invoke(delegate {
+                    Application.Current.Dispatcher.Invoke(delegate
+                    {
                         ExecutionRecordClass r = View.RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == uuid);
                         if (r != null) {
                             r.Sent = messagesSent;
@@ -545,7 +553,8 @@ namespace LoadInjectorCommandCentre {
         }
 
         private void OnRefreshGridEvent(object sender, ElapsedEventArgs e) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 try {
                     if (View.VisibleDataGrid == null) {
                         View.EnumVisual(View.nodeTabHolder);
@@ -561,7 +570,8 @@ namespace LoadInjectorCommandCentre {
             if (clientControls.ContainsKey(context.ConnectionId)) {
                 ClientControl client = clientControls[context.ConnectionId];
                 clientControls.Remove(context.ConnectionId);
-                Application.Current.Dispatcher.Invoke(delegate {
+                Application.Current.Dispatcher.Invoke(delegate
+                {
                     try {
                         View.RemoveClientControl(client);
                         View.RemoveClientTab(client.ConnectionID);
@@ -573,7 +583,8 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 if (clientControls.ContainsKey(context.ConnectionId)) {
                     ClientControl client = clientControls[context.ConnectionId];
                     client.SetStatusText(message);
@@ -591,7 +602,8 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void SetCompletionReport(string executionNodeID, IterationRecords report, HubCallerContext context) {
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 if (clientTabControls.ContainsKey(context.ConnectionId)) {
                     ClientTabControl client = clientTabControls[context.ConnectionId];
                     client.SetCompletionReportText(report);
@@ -601,7 +613,8 @@ namespace LoadInjectorCommandCentre {
 
         public void SetConsoleMessage(string message, HubCallerContext context) {
             ClientTabControl clientTabControl = clientTabControls[context.ConnectionId];
-            Application.Current.Dispatcher.Invoke(delegate {
+            Application.Current.Dispatcher.Invoke(delegate
+            {
                 clientTabControl.ConsoleText = clientTabControl.ConsoleText + message + "\n";
             });
         }

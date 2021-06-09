@@ -3,6 +3,7 @@
   <initialClient>4</initialClient>
   <autoStart>true</autoStart>
   <autoAssignFile>C:\Users\dave_\Desktop\DAVE.LIA</autoAssignFile>
-  <hubURL>http://localhost:6220/</hubURL>
-  <webserverURL>http://localhost:49152/</webserverURL>
+  <signalRIP>localhost</signalRIP>
+  <signalRPort>6221</signalRPort>
+  <serverPort>49152</serverPort>
 </config>

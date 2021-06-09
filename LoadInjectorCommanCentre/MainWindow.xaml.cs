@@ -1,21 +1,14 @@
 ﻿using LoadInjector.RunTime.Views;
-using LoadInjectorCommandCentre;
 using LoadInjectorCommandCentre.Views;
-
-using LoadInjectorCommandCentre;
-
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Collections.Generic;
 using System.Windows.Media;
 using System.Xml;
-using System.IO;
 
 namespace LoadInjectorCommandCentre {
 
@@ -57,6 +50,8 @@ namespace LoadInjectorCommandCentre {
         private string autoArchiveFile;
         private bool autoExecute = false;
 
+
+
         public ExecutionRecords RecordsCollection {
             get { return this._records; }
         }
@@ -71,8 +66,9 @@ namespace LoadInjectorCommandCentre {
                 doc.Load("Config.xml");
 
                 NumClients = Int32.Parse(doc.SelectSingleNode(".//initialClient")?.InnerText);
-                SignalRURL = doc.SelectSingleNode(".//hubURL")?.InnerText;
-                ServerURL = doc.SelectSingleNode(".//webserverURL")?.InnerText;
+                SignalRIP = doc.SelectSingleNode(".//signalRIP")?.InnerText;
+                SignalRPort = doc.SelectSingleNode(".//signalRPort")?.InnerText;
+                ServerPort = doc.SelectSingleNode(".//serverPort")?.InnerText;
                 AutoExecute = bool.Parse(doc.SelectSingleNode(".//autoStart")?.InnerText);
                 AutoAssignArchive = doc.SelectSingleNode(".//autoAssignFile")?.InnerText;
 
@@ -112,6 +108,11 @@ namespace LoadInjectorCommandCentre {
         }
 
         public int NumClients { get { return numClients; } set { numClients = value; } }
+
+        public string SignalRIP { get; set; }
+        public string SignalRPort { get; set; }
+        public string ServerPort { get; set; }
+
         public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
         public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
         public string AutoAssignArchive { get { return autoArchiveFile; } set { autoArchiveFile = value; OnPropertyChanged("AutoAssignArchive"); } }
@@ -158,7 +159,8 @@ namespace LoadInjectorCommandCentre {
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
-                Application.Current.Dispatcher.Invoke(delegate {
+                Application.Current.Dispatcher.Invoke(delegate
+                {
                     ExecutionRecordClass r = RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
                     if (r != null) {
@@ -210,6 +212,9 @@ namespace LoadInjectorCommandCentre {
             };
             welcome.ShowDialog();
 
+            ServerURL = $"http://{SignalRIP}:{ServerPort}/";
+            SignalRURL = $"http://{SignalRIP}:{SignalRPort}";
+
             try {
                 XmlDocument doc = new XmlDocument();
 
@@ -221,13 +226,13 @@ namespace LoadInjectorCommandCentre {
                 root.AppendChild(elem);
                 root.LastChild.AppendChild(text);
 
-                XmlElement elem1 = doc.CreateElement("hubURL");
-                XmlText text1 = doc.CreateTextNode(SignalRURL);
+                XmlElement elem1 = doc.CreateElement("signalRIP");
+                XmlText text1 = doc.CreateTextNode(SignalRIP);
                 root.AppendChild(elem1);
                 root.LastChild.AppendChild(text1);
 
-                XmlElement elem2 = doc.CreateElement("webserverURL");
-                XmlText text2 = doc.CreateTextNode(ServerURL);
+                XmlElement elem2 = doc.CreateElement("serverPort");
+                XmlText text2 = doc.CreateTextNode(ServerPort);
                 root.AppendChild(elem2);
                 root.LastChild.AppendChild(text2);
 
@@ -240,6 +245,11 @@ namespace LoadInjectorCommandCentre {
                 XmlText text4 = doc.CreateTextNode(AutoAssignArchive);
                 root.AppendChild(elem4);
                 root.LastChild.AppendChild(text4);
+
+                XmlElement elem5 = doc.CreateElement("signalRPort");
+                XmlText text5 = doc.CreateTextNode(SignalRPort);
+                root.AppendChild(elem5);
+                root.LastChild.AppendChild(text5);
 
                 File.WriteAllText("Config.xml", doc.OuterXml);
             } catch (Exception ex) {

@@ -84,24 +84,17 @@ namespace LoadInjector.Runtime.EngineComponents {
         private string _rootDirectory;
         public string _serverPath;
         private HttpListener _listener;
-        private int _port;
+        private string _port;
         public bool _useHTTPS = false;
         public string _host;
 
-        public SimpleHTTPServer(string path, string serverPath) {
+        public SimpleHTTPServer(string path, string serverIP, string serverPort) {
             this._rootDirectory = path;
-            this._serverPath = serverPath;
+            this._host = serverIP;
+            this._port = serverPort;
+            this._serverPath = $"http://{_host}:{_port}/";
 
-            string temp = serverPath.Substring(serverPath.LastIndexOf(':') + 1);
-            temp = temp.Substring(0, temp.IndexOf('/'));
-            _port = int.Parse(temp);
-            _useHTTPS = serverPath.ToLower().Contains("https:");
-
-            int index = _serverPath.IndexOf('/') + 2;
-            string temp2 = _serverPath.Substring(index, _serverPath.Length - index);
-            _host = temp2.Substring(0, temp2.IndexOf(':'));
-
-            this.Initialize(path, serverPath);
+            this.Initialize(path, _serverPath);
         }
 
         private void Initialize(string path, string serverPath) {
