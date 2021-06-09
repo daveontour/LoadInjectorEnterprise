@@ -334,11 +334,11 @@ namespace LoadInjector.RunTime {
                     lr.Name = line.name;
                     lr.MessagesSent = line.messagesSent;
                     lr.MessagesFailed = line.messagesFail;
-                    logger.Warn("Line Record Added");
+
+                    itRecord.DestinationLineRecords.Add(lr);
                 }
 
                 iterationRecords.Records.Add(itRecord);
-                logger.Warn("iteratoin Record Added");
             } catch (Exception ex) {
                 logger.Error(ex, $"Iteration records{ex.Message}");
             }

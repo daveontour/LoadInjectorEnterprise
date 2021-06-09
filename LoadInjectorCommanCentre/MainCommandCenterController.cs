@@ -59,18 +59,18 @@ namespace LoadInjectorCommandCentre {
 
             int hubport = Utils.GetAvailablePort(int.Parse(View.SignalRPort));
             if (hubport != int.Parse(View.SignalRPort)) {
-                View.SignalRPort = hubport.ToString();
                 MessageBox.Show($"Port {View.SignalRPort} is unavailable. Using {hubport} instead", "Client Hub Port", MessageBoxButton.OK, MessageBoxImage.Warning);
+                View.SignalRPort = hubport.ToString();
             }
             signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
             MessageHub.StartHub(signalRURL);
 
             int webport = Utils.GetAvailablePort(int.Parse(View.ServerPort));
             if (webport != int.Parse(View.ServerPort)) {
-                View.ServerPort = webport.ToString();
                 MessageBox.Show($"Port {View.ServerPort} is unavailable. Using {webport} instead", "Archive Server Port", MessageBoxButton.OK, MessageBoxImage.Warning);
+                View.ServerPort = webport.ToString();
             }
-            WebServerURL = serverURL;
+            WebServerURL = $"http://{View.SignalRIP}:{View.ServerPort}/";
 
             WebServer = new SimpleHTTPServer(ArchiveRoot, View.SignalRIP, View.ServerPort);
             StartClients(NumClients);
