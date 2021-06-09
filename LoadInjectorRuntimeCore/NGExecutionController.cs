@@ -93,7 +93,7 @@ namespace LoadInjector.RunTime {
         private XmlNodeList destinations;
 
         public ClientHub clientHub;
-        public IterationRecords iterationRecords = new IterationRecords();
+        public CompletionReport iterationRecords = new CompletionReport();
 
         private readonly string getFlightsTemplate = @"<soapenv:Envelope xmlns:soapenv=""http://schemas.xmlsoap.org/soap/envelope/"" xmlns:ams6=""http://www.sita.aero/ams6-xml-api-webservice"">
    <soapenv:Header/>
@@ -294,6 +294,7 @@ namespace LoadInjector.RunTime {
 
             repeatsExecuted = 0;
             PrepareAsync().Wait();
+            this.executionStarted = DateTime.Now;
             Run();
 
             stopWatch.Reset();
@@ -333,8 +334,6 @@ namespace LoadInjector.RunTime {
                     lr.Name = line.name;
                     lr.MessagesSent = line.messagesSent;
                     lr.MessagesFailed = line.messagesFail;
-                    logger.Warn("Line record Created");
-                    itRecord.DestinationLineRecords.Add(lr);
                     logger.Warn("Line Record Added");
                 }
 

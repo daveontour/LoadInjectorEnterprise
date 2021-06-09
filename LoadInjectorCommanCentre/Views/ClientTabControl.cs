@@ -150,9 +150,9 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
-        private IterationRecords completionReport;
+        private CompletionReport completionReport;
 
-        public IterationRecords CompletionReport {
+        public CompletionReport CompletionReport {
             get { return completionReport; }
             set {
                 completionReport = value;
@@ -214,7 +214,7 @@ namespace LoadInjectorCommandCentre.Views {
             }
         }
 
-        internal void SetCompletionReportText(IterationRecords report) {
+        internal void SetCompletionReportText(CompletionReport report) {
             Application.Current.Dispatcher.Invoke((Action)delegate {
                 CompletionReport = report;
             });

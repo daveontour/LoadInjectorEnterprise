@@ -32,7 +32,7 @@ namespace LoadInjectorBase.Common {
         public int IterationNumber { get; set; }
     }
 
-    public class IterationRecords {
+    public class CompletionReport {
         public string ExecutionNodeID { get; set; }
         public string IPAddress { get; set; }
         public string ProcessID { get; set; }
@@ -49,10 +49,32 @@ namespace LoadInjectorBase.Common {
         public override string ToString() {
             StringBuilder sb = new StringBuilder();
 
-            sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node ID:", ExecutionNodeID));
             sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node IP:", IPAddress));
             sb.AppendLine(string.Format("{0,27}{1,15}", "Execution Node Process ID:", ProcessID));
             sb.AppendLine(string.Format("{0,27}{1,15}", "Work Package:", WorkPacakage));
+
+            int index = 0;
+            foreach (IterationRecord itRec in Records) {
+                index++;
+                if (Records.Count() > 1) {
+                    sb.AppendLine($"\nExecution Iteration Number: {index}");
+                }
+
+                sb.AppendLine(string.Format("{0, -20}{1}", "Start of Execution:", itRec.ExecutionStart));
+                sb.AppendLine(string.Format("{0, -20}{1}", "End of Execution:", itRec.ExecutionEnd));
+
+                sb.AppendLine("\nSources:");
+                sb.AppendLine(string.Format("{0, -15}{1, -15}{2, -15}", "Type", "Name", "Trigers Fired"));
+                foreach (LineRecord rec in itRec.SourceLineRecords) {
+                    sb.AppendLine(string.Format("{0, -15}{1, -15}{2, -15}", rec.SourceType, rec.Description, rec.MessagesSent));
+                }
+
+                sb.AppendLine("\nDestination:");
+                sb.AppendLine(string.Format("{0, -15}{1, -15}{2, -15}{3, -15}", "Type", "Name", "Messages Sent", "Messages Failed"));
+                foreach (LineRecord rec in itRec.DestinationLineRecords) {
+                    sb.AppendLine(string.Format("{0, -15}{1, -15}{2, -15}{3,-15}", rec.DestinationType, rec.Description, rec.MessagesSent, rec.MessagesFailed));
+                }
+            }
 
             return sb.ToString();
         }

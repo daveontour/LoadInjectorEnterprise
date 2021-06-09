@@ -39,25 +39,28 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="30" />
                 <RowDefinition Height="30" />
+                <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
 
-            <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Client Hub URL:</Label>
-            <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Web Server URL:</Label>
-            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Initial number of local execution nodes:</Label>
-            <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Auto Assign Archive:</Label>
-            <Label Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Auto Execute:</Label>
-            <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Content="{Binding Mode=TwoWay, Path=SignalRURL}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
-            <Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Content="{Binding Mode=TwoWay, Path=ServerURL}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
-            <Label Grid.Row="2" Grid.Column="1" Name="myUpDownControl"  Width="50" HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Content="{Binding Mode=TwoWay, Path=NumClients}"  />
-            <DockPanel Grid.Row="3" Grid.Column="1" LastChildFill="True">
+            <Label Grid.Row="0" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Client Hub IP:</Label>
+            <Label Grid.Row="1" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Client Hub Port:</Label>
+            <Label Grid.Row="2" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Archive Server Port:</Label>
+            <Label Grid.Row="3" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Initial number of local execution nodes:</Label>
+            <Label Grid.Row="4" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Auto Assign Archive:</Label>
+            <Label Grid.Row="5" Grid.Column="0" HorizontalAlignment="Right" Margin="0,0,10,0">Auto Execute:</Label>
+            <Label Grid.Row="0" Grid.Column="1" HorizontalAlignment="Left" Content="{Binding Mode=TwoWay, Path=SignalRIP}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            <Label Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Content="{Binding Mode=TwoWay, Path=SignalRPort}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            <Label Grid.Row="2" Grid.Column="1" HorizontalAlignment="Left" Content="{Binding Mode=TwoWay, Path=ServerPort}" Width="250" Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
+            <Label Grid.Row="3" Grid.Column="1" Name="myUpDownControl"  Width="50" HorizontalAlignment="Left" Height="25" VerticalAlignment="Center" Content="{Binding Mode=TwoWay, Path=NumClients}" />
+            <DockPanel Grid.Row="4" Grid.Column="1" LastChildFill="True">
                 <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" DockPanel.Dock="Right">
                     <Button  Height="24" Margin="0,0,5,0" Width="50" DockPanel.Dock="Right" Click="SelectAutoArchive_Click">Select</Button>
                     <Button  Height="24" Margin="0,0,5,0" Width="50" DockPanel.Dock="Right" Click="ClearAutoArchive_Click">Clear</Button>
                 </StackPanel>
                 <TextBox  Text="{Binding Mode=TwoWay, Path=AutoAssignArchive}" Margin="0,0,5,0"   Height="25" VerticalAlignment="Center" Padding="2,2,2,0" />
             </DockPanel>
-            <CheckBox Grid.Row="4" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=AutoExecute}" VerticalAlignment="Center" />
+            <CheckBox Grid.Row="5" Grid.Column="1" IsChecked="{Binding Mode=TwoWay, Path=AutoExecute}" VerticalAlignment="Center" />
         </Grid>
 
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,0,10" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="2">

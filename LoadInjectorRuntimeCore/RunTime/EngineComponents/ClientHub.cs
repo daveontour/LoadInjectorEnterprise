@@ -299,7 +299,7 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SendCompletionReport(string executionNodeID, IterationRecords report) {
+        internal void SendCompletionReport(string executionNodeID, CompletionReport report) {
             if (localOnly) {
                 logger.Info("Completion Report");
                 logger.Info(report);
