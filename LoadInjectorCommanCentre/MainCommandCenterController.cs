@@ -57,17 +57,21 @@ namespace LoadInjectorCommandCentre {
             MessageHub = new CentralMessagingHub(this);
             MessageHub.StartHub(signalRURL);
 
-            int hubport = Utils.GetAvailablePort(int.Parse(View.SignalRPort));
-            if (hubport != int.Parse(View.SignalRPort)) {
-                MessageBox.Show($"Port {View.SignalRPort} is unavailable. Using {hubport} instead", "Client Hub Port", MessageBoxButton.OK, MessageBoxImage.Warning);
+            int configHubPort = int.Parse(View.SignalRPort);
+            int configServerPort = int.Parse(View.ServerPort);
+
+            int hubport = Utils.GetAvailablePort(configHubPort);
+            hubport = Utils.GetAvailablePort(configHubPort);
+            if (hubport != configHubPort) {
+                MessageBox.Show($"Port {configHubPort} is unavailable. Using {hubport} instead", "Client Hub Port", MessageBoxButton.OK, MessageBoxImage.Warning);
                 View.SignalRPort = hubport.ToString();
             }
             signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
             MessageHub.StartHub(signalRURL);
 
-            int webport = Utils.GetAvailablePort(int.Parse(View.ServerPort));
-            if (webport != int.Parse(View.ServerPort)) {
-                MessageBox.Show($"Port {View.ServerPort} is unavailable. Using {webport} instead", "Archive Server Port", MessageBoxButton.OK, MessageBoxImage.Warning);
+            int webport = Utils.GetAvailablePort(configServerPort);
+            if (webport != configServerPort) {
+                MessageBox.Show($"Port {configServerPort} is unavailable. Using {webport} instead", "Archive Server Port", MessageBoxButton.OK, MessageBoxImage.Warning);
                 View.ServerPort = webport.ToString();
             }
             WebServerURL = $"http://{View.SignalRIP}:{View.ServerPort}/";
