@@ -4,6 +4,8 @@ using LoadInjectorBase.Common;
 using LoadInjectorBase.Common;
 
 using Microsoft.Win32;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -17,6 +19,8 @@ namespace LoadInjectorCommandCentre.Views {
         public CentralMessagingHub MessageHub { get; }
 
         private string executionID;
+
+        public CompletionReport iterationRecords;
 
         public string ExecutionNodeID {
             get {
@@ -203,6 +207,110 @@ namespace LoadInjectorCommandCentre.Views {
             Application.Current.Dispatcher.Invoke((Action)delegate {
                 CompletionReport = report;
             });
+        }
+
+        public void SaveExcelCompletionReport() {
+            if (iterationRecords == null) {
+                MessageBox.Show("The Completion Report has not been retrieved yet. Please use the \"Completion Report\" button to retrieve", "Completion Report Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            ExcelPackage excel = new ExcelPackage();
+
+            foreach (IterationRecord itRec in iterationRecords.Records) {
+                var workSheet = excel.Workbook.Worksheets.Add($"Iteration {itRec.IterationNumber}");
+
+                workSheet.Cells[1, 1].Value = "Execution Node IP";
+                workSheet.Cells[2, 1].Value = "Execution Process";
+                workSheet.Cells[3, 1].Value = "Work Package";
+
+                workSheet.Cells[5, 1].Value = "Execution Start";
+                workSheet.Cells[6, 1].Value = "Execution End";
+
+                workSheet.Column(1).AutoFit();
+                workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Column(1).Style.Font.Bold = true;
+
+                workSheet.Cells[1, 2].Value = iterationRecords.IPAddress;
+                workSheet.Cells[2, 2].Value = iterationRecords.ProcessID;
+                workSheet.Cells[3, 2].Value = iterationRecords.WorkPacakage;
+
+                workSheet.Cells[5, 2].Value = itRec.ExecutionStart.ToString("yyyy-MM-dd  HH:mm:ss");
+                workSheet.Cells[6, 2].Value = itRec.ExecutionEnd.ToString("yyyy-MM-dd  HH:mm:ss");
+                workSheet.Column(2).AutoFit();
+
+                workSheet.Cells[7, 3].Value = "Sources:";
+                workSheet.Row(7).Style.Font.Bold = true;
+                workSheet.Cells[8, 4].Value = "Type";
+                workSheet.Cells[8, 5].Value = "Description";
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Cells[8, 6].Value = "Triggers Fired";
+                workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Cells[8, 8].Value = "Source";
+                workSheet.Row(8).Style.Font.Bold = true;
+
+                int row = 9;
+                foreach (LineRecord rec in itRec.SourceLineRecords) {
+                    workSheet.Cells[row, 4].Value = rec.SourceType;
+                    workSheet.Cells[row, 5].Value = rec.Name;
+                    workSheet.Cells[row, 6].Value = rec.MessagesSent;
+                    workSheet.Cells[row, 8].Value = rec.Description;
+                    row++;
+                }
+
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                row++;
+
+                workSheet.Cells[row, 3].Value = "Destinations:";
+                workSheet.Row(row).Style.Font.Bold = true;
+                row++;
+                workSheet.Cells[row, 4].Value = "Type";
+                workSheet.Cells[row, 5].Value = "Description";
+                workSheet.Cells[row, 6].Value = "Messages Sent";
+                workSheet.Cells[row, 7].Value = "Messages Fail";
+                workSheet.Cells[row, 8].Value = "Destination";
+                workSheet.Row(row).Style.Font.Bold = true;
+                row++;
+                foreach (LineRecord rec in itRec.DestinationLineRecords) {
+                    workSheet.Cells[row, 4].Value = rec.DestinationType;
+                    workSheet.Cells[row, 5].Value = rec.Name;
+                    workSheet.Cells[row, 6].Value = rec.MessagesSent;
+                    workSheet.Cells[row, 7].Value = rec.MessagesFailed;
+                    workSheet.Cells[row, 8].Value = rec.Description;
+                    row++;
+                }
+
+                workSheet.Column(3).AutoFit();
+                workSheet.Column(4).AutoFit();
+                workSheet.Column(5).AutoFit();
+                workSheet.Column(6).AutoFit();
+                workSheet.Column(7).AutoFit();
+                workSheet.Column(8).AutoFit();
+            }
+
+            SaveFileDialog dialog = new SaveFileDialog {
+                Filter = "Excel Files (*.xlsx)|*.xlsx"
+            };
+            if (dialog.ShowDialog() == true) {
+                if (File.Exists(dialog.FileName))
+                    File.Delete(dialog.FileName);
+
+                // Create excel file on physical disk
+                FileStream objFileStrm = File.Create(dialog.FileName);
+                objFileStrm.Close();
+
+                // Write content to excel file
+                File.WriteAllBytes(dialog.FileName, excel.GetAsByteArray());
+                //Close Excel package
+            }
+
+            excel.Dispose();
         }
     }
 }

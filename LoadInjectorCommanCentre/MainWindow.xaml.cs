@@ -50,8 +50,6 @@ namespace LoadInjectorCommandCentre {
         private string autoArchiveFile;
         private bool autoExecute = false;
 
-
-
         public ExecutionRecords RecordsCollection {
             get { return this._records; }
         }
@@ -124,6 +122,8 @@ namespace LoadInjectorCommandCentre {
             }
         }
 
+        public string SelectedConnectionID { get; private set; }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         private void OutputConsole_Initialized(object sender, EventArgs e) {
@@ -159,8 +159,7 @@ namespace LoadInjectorCommandCentre {
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
             try {
-                Application.Current.Dispatcher.Invoke(delegate
-                {
+                Application.Current.Dispatcher.Invoke(delegate {
                     ExecutionRecordClass r = RecordsCollection.FirstOrDefault<ExecutionRecordClass>(record => record.ExecutionLineID == rec.ExecutionLineID);
 
                     if (r != null) {
@@ -310,6 +309,7 @@ namespace LoadInjectorCommandCentre {
                 TabControl tabControl = e.Source as TabControl;
                 if (tabControl.SelectedValue is ClientTabControl control) {
                     control.TabSelected();
+                    SelectedConnectionID = control.ConnectionID;
                 }
             }
 
@@ -388,6 +388,10 @@ namespace LoadInjectorCommandCentre {
 
         private void clearBtn_Click(object sender, RoutedEventArgs e) {
             cccontroller.ClearGrid();
+        }
+
+        private void saveReportBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.saveReport(SelectedConnectionID);
         }
     }
 }

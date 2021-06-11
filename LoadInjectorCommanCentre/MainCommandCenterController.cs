@@ -317,6 +317,11 @@ namespace LoadInjectorCommandCentre {
             clientTabControl.OnPropertyChanged("Title");
         }
 
+        internal void saveReport(string selectedConnectionID) {
+            ClientControl control = clientControls[selectedConnectionID];
+            control.SaveExcelCompletionReport();
+        }
+
         public void PrepAll() {
             int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.Assigned.Value);
             if (ready == 0) {
@@ -609,6 +614,8 @@ namespace LoadInjectorCommandCentre {
                 if (clientTabControls.ContainsKey(context.ConnectionId)) {
                     ClientTabControl client = clientTabControls[context.ConnectionId];
                     client.SetCompletionReportText(report);
+                    ClientControl client2 = clientControls[context.ConnectionId];
+                    client2.iterationRecords = report;
                 }
             });
         }
