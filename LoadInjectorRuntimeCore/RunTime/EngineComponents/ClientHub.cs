@@ -63,6 +63,7 @@ namespace LoadInjector.RunTime.EngineComponents {
                 hubProxy.On("CompletionReport", () => {
                     logger.Info("Completion report requested");
                     ngExecutionController.ProduceCompletionReport();
+                    ngExecutionController.GetExcelCompletionReport();
                 });
 
                 hubProxy.On("DisableDetails", () => {
