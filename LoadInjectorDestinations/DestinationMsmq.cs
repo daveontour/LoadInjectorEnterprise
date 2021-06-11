@@ -26,6 +26,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Queue: {queueName}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             try {
                 using (MessageQueue msgQueue = new MessageQueue(queueName)) {

@@ -46,6 +46,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Server: {tcpServerIP}, Port: {tcpServerPort}";
+        }
+
         public override void Prepare() {
             if (sockListner != null) {
                 try {

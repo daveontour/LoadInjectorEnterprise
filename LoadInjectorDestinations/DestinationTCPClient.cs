@@ -31,6 +31,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Server: {tcpServerIP}, Port: {tcpServerPort}";
+        }
+
         public override bool Send(string message, List<Variable> vars) {
             try {
                 TcpClient client = new TcpClient(tcpServerIP, tcpServerPort);

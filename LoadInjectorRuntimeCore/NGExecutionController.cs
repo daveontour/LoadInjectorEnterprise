@@ -318,6 +318,21 @@ namespace LoadInjector.RunTime {
             state = ClientState.ExecutionComplete;
             clientHub.SetStatus(this.executionNodeUuid);
 
+            PrepareIterationCompletionReport();
+
+            if (repeatsExecuted < repeats) {
+                repetitionTimer = new Timer {
+                    Interval = repeatRest * 1000,
+                    AutoReset = false,
+                    Enabled = true
+                };
+                repetitionTimer.Elapsed += NextExecution;
+                state = ClientState.WaitingNextIteration;
+                clientHub.SetStatus(this.executionNodeUuid);
+            }
+        }
+
+        private void PrepareIterationCompletionReport() {
             // Collect the data for the Completion Report
             try {
                 IterationRecord itRecord = new IterationRecord() {
@@ -334,24 +349,77 @@ namespace LoadInjector.RunTime {
                     lr.Name = line.name;
                     lr.MessagesSent = line.messagesSent;
                     lr.MessagesFailed = line.messagesFail;
+                    lr.Description = line.destinationEndPoint.endPointDestination.GetDestinationDescription();
 
                     itRecord.DestinationLineRecords.Add(lr);
+                }
+                foreach (AmsDirectExecutionController line in amsLines) {
+                    LineRecord lr = new LineRecord();
+                    lr.DestinationType = line.LineType;
+                    lr.Name = line.name;
+                    lr.MessagesSent = line.messagesSent;
+                    lr.MessagesFailed = line.messagesFail;
+
+                    itRecord.DestinationLineRecords.Add(lr);
+                }
+
+                foreach (RateDrivenSourceController line in rateDrivenLines) {
+                    LineRecord lr = new LineRecord();
+                    lr.SourceType = "Rate Driven";
+                    lr.Name = line.name;
+                    lr.MessagesSent = line.messagesSent;
+                    switch (line.dataSourceType) {
+                        case "CSV":
+                        case "Excel":
+                        case "XML":
+                        case "JSON":
+                            lr.Description = $"{line.dataSourceType}: {line.dataFile}, Configured Rate: {line.messagesPerMinute} msgs/min";
+                            break;
+
+                        case "DATABASE":
+                        case "MSSQL":
+                        case "MySQL":
+                        case "ORACLE":
+                            lr.Description = $"{line.dataSourceType}: {line.connStr}, Configured Rate: {line.messagesPerMinute} msgs/min";
+                            break;
+
+                        default:
+                            lr.Description = $"Configured Rate: {line.messagesPerMinute} msgs/min";
+                            break;
+                    }
+                    itRecord.SourceLineRecords.Add(lr);
+                }
+
+                foreach (List<DataDrivenSourceController> controller in new List<List<DataDrivenSourceController>>() {amsDataDrivenLines
+    ,csvDataDrivenLines,excelDataDrivenLines,xmlDataDrivenLines,jsonDataDrivenLines,databaseDataDrivenLines }) {
+                    foreach (DataDrivenSourceController line in controller) {
+                        LineRecord lr = new LineRecord();
+                        lr.SourceType = line.dataSourceType;
+                        lr.Name = line.name;
+                        lr.MessagesSent = line.messagesSent;
+
+                        switch (line.dataSourceType) {
+                            case "CSV":
+                            case "Excel":
+                            case "XML":
+                            case "JSON":
+                                lr.Description = $"{line.dataSourceType}: {line.dataFile}";
+                                break;
+
+                            case "DATABASE":
+                            case "MSSQL":
+                            case "MySQL":
+                            case "ORACLE":
+                                lr.Description = $"{line.dataSourceType}: {line.connStr}";
+                                break;
+                        }
+                        itRecord.SourceLineRecords.Add(lr);
+                    }
                 }
 
                 iterationRecords.Records.Add(itRecord);
             } catch (Exception ex) {
                 logger.Error(ex, $"Iteration records{ex.Message}");
-            }
-
-            if (repeatsExecuted < repeats) {
-                repetitionTimer = new Timer {
-                    Interval = repeatRest * 1000,
-                    AutoReset = false,
-                    Enabled = true
-                };
-                repetitionTimer.Elapsed += NextExecution;
-                state = ClientState.WaitingNextIteration;
-                clientHub.SetStatus(this.executionNodeUuid);
             }
         }
 

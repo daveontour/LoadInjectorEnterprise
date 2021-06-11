@@ -115,6 +115,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Host: {qHost}, Queue Manager: {qMgr}, Queue: {queueName}";
+        }
+
         public override void Prepare() {
             base.Prepare();
 

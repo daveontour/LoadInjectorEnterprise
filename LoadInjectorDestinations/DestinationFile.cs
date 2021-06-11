@@ -30,6 +30,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"File Name: {destinationFile}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             /*
              *  Check behaviour if directory does not exist. Create it if it does not exist.

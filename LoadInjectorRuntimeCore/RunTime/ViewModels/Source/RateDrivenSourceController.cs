@@ -37,7 +37,7 @@ namespace LoadInjector.RunTime {
         private readonly string maxMsgPerMinuteProfile;
         private readonly bool abortOnListEnd;
         private readonly bool sequentialFlight = true;
-        private int messagesSent;
+        public int messagesSent;
 
         public bool prepOK = true;
         public bool finished;

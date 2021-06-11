@@ -21,6 +21,8 @@ namespace LoadInjectorBase {
             return true;
         }
 
+        public abstract string GetDestinationDescription();
+
         public virtual bool Send(string val, List<Variable> vars) {
             return false;
         }

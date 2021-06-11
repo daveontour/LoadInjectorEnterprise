@@ -59,6 +59,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"URL: {getURL}";
+        }
+
         public override async Task<bool> SendAsync(string message, List<Variable> vars) {
             string url = string.Copy(getURL);
             foreach (Variable v in vars) {

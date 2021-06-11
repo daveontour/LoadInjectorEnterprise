@@ -34,6 +34,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"URL: {serverURL}";
+        }
+
         public override void Prepare() {
             source = new CancellationTokenSource();
             CancellationToken token = source.Token;

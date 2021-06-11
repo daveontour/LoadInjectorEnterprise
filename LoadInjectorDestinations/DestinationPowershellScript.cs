@@ -25,6 +25,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"PowerShell Command";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             var result = RunScript(val);
             if (showResults) {

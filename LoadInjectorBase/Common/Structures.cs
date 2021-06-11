@@ -64,15 +64,15 @@ namespace LoadInjectorBase.Common {
                 sb.AppendLine(string.Format("{0, -20}{1}", "End of Execution:", itRec.ExecutionEnd));
 
                 sb.AppendLine("\nSources:");
-                sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}", "Type", "Description", "Trigers Fired"));
+                sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15} Source", "Type", "Description", "Trigers Fired"));
                 foreach (LineRecord rec in itRec.SourceLineRecords) {
-                    sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}", rec.SourceType, rec.Name, rec.MessagesSent));
+                    sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15} {3}", rec.SourceType, rec.Name, rec.MessagesSent, rec.Description));
                 }
 
                 sb.AppendLine("\nDestination:");
-                sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}{3, -15}", "Type", "Description", "Messages Sent", "Messages Failed"));
+                sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}{3, -15} Destination", "Type", "Description", "Messages Sent", "Messages Failed"));
                 foreach (LineRecord rec in itRec.DestinationLineRecords) {
-                    sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}{3,-15}", rec.DestinationType, rec.Name, rec.MessagesSent, rec.MessagesFailed));
+                    sb.AppendLine(string.Format("{0, -15}{1, -30}{2, -15}{3,-15} {4}", rec.DestinationType, rec.Name, rec.MessagesSent, rec.MessagesFailed, rec.Description));
                 }
             }
 

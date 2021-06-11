@@ -40,6 +40,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Server: {bootStrapServers}, Key: {Key}, Topic: {Topic}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             var config = new ProducerConfig { BootstrapServers = bootStrapServers };
             foreach (Variable v in vars) {

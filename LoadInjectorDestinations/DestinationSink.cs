@@ -12,6 +12,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"The Sink";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             return true;
         }

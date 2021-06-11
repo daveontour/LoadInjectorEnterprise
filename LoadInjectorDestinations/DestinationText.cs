@@ -13,6 +13,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Console Text";
+        }
+
         public override bool Send(String val, List<Variable> vars) {
             destLogger.Info($"\nOutput Message=======>\n{val}\n<=======Output Message");
             return true;

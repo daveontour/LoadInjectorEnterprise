@@ -11,7 +11,7 @@ namespace LoadInjector.RunTime {
 
     public class DataDrivenSourceController : SourceControllerAbstract {
         internal bool ConfigOK = true;
-
+        public int messagesSent;
         private readonly bool sequentialFlight;
         private readonly List<string> triggersThisLine = new List<string>();
         private readonly string uid = Guid.NewGuid().ToString();
@@ -145,7 +145,7 @@ namespace LoadInjector.RunTime {
                             try {
                                 triggerTime = DateTime.ParseExact(timeStr, timeFormat, provider);
                             } catch (Exception ex) {
-                                sourceLogger.Error(ex,$"Error parsing triggerTime. Unparsed string: {timeStr}");
+                                sourceLogger.Error(ex, $"Error parsing triggerTime. Unparsed string: {timeStr}");
                                 break;
                             }
                         }
@@ -212,6 +212,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareXML() {
+            messagesSent = 0;
             if (PrepareXML(timeElement)) {
                 return SetTriggers(dataRecords, timeElement, timeElementFormat);
             } else {
@@ -220,6 +221,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareJSON() {
+            messagesSent = 0;
             if (PrepareJSON(timeElement)) {
                 return SetTriggers(dataRecords, timeElement, timeElementFormat);
             } else {
@@ -228,6 +230,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareDB() {
+            messagesSent = 0;
             if (PrepareDB(timeElement)) {
                 return SetTriggers(dataRecords, timeElement, timeElementFormat);
             } else {
@@ -236,6 +239,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareExcel() {
+            messagesSent = 0;
             if (PrepareExcel(timeElement)) {
                 return SetTriggers(dataRecords, timeElement, timeElementFormat);
             } else {
@@ -244,6 +248,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareCSV() {
+            messagesSent = 0;
             if (PrepareCSV(timeElement)) {
                 return SetTriggers(dataRecords, timeElement, timeElementFormat);
             } else {
@@ -252,6 +257,7 @@ namespace LoadInjector.RunTime {
         }
 
         public bool PrepareAMS(List<FlightNode> all, List<FlightNode> arr, List<FlightNode> dep) {
+            messagesSent = 0;
             if (!lineInUse) {
                 SetSourceLineOutput("No destination lines configured to use triggers for this type of flight");
                 return true;
@@ -293,7 +299,7 @@ namespace LoadInjector.RunTime {
             }
 
             if (!prepOK) {
-               sourceLogger.Error("Preparation of iteration data for AMS Data Driven line was not successful");
+                sourceLogger.Error("Preparation of iteration data for AMS Data Driven line was not successful");
                 return false;
             }
 
@@ -365,7 +371,7 @@ namespace LoadInjector.RunTime {
                                 triggerTime = DateTime.Parse(flt.externals[trigger.Attributes["externalName"].Value]);
                             }
                         } catch (Exception ex) {
-                            sourceLogger.Error(ex,$"Error parsing trigger time for external name {flt.externals[trigger.Attributes["externalName"].Value]}");
+                            sourceLogger.Error(ex, $"Error parsing trigger time for external name {flt.externals[trigger.Attributes["externalName"].Value]}");
                             break;
                         }
 
@@ -401,7 +407,7 @@ namespace LoadInjector.RunTime {
                     }
                 }
             } catch (Exception ex) {
-                sourceLogger.Error(ex,"Error preparing triggers for AMS");
+                sourceLogger.Error(ex, "Error preparing triggers for AMS");
             }
 
             foreach (XmlNode trigger in node.SelectNodes("trigger")) {
@@ -423,6 +429,7 @@ namespace LoadInjector.RunTime {
         public void TriggerHandler(object sender, TriggerFiredEventArgs e) {
             foreach (TriggerRecord record in eventDistributor.triggerQueue) {
                 if (triggersInUse.Contains(record.ID) && triggersThisLine.Contains(record.ID)) {
+                    messagesSent++;
                     if (e.Flight != null) {
                         SetSourceLineOutput($"Trigger: {e.TriggerName}. Fired for {e.Flight.airlineCode}{e.Flight.fltNumber} at {DateTime.Now}. Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                         return;
@@ -438,6 +445,7 @@ namespace LoadInjector.RunTime {
         }
 
         internal void Start(TriggerRecord first) {
+            messagesSent = 0;
             if (first == null) {
                 SetSourceLineOutput("No triggers utilised from this line or triggers beyond test time");
                 return;
@@ -454,6 +462,7 @@ namespace LoadInjector.RunTime {
                 } else {
                     foreach (TriggerRecord record in q) {
                         if (triggersInUse.Contains(record.ID) && triggersThisLine.Contains(record.ID)) {
+                            messagesSent++;
                             if (record.record.Item2 != null) {
                                 SetSourceLineOutput($"Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                                 return;

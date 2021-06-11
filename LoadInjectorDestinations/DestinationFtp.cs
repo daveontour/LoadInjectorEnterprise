@@ -37,6 +37,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"FTP Destination: {ftpURL}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             string uri = string.Copy(ftpURL);
 

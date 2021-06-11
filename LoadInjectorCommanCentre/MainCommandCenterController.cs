@@ -54,9 +54,6 @@ namespace LoadInjectorCommandCentre {
                 AutoAssignArchive = null;
             }
 
-            MessageHub = new CentralMessagingHub(this);
-            MessageHub.StartHub(signalRURL);
-
             int configHubPort = int.Parse(View.SignalRPort);
             int configServerPort = int.Parse(View.ServerPort);
 
@@ -67,6 +64,7 @@ namespace LoadInjectorCommandCentre {
                 View.SignalRPort = hubport.ToString();
             }
             signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
+            MessageHub = new CentralMessagingHub(this);
             MessageHub.StartHub(signalRURL);
 
             int webport = Utils.GetAvailablePort(configServerPort);

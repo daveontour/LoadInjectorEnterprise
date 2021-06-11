@@ -55,6 +55,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Server URL: {mqttServerURL}, Topic: {topic}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             MqttApplicationMessage msg = new MqttApplicationMessageBuilder()
             .WithTopic(topic)

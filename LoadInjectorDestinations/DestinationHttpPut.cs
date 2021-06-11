@@ -62,6 +62,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"URL: {postURL}";
+        }
+
         public override async Task<bool> SendAsync(string message, List<Variable> vars) {
             string messageXML = message;
             string url = postURL;

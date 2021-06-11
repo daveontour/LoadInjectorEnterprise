@@ -30,6 +30,10 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
+        public override string GetDestinationDescription() {
+            return $"Connection String: {connStr}";
+        }
+
         public override bool Send(string val, List<Variable> vars) {
             foreach (Variable v in vars) {
                 try {
