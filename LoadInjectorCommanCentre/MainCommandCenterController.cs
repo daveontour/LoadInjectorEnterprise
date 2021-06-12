@@ -281,8 +281,25 @@ namespace LoadInjectorCommandCentre {
                                 ExecutionLineID = node.Attributes["uuid"]?.Value,
                                 ExecutionNodeID = node.Attributes["executionNodeUuid"]?.Value,
                                 SourceDestination = "Data Driven Source",
+                                Protocol = "Data Driven Source",
                                 ConnectionID = context.ConnectionId
                             };
+
+                            if (node.Name.Contains("csvdatadriven")) {
+                                rec.Protocol = "CSV Data Driven";
+                            }
+                            if (node.Name.Contains("jsondatadriven")) {
+                                rec.Protocol = "JSON Data Driven";
+                            }
+                            if (node.Name.Contains("xmldatadriven")) {
+                                rec.Protocol = "XML Data Driven";
+                            }
+                            if (node.Name.Contains("exceldatadriven")) {
+                                rec.Protocol = "Excel Data Driven";
+                            }
+                            if (node.Name.Contains("databasedatadriven")) {
+                                rec.Protocol = "Data Base Data Driven";
+                            }
 
                             View.AddUpdateExecutionRecord(rec);
                             client.ExecutionNodeID = rec.ExecutionNodeID;

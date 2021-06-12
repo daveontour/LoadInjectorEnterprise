@@ -60,7 +60,6 @@ namespace LoadInjector.RunTime {
         private readonly List<Tuple<int, int>> flightSets = new List<Tuple<int, int>>();
 
         private Timer timer;
-
         private Timer timerStart;
 
         private int duration = -1;
@@ -323,7 +322,13 @@ namespace LoadInjector.RunTime {
             // signalling the end of the test.
 
             repeatsExecuted++;
-            Stop();
+            try {
+                logger.Warn("Times UP");
+                Stop();
+                logger.Warn("Stoppd");
+            } catch (Exception ex) {
+                logger.Error(ex, "Error Stopping");
+            }
 
             if (repeatsExecuted < repeats) {
                 logger.Info($"Test Execution Repetition {repeatsExecuted} of {repeats} Complete");
@@ -517,11 +522,10 @@ namespace LoadInjector.RunTime {
                     itRecord.SourceLineRecords.Add(lr);
                 }
 
-                foreach (List<DataDrivenSourceController> controller in new List<List<DataDrivenSourceController>>() {amsDataDrivenLines
-    ,csvDataDrivenLines,excelDataDrivenLines,xmlDataDrivenLines,jsonDataDrivenLines,databaseDataDrivenLines }) {
+                foreach (List<DataDrivenSourceController> controller in new List<List<DataDrivenSourceController>>() { amsDataDrivenLines, csvDataDrivenLines, excelDataDrivenLines, xmlDataDrivenLines, jsonDataDrivenLines, databaseDataDrivenLines }) {
                     foreach (DataDrivenSourceController line in controller) {
                         LineRecord lr = new LineRecord();
-                        lr.SourceType = line.dataSourceType;
+                        lr.SourceType = line.dataSourceType + "Data Driven";
                         lr.Name = line.name;
                         lr.MessagesSent = line.messagesSent;
 
@@ -553,51 +557,6 @@ namespace LoadInjector.RunTime {
                 logger.Info(iterationRecords.ToString());
             }
         }
-
-        //private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
-        //    // This is an Event Handler that handles the action when the timer goes off
-        //    // signalling the end of the test.
-        //    repeatsExecuted++;
-        //    Stop();
-
-        //    logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
-        //    state = ClientState.Stopped;
-        //    clientHub.SetStatus(this.executionNodeUuid);
-
-        //    // Collect the data for the Completion Report
-        //    IterationRecord itRecord = new IterationRecord() {
-        //        UUID = this.executionNodeUuid,
-        //        ExecutionStart = this.executionStarted,
-        //        ExecutionEnd = DateTime.Now,
-        //        IterationNumber = repeatsExecuted,
-        //    };
-
-        //    foreach (LineExecutionController line in destLines) {
-        //        LineRecord lr = new LineRecord();
-        //        lr.DestinationType = line.LineType;
-        //        lr.Name = line.name;
-        //        lr.MessagesSent = line.messagesSent;
-        //        lr.MessagesFailed = line.messagesFail;
-
-        //        itRecord.DestinationLineRecords.Add(lr);
-        //    }
-
-        //    iterationRecords.Records.Add(itRecord);
-
-        //    if (repeatsExecuted < repeats) {
-        //        repetitionTimer = new Timer {
-        //            Interval = repeatRest * 1000,
-        //            AutoReset = false,
-        //            Enabled = true
-        //        };
-        //        repetitionTimer.Elapsed += NextExecution;
-        //        state = ClientState.WaitingNextIteration;
-        //        clientHub.SetStatus(this.executionNodeUuid);
-        //    } else {
-        //        state = ClientState.ExecutionComplete;
-        //        clientHub.SetStatus(this.executionNodeUuid);
-        //    }
-        //}
 
         private void NextExecution(object sender, ElapsedEventArgs e) {
             try {
@@ -1268,8 +1227,13 @@ namespace LoadInjector.RunTime {
             ConsoleMsg("Shutting down lines");
             StopLines();
             logger.Info("Test Iteration Complete");
-            state = ClientState.Stopped;
+            state = ClientState.ExecutionComplete;
             clientHub.SetStatus(this.executionNodeUuid);
+
+            if (standAloneMode && manual) {
+                PrepareIterationCompletionReport();
+                SaveExcelCompletionReport();
+            }
         }
 
         public void Cancel() {

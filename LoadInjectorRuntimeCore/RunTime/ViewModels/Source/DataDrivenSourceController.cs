@@ -430,6 +430,7 @@ namespace LoadInjector.RunTime {
             foreach (TriggerRecord record in eventDistributor.triggerQueue) {
                 if (triggersInUse.Contains(record.ID) && triggersThisLine.Contains(record.ID)) {
                     messagesSent++;
+                    Report(null, messagesSent, 0, 0);
                     if (e.Flight != null) {
                         SetSourceLineOutput($"Trigger: {e.TriggerName}. Fired for {e.Flight.airlineCode}{e.Flight.fltNumber} at {DateTime.Now}. Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                         return;

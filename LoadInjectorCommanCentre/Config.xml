@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <config>
-  <initialClient>4</initialClient>
+  <initialClient>1</initialClient>
   <autoStart>true</autoStart>
-  <autoAssignFile>C:\Users\dave_\Desktop\LI2.LIA</autoAssignFile>
+  <autoAssignFile>C:\Users\dave_\Desktop\testdata.lia</autoAssignFile>
   <signalRIP>localhost</signalRIP>
   <signalRPort>6220</signalRPort>
   <serverPort>6230</serverPort>

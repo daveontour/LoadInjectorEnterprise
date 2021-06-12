@@ -240,7 +240,7 @@ namespace LoadInjector.RunTime.ViewModels {
                     }
                     ScheduleNext(triggerQueue.Dequeue());
                 } catch (Exception ex) {
-                    sourceLogger.Error(ex, "Error dequeuing next event");
+                    sourceLogger.Error(ex, "Error dequeuing next event (2) " + ex.Message);
                 }
                 return;
             }
@@ -258,9 +258,12 @@ namespace LoadInjector.RunTime.ViewModels {
         public void Timer_Elapsed(TriggerRecord rec) {
             DistributeMessage(rec);
             try {
+                if (triggerQueue.Count == 0) {
+                    return;
+                }
                 ScheduleNext(triggerQueue.Dequeue());
             } catch (Exception ex) {
-                sourceLogger.Error(ex, "Error dequeuing next event");
+                sourceLogger.Error(ex, "Error dequeuing next event (1)");
             }
         }
 
