@@ -7,6 +7,7 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -135,8 +136,8 @@ namespace LoadInjectorCommandCentre {
                     Process process = new Process();
 
                     // Configure the process using the StartInfo properties.
-                    string lir = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug\LoadInjectorRuntime.exe";
-                    process.StartInfo.WorkingDirectory = @"C:\Users\dave_\source\repos\LoadInjectorEnterprise\LoadInjectorRuntime\bin\Debug";
+                    string lir = $"{ConfigurationManager.AppSettings["RunTimeDirectory"]}\\LoadInjectorRuntime.exe";
+                    process.StartInfo.WorkingDirectory = ConfigurationManager.AppSettings["RunTimeDirectory"];
                     process.StartInfo.FileName = lir;
                     process.StartInfo.Arguments = $"-server:http://{View.SignalRIP}:{View.SignalRPort}/";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
@@ -144,6 +145,7 @@ namespace LoadInjectorCommandCentre {
                     process.Start();
                 }
             } catch (Exception ex) {
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -375,6 +377,32 @@ namespace LoadInjectorCommandCentre {
         public void ExecuteClient(string clientID) {
             MessageHub.Hub.Clients.Client(clientID).Execute();
             SetRefreshRate();
+        }
+
+        internal void RequestCompletionReports() {
+            int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.ExecutionComplete.Value);
+            if (ready == 0) {
+                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are in completed state", "Completion Reports", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            int notready = clientControls.Values.Count<ClientControl>(x => x.StatusText != ClientState.ExecutionComplete.Value);
+            if (notready > 0) {
+                MessageBoxResult res = MessageBox.Show($"{notready} Execution Nodes have not completed. Request reports from nodes that have completed?", "Completion Reports", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (res == MessageBoxResult.Yes) {
+                    foreach (ClientControl c in clientControls.Values) {
+                        if (c.StatusText == ClientState.ExecutionComplete.Value) {
+                            MessageHub.Hub.Clients.Client(c.ConnectionID).CompletionReport()();
+                        }
+                    }
+                }
+
+                MessageBox.Show($"Requested Completion Reports from {ready} nodes", "Completion Reports", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                return;
+            }
+            MessageHub.Hub.Clients.All.CompletionReport();
+            MessageBox.Show($"Requested Completion Reports from {ready} nodes", "Completion Reports", MessageBoxButton.OK, MessageBoxImage.Information);
         }
 
         public void StopAll() {

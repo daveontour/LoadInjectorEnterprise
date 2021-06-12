@@ -16,6 +16,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
@@ -119,6 +120,8 @@ namespace LoadInjector.RunTime {
         private string archiveDirectory;
         public string archName = "-Not Assigned-";
         private DateTime executionStarted;
+        private bool standAloneMode;
+        private string reportFile;
 
         public string ArchiveDirectory {
             get {
@@ -130,8 +133,10 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        public NgExecutionController(ExecutionControllerType type, string serverHub = null, string executeFile = null) {
+        public NgExecutionController(ExecutionControllerType type, string serverHub = null, string executeFile = null, string reportFile = null) {
             // Client Server Mode
+
+            this.reportFile = reportFile;
             if (type == ExecutionControllerType.Client || type == ExecutionControllerType.Local) {
                 try {
                     this.clientHub = new ClientHub(serverHub, this);
@@ -143,6 +148,7 @@ namespace LoadInjector.RunTime {
 
             // Running directly from a local file
             if (type == ExecutionControllerType.StandAlone) {
+                this.standAloneMode = true;
                 XmlDocument doc = new XmlDocument();
                 if (executeFile.ToLower().EndsWith(".lia")) {
                     string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTController";
@@ -288,10 +294,12 @@ namespace LoadInjector.RunTime {
         }
 
         public void RunLocal() {
-            if (state.Value != ClientState.Ready.Value) {
-                logger.Warn("Execute requested, but not in ready state");
-                clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state");
-                return;
+            if (!standAloneMode) {
+                if (state.Value != ClientState.Ready.Value) {
+                    logger.Warn("Execute requested, but not in ready state");
+                    clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state");
+                    return;
+                }
             }
 
             repeatsExecuted = 0;
@@ -313,16 +321,12 @@ namespace LoadInjector.RunTime {
         private void OnExecutionCompleteEvent(Object source, ElapsedEventArgs e) {
             // This is an Event Handler that handles the action when the timer goes off
             // signalling the end of the test.
+
             repeatsExecuted++;
             Stop();
 
-            logger.Info($"Test Execution Repitition {repeatsExecuted} of {repeats} Complete");
-            state = ClientState.ExecutionComplete;
-            clientHub.SetStatus(this.executionNodeUuid);
-
-            PrepareIterationCompletionReport();
-
             if (repeatsExecuted < repeats) {
+                logger.Info($"Test Execution Repetition {repeatsExecuted} of {repeats} Complete");
                 repetitionTimer = new Timer {
                     Interval = repeatRest * 1000,
                     AutoReset = false,
@@ -331,7 +335,128 @@ namespace LoadInjector.RunTime {
                 repetitionTimer.Elapsed += NextExecution;
                 state = ClientState.WaitingNextIteration;
                 clientHub.SetStatus(this.executionNodeUuid);
+            } else {
+                logger.Info($"Test Execution Repetition {repeatsExecuted} of {repeats} Complete");
+                state = ClientState.ExecutionComplete;
+                clientHub.SetStatus(this.executionNodeUuid);
+                PrepareIterationCompletionReport();
+                if (reportFile != null && standAloneMode) {
+                    SaveExcelCompletionReport();
+                }
             }
+        }
+
+        internal void ReviseCompletion() {
+            iterationRecords.Clear();
+            PrepareIterationCompletionReport();
+            if (standAloneMode) {
+                logger.Warn("Post Completion Update");
+                logger.Info(iterationRecords.ToString());
+                if (reportFile != null) {
+                    SaveExcelCompletionReport();
+                }
+            }
+        }
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public void SaveExcelCompletionReport() {
+            ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+            ExcelPackage excel = new ExcelPackage();
+
+            foreach (IterationRecord itRec in iterationRecords.Records) {
+                var workSheet = excel.Workbook.Worksheets.Add($"Iteration {itRec.IterationNumber}");
+
+                workSheet.Cells[1, 1].Value = "Execution Node IP";
+                workSheet.Cells[2, 1].Value = "Execution Process";
+                workSheet.Cells[3, 1].Value = "Work Package";
+
+                workSheet.Cells[5, 1].Value = "Execution Start";
+                workSheet.Cells[6, 1].Value = "Execution End";
+
+                workSheet.Column(1).AutoFit();
+                workSheet.Column(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Column(1).Style.Font.Bold = true;
+
+                workSheet.Cells[1, 2].Value = iterationRecords.IPAddress;
+                workSheet.Cells[2, 2].Value = iterationRecords.ProcessID;
+                workSheet.Cells[3, 2].Value = iterationRecords.WorkPacakage;
+
+                workSheet.Cells[5, 2].Value = itRec.ExecutionStart.ToString("yyyy-MM-dd  HH:mm:ss");
+                workSheet.Cells[6, 2].Value = itRec.ExecutionEnd.ToString("yyyy-MM-dd  HH:mm:ss");
+                workSheet.Column(2).AutoFit();
+
+                workSheet.Cells[7, 3].Value = "Sources:";
+                workSheet.Row(7).Style.Font.Bold = true;
+                workSheet.Cells[8, 4].Value = "Type";
+                workSheet.Cells[8, 5].Value = "Description";
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Right;
+                workSheet.Cells[8, 6].Value = "Triggers Fired";
+                workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Cells[8, 8].Value = "Source";
+                workSheet.Row(8).Style.Font.Bold = true;
+
+                int row = 9;
+                foreach (LineRecord rec in itRec.SourceLineRecords) {
+                    workSheet.Cells[row, 4].Value = rec.SourceType;
+                    workSheet.Cells[row, 5].Value = rec.Name;
+                    workSheet.Cells[row, 6].Value = rec.MessagesSent;
+                    workSheet.Cells[row, 8].Value = rec.Description;
+                    row++;
+                }
+
+                workSheet.Column(4).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                workSheet.Column(5).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                workSheet.Column(6).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Column(7).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                workSheet.Column(8).Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+
+                row++;
+
+                workSheet.Cells[row, 3].Value = "Destinations:";
+                workSheet.Row(row).Style.Font.Bold = true;
+                row++;
+                workSheet.Cells[row, 4].Value = "Type";
+                workSheet.Cells[row, 5].Value = "Description";
+                workSheet.Cells[row, 6].Value = "Messages Sent";
+                workSheet.Cells[row, 7].Value = "Messages Fail";
+                workSheet.Cells[row, 8].Value = "Destination";
+                workSheet.Row(row).Style.Font.Bold = true;
+                row++;
+                foreach (LineRecord rec in itRec.DestinationLineRecords) {
+                    workSheet.Cells[row, 4].Value = rec.DestinationType;
+                    workSheet.Cells[row, 5].Value = rec.Name;
+                    workSheet.Cells[row, 6].Value = rec.MessagesSent;
+                    workSheet.Cells[row, 7].Value = rec.MessagesFailed;
+                    workSheet.Cells[row, 8].Value = rec.Description;
+                    row++;
+                }
+
+                workSheet.Column(3).AutoFit();
+                workSheet.Column(4).AutoFit();
+                workSheet.Column(5).AutoFit();
+                workSheet.Column(6).AutoFit();
+                workSheet.Column(7).AutoFit();
+                workSheet.Column(8).AutoFit();
+            }
+
+            try {
+                if (this.reportFile != null) {
+                    if (File.Exists(this.reportFile))
+                        File.Delete(this.reportFile);
+
+                    // Create excel file on physical disk
+                    FileStream objFileStrm = File.Create(this.reportFile);
+                    objFileStrm.Close();
+
+                    // Write content to excel file
+                    File.WriteAllBytes(this.reportFile, excel.GetAsByteArray());
+                    //Close Excel package
+                }
+            } catch (Exception ex) {
+                logger.Error(ex, "Writing report error");
+            }
+            excel.Dispose();
         }
 
         private void PrepareIterationCompletionReport() {
@@ -422,6 +547,10 @@ namespace LoadInjector.RunTime {
                 iterationRecords.Records.Add(itRecord);
             } catch (Exception ex) {
                 logger.Error(ex, $"Iteration records{ex.Message}");
+            }
+
+            if (standAloneMode) {
+                logger.Info(iterationRecords.ToString());
             }
         }
 
@@ -1102,10 +1231,10 @@ namespace LoadInjector.RunTime {
         }
 
         public void Stop(bool manual = false) {
-            if (state.Value != ClientState.Executing.Value ||
-                state.Value != ClientState.ExecutionPending.Value ||
-                state.Value != ClientState.WaitingNextIteration.Value
-                ) {
+            if (!(state.Value == ClientState.Executing.Value ||
+                state.Value == ClientState.ExecutionPending.Value ||
+                state.Value == ClientState.WaitingNextIteration.Value
+                )) {
                 clientHub.ConsoleMsg(executionNodeUuid, null, "Stop received, but not in executing state");
             }
 

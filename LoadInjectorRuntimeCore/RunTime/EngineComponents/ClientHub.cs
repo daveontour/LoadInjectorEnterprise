@@ -267,6 +267,11 @@ namespace LoadInjector.RunTime.EngineComponents {
                 latsetSourceReport.Add(uuid, rec);
             }
 
+            if (ngExecutionController.state.Value == ClientState.ExecutionComplete.Value) {
+                logger.Warn("Post completion message received");
+                ngExecutionController.ReviseCompletion();
+            }
+
             if (localOnly) {
                 sourceLogger.Info($"{v} Messages Sent: {messagesSent}, Current Rate: {currentRate}, Messages Per Minute: {messagesPerMinute}");
             } else {
@@ -283,6 +288,11 @@ namespace LoadInjector.RunTime.EngineComponents {
                 latsetDestinationReport[uuid] = rec;
             } else {
                 latsetDestinationReport.Add(uuid, rec);
+            }
+
+            if (ngExecutionController.state.Value == ClientState.ExecutionComplete.Value) {
+                logger.Warn("Post completion message received");
+                ngExecutionController.ReviseCompletion();
             }
 
             if (localOnly) {

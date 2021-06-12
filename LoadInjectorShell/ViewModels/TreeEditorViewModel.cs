@@ -1224,27 +1224,57 @@ namespace LoadInjector.ViewModels {
             };
 
             if (dialog.ShowDialog() == true) {
-                ExportToFile(newDoc, dialog.FileName);
+                bool success = ExportToFile(newDoc, dialog.FileName);
+                if (!success) {
+                    MessageBox.Show("Error creating archive. Possibly due to missing data or template file", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
         }
 
-        private void ExportToFile(XmlDocument doc, string file) {
+        private bool ExportToFile(XmlDocument doc, string file) {
             Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
+            Dictionary<string, string> fullfileName = new Dictionary<string, string>();
 
             foreach (XmlNode node in doc.SelectNodes(".//*")) {
                 if (node.Attributes["dataFile"]?.Value != null) {
-                    string fullFile = node.Attributes["dataFile"]?.Value;
-                    string[] f2 = fullFile.Split('\\');
-                    string filename = f2[f2.Length - 1];
-                    files.Add($"DATA/{filename}", File.ReadAllBytes(fullFile));
-                    node.Attributes["dataFile"].Value = $"./DATA/{filename}";
+                    try {
+                        string fullFile = node.Attributes["dataFile"]?.Value;
+                        if (fullfileName.ContainsKey(fullFile)) {
+                            node.Attributes["dataFile"].Value = $"./DATA/{fullfileName[fullFile]}";
+                        } else {
+                            string[] f2 = fullFile.Split('\\');
+                            string filename = f2[f2.Length - 1];
+
+                            files.Add($"DATA/{filename}", File.ReadAllBytes(fullFile));
+                            node.Attributes["dataFile"].Value = $"./DATA/{filename}";
+                            fullfileName.Add(fullFile, filename);
+                        }
+                    } catch (FileNotFoundException) {
+                        MessageBox.Show("Data file not found", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return false;
+                    } catch (Exception) {
+                        return false;
+                    }
                 }
                 if (node.Attributes["templateFile"]?.Value != null) {
-                    string fullFile = node.Attributes["templateFile"]?.Value;
-                    string[] f2 = fullFile.Split('\\');
-                    string filename = f2[f2.Length - 1];
-                    files.Add($"TEMPLATES/{filename}", File.ReadAllBytes(fullFile));
-                    node.Attributes["templateFile"].Value = $"./TEMPLATES/{filename}";
+                    try {
+                        string fullFile = node.Attributes["templateFile"]?.Value;
+                        if (fullfileName.ContainsKey(fullFile)) {
+                            node.Attributes["templateFile"].Value = $"./TEMPLATES/{fullfileName[fullFile]}";
+                        } else {
+                            string[] f2 = fullFile.Split('\\');
+                            string filename = f2[f2.Length - 1];
+
+                            files.Add($"TEMPLATES/{filename}", File.ReadAllBytes(fullFile));
+                            node.Attributes["templateFile"].Value = $"./TEMPLATES/{filename}";
+                            fullfileName.Add(fullFile, filename);
+                        }
+                    } catch (FileNotFoundException) {
+                        MessageBox.Show("Template file not found", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return false;
+                    } catch (Exception) {
+                        return false;
+                    }
                 }
             }
 
@@ -1263,6 +1293,8 @@ namespace LoadInjector.ViewModels {
             byte[] archiveBytes = ZipFiles(files);
 
             File.WriteAllBytes(file, archiveBytes);
+
+            return true;
         }
 
         private static byte[] ZipFiles(Dictionary<string, byte[]> files) {

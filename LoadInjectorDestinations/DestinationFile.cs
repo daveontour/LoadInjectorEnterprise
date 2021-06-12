@@ -3,6 +3,8 @@ using NLog;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Contexts;
 using System.Xml;
 
 namespace LoadInjector.Destinations {
@@ -34,6 +36,7 @@ namespace LoadInjector.Destinations {
             return $"File Name: {destinationFile}";
         }
 
+        [MethodImpl(MethodImplOptions.Synchronized)]
         public override bool Send(string val, List<Variable> vars) {
             /*
              *  Check behaviour if directory does not exist. Create it if it does not exist.

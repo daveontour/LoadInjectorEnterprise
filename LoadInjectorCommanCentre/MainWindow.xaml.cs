@@ -45,16 +45,19 @@ namespace LoadInjectorCommandCentre {
         private int gridRefreshRate = 1;
         public ControlWriter consoleWriter;
         private int numClients = 0;
-        private string webServerURL = "http://localhost:49152/";
+        private string webServerURL = "http://localhost:6230/";
         private string signalRURL = "http://localhost:6220/";
         private string autoArchiveFile;
         private bool autoExecute = false;
+        private DataGrid _visdataGrid;
+        private string[] args;
 
         public ExecutionRecords RecordsCollection {
             get { return this._records; }
         }
 
-        public MainWindow() {
+        public MainWindow(string[] args = null) {
+            this.args = args;
             InitializeComponent();
             DataContext = this;
             this.ClientTabDatas = new ObservableCollection<object>();
@@ -74,6 +77,19 @@ namespace LoadInjectorCommandCentre {
             } catch (Exception ex) {
                 // NO-OP
             }
+
+            try {
+                if (args != null) {
+                    foreach (string arg in args) {
+                        if (arg.StartsWith("-autoAssign:")) {
+                            AutoAssignArchive = arg.Split(':')[1];
+                            AutoExecute = false;
+                        }
+                    }
+                }
+            } catch (Exception) {
+                //NO-OP
+            }
         }
 
         public void OnPropertyChanged(string propName) {
@@ -83,8 +99,6 @@ namespace LoadInjectorCommandCentre {
                 //NO-OP
             }
         }
-
-        private DataGrid _visdataGrid;
 
         public DataGrid VisibleDataGrid {
             get {
@@ -155,6 +169,10 @@ namespace LoadInjectorCommandCentre {
 
         private void LocalClientBtn_OnClick(object sender, RoutedEventArgs e) {
             cccontroller.StartClients(1);
+        }
+
+        private void completionReportBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.RequestCompletionReports();
         }
 
         public void AddUpdateExecutionRecord(ExecutionRecordClass rec) {
@@ -258,10 +276,6 @@ namespace LoadInjectorCommandCentre {
             OnPropertyChanged("NoAutoAssign");
             cccontroller = new MainCommandCenterController(this, NumClients, SignalRURL, ServerURL, AutoAssignArchive);
             _records = (ExecutionRecords)this.Resources["records"];
-        }
-
-        private void completionReportBtn_Click(object sender, RoutedEventArgs e) {
-            cccontroller.MessageHub.Hub.Clients.All.CompletionReport();
         }
 
         public void AddClientTab(ClientTabControl clientTabData) {

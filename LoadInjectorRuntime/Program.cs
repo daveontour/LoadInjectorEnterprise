@@ -11,17 +11,17 @@ namespace LoadInjectorRuntime {
             NLog.Logger logger = NLog.LogManager.GetLogger("LoadInjectorClient");
 
             try {
-                var exitCode = HostFactory.Run(x =>
-                {
+                var exitCode = HostFactory.Run(x => {
                     string executeFile = null;
                     string server = null;
+                    string report = null;
                     x.AddCommandLineDefinition("execute", f => { executeFile = f; });
                     x.AddCommandLineDefinition("server", srv => { server = srv; });
+                    x.AddCommandLineDefinition("report", rep => { report = rep; });
                     x.ApplyCommandLine();
                     try {
-                        x.Service<LoadInjectorRuntimeClient>(s =>
-                        {
-                            s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile, server));
+                        x.Service<LoadInjectorRuntimeClient>(s => {
+                            s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile, server, report));
                             s.WhenStarted(core => core.OnStart());
                             s.WhenStopped(core => core.OnStop());
                         });
