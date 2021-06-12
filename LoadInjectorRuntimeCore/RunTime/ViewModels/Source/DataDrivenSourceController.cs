@@ -432,15 +432,18 @@ namespace LoadInjector.RunTime {
                     messagesSent++;
                     Report(null, messagesSent, 0, 0);
                     if (e.Flight != null) {
+                        Report($"Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.", messagesSent, 0, 0);
                         SetSourceLineOutput($"Trigger: {e.TriggerName}. Fired for {e.Flight.airlineCode}{e.Flight.fltNumber} at {DateTime.Now}. Next Event {record.ID} for {record.record.Item2.DisplayFlight} at {record.TIME}.");
                         return;
                     } else {
+                        Report($"Next Event {record.ID}  at {record.TIME}.", messagesSent, 0, 0);
                         SetSourceLineOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. Next Event {record.ID}  at {record.TIME}.");
                         return;
                     }
                 }
             }
-
+            messagesSent++;
+            Report($"Trigger: {e.TriggerName} at {DateTime.Now}. No further scheduled events", messagesSent, 0, 0);
             SetSourceLineOutput($"Trigger: {e.TriggerName} at {DateTime.Now}. No further scheduled events");
             executionController.CheckForCompletion();
         }

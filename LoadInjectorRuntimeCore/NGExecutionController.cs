@@ -295,8 +295,8 @@ namespace LoadInjector.RunTime {
         public void RunLocal() {
             if (!standAloneMode) {
                 if (state.Value != ClientState.Ready.Value) {
-                    logger.Warn("Execute requested, but not in ready state");
-                    clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state");
+                    logger.Warn("Execute requested, but not in ready state " + state.Value);
+                    clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state " + state.Value);
                     return;
                 }
             }
@@ -787,10 +787,10 @@ namespace LoadInjector.RunTime {
 
                     if (logLevel.ToLower() == "trace") {
                         rule.EnableLoggingForLevel(LogLevel.Trace);
-                        logger.Info($"Logging Level set to TRACE for rule {rule.RuleName }");
+                        //                     logger.Info($"Logging Level set to TRACE for rule {rule.RuleName }");
                     } else {
                         rule.DisableLoggingForLevel(LogLevel.Trace);
-                        logger.Info($"Logging Level set to INFO  for rule {rule.RuleName }");
+                        //                       logger.Info($"Logging Level set to INFO  for rule {rule.RuleName }");
                     }
                 }
 

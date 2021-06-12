@@ -224,11 +224,13 @@ namespace LoadInjector.RunTime.EngineComponents {
         }
 
         internal void SetSourceLineOutput(string executionNodeID, string uuid, string s) {
-            if (localOnly) {
-                sourceLogger.Info(s);
-            } else {
-                Task.Run(() => { this.hubProxy.Invoke("SetSourceLineOutput", executionNodeID, uuid, s); });
-            }
+            //if (localOnly) {
+            //    sourceLogger.Info(s);
+            //} else {
+            //    sourceLogger.Info(s);
+            //    Task.Run(() => { this.hubProxy.Invoke("SetSourceLineOutput", executionNodeID, uuid, s); });
+            //}
+            ConsoleMsg(executionNodeID, uuid, s);
         }
 
         internal void ConsoleMsg(string executionNodeID, string uuid, string s) {
@@ -350,13 +352,14 @@ namespace LoadInjector.RunTime.EngineComponents {
         }
 
         internal void SetDestinationOutput(string executionNodeID, string uuid, string s) {
-            if (localOnly) {
-                destLogger.Info(s);
-            } else {
-                if (sendDetails) {
-                    Task.Run(() => { this.hubProxy.Invoke("SetDestinationOutput", executionNodeID, uuid, s); });
-                }
-            }
+            ConsoleMsg(executionNodeID, uuid, s);
+            //if (localOnly) {
+            //    destLogger.Info(s);
+            //} else {
+            //    if (sendDetails) {
+            //        Task.Run(() => { this.hubProxy.Invoke("SetDestinationOutput", executionNodeID, uuid, s); });
+            //    }
+            //}
         }
 
         internal void SetDestinationRate(string executionNodeID, string uuid, double s) {
