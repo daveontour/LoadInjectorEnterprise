@@ -15,13 +15,15 @@ namespace LoadInjectorRuntime {
                     string executeFile = null;
                     string server = null;
                     string report = null;
+                    string port = null;
                     x.AddCommandLineDefinition("execute", f => { executeFile = f; });
                     x.AddCommandLineDefinition("server", srv => { server = srv; });
+                    x.AddCommandLineDefinition("port", prt => { port = prt; });
                     x.AddCommandLineDefinition("report", rep => { report = rep; });
                     x.ApplyCommandLine();
                     try {
                         x.Service<LoadInjectorRuntimeClient>(s => {
-                            s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile, server, report));
+                            s.ConstructUsing(core => new LoadInjectorRuntimeClient(executeFile, server, port, report));
                             s.WhenStarted(core => core.OnStart());
                             s.WhenStopped(core => core.OnStop());
                         });

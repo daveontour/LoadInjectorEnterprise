@@ -56,7 +56,7 @@ namespace LoadInjector {
         }
 
         private void CommandBarView_DocumentLoaded(object sender, DocumentLoadedEventArgs e) {
-            var xmlTreeViewModel = new TreeEditorViewModel(e.Document, e.Path, e.FileName);
+            var xmlTreeViewModel = new TreeEditorViewModel(e.Document, e.Path, e.FileName, e.ArchiveRoot);
             editorsVM.Add(xmlTreeViewModel);
         }
 

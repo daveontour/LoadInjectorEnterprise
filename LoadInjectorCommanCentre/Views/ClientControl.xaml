@@ -173,6 +173,7 @@
             <Button Grid.Row="2" Grid.Column="1" Style="{DynamicResource RoundCorner}" x:Name="stopBtn" Click="Stop_OnClick" HorizontalAlignment="Left" Content="Stop" />
             <Button Grid.Row="3" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="viewBtn"  HorizontalAlignment="Left" Click="Status_OnClick"  Content="View Status" />
             <Button Grid.Row="3" Grid.Column="1"  Style="{DynamicResource RoundCorner}" x:Name="disconnectBtn"  HorizontalAlignment="Left" Click="Disconnect_OnClick"  Content="Disconnect" />
+            <Button Grid.Row="4" Grid.Column="0"  Style="{DynamicResource RoundCorner}" x:Name="resetBtn"  HorizontalAlignment="Left" Click="Reset_OnClick"  Content="Reset" />
 
             <TextBlock  Style="{DynamicResource NodeText}" Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
         </Grid>

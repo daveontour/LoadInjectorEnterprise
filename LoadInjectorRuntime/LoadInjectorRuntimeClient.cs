@@ -24,11 +24,19 @@ namespace LoadInjectorRuntime {
             set => server = value;
         }
 
+        public string port = null;
+
+        public string Port {
+            get => port;
+            set => port = value;
+        }
+
         public string Report { get; set; }
 
-        public LoadInjectorRuntimeClient(string executeFile, string server, string report) {
+        public LoadInjectorRuntimeClient(string executeFile, string server, string port, string report) {
             ExecuteFile = executeFile;
             Server = server;
+            Port = port;
             Report = report;
         }
 
@@ -65,7 +73,7 @@ namespace LoadInjectorRuntime {
         }
 
         private void StartClientMode() {
-            controller = new NgExecutionController(ExecutionControllerType.Client, serverHub: Server);
+            controller = new NgExecutionController(ExecutionControllerType.Client, serverHub: $"http://{Server}:{Port}/");
         }
     }
 }

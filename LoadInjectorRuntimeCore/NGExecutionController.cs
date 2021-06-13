@@ -150,8 +150,8 @@ namespace LoadInjector.RunTime {
                 this.standAloneMode = true;
                 XmlDocument doc = new XmlDocument();
                 if (executeFile.ToLower().EndsWith(".lia")) {
-                    string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTController";
-                    doc = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(executeFile, archiveRoot, "lia.lia");
+                    //string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTController";
+                    doc = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(executeFile, ArchiveDirectory, "lia.lia");
                 } else {
                     doc.Load(executeFile);
                 }

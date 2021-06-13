@@ -12,6 +12,12 @@ namespace LoadInjectorBase.Common {
 
     public class Utils {
 
+        public static string GetTemporaryDirectory() {
+            string tempDirectory = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempDirectory);
+            return tempDirectory;
+        }
+
         public static XmlDocument ExtractArchiveToDirectory(string archiveFile, string archiveRoot, string archiveFileName, bool addUniqueID = true) {
             XmlDocument document = new XmlDocument();
             try {
@@ -54,6 +60,23 @@ namespace LoadInjectorBase.Common {
             }
 
             File.WriteAllText(archiveRoot + "/config.xml", document.OuterXml);
+
+            return document;
+        }
+
+        public static XmlDocument ExtractArchiveToDirectoryForEdit(string archiveFile, string archiveRoot, string archiveFileName, bool addUniqueID = true) {
+            XmlDocument document = new XmlDocument();
+            try {
+                Directory.Delete(archiveRoot, true);
+            } catch (Exception ex) {
+                // NO-OP
+            }
+
+            ZipFile.ExtractToDirectory(archiveFile, archiveRoot);
+            File.Copy(archiveFile, $"{archiveRoot}/{archiveFileName}");
+
+            string configXML = FormatXML(File.ReadAllText(archiveRoot + "/config.xml"));
+            document.LoadXml(configXML);
 
             return document;
         }

@@ -1,6 +1,7 @@
 ﻿using LoadInjector.Common;
 using LoadInjector.GridDefinitions;
 using LoadInjector.Views;
+using LoadInjectorBase.Common;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -30,6 +31,8 @@ namespace LoadInjector.ViewModels {
         public string Path { get; private set; }
 
         public string FileName { get; private set; }
+
+        private readonly string ArchiveRoot;
 
         public Action<XmlNode> HighlightNodeInUI { get; set; }
 
@@ -81,10 +84,11 @@ namespace LoadInjector.ViewModels {
 
         #endregion Commands
 
-        public TreeEditorViewModel(XmlDocument dataModel, string filePath, string fileName) {
+        public TreeEditorViewModel(XmlDocument dataModel, string filePath, string fileName, string archiveRoot = null) {
             DataModel = dataModel;
             Path = filePath;
             this.FileName = fileName;
+            this.ArchiveRoot = archiveRoot;
 
             ViewAttributesCommand = new RelayCommand<XmlNode>(TreeLeafSelected);
             AddAMSDirectCommand = new RelayCommand(p => { AddAMSDirect(); });
@@ -1187,9 +1191,14 @@ namespace LoadInjector.ViewModels {
         public void Save() {
             if (Path == null) {
                 SaveFileDialog dialog = new SaveFileDialog {
-                    Filter = "XML Files (*.xml)|*.xml"
+                    Filter = "Load Injector Config File (*.xml)|*.xml|Load Injector Archive File (*.lia)|*.lia"
                 };
                 if (dialog.ShowDialog() == true) {
+                    if (dialog.FileName.ToLower().EndsWith("lia")) {
+                        Export(dialog.FileName);
+                        return;
+                    }
+
                     using (TextWriter sw = new StreamWriter(dialog.FileName, false, Encoding.UTF8)) {
                         DataModel.Save(sw);
 
@@ -1205,6 +1214,10 @@ namespace LoadInjector.ViewModels {
                     return;
                 }
             }
+            if (Path.ToLower().EndsWith("lia")) {
+                Export(Path);
+                return;
+            }
 
             using (TextWriter sw = new StreamWriter(Path, false, Encoding.UTF8)) {
                 DataModel.Save(sw);
@@ -1217,17 +1230,38 @@ namespace LoadInjector.ViewModels {
             OnPropertyChanged("Path");
         }
 
-        public void Export() {
+        public void Export(string filename = null) {
             XmlDocument newDoc = DataModel.CloneNode(true) as XmlDocument;
-            SaveFileDialog dialog = new SaveFileDialog {
-                Filter = "Load Injector Archive Files (*.lia)|*.lia"
-            };
 
-            if (dialog.ShowDialog() == true) {
-                bool success = ExportToFile(newDoc, dialog.FileName);
+            if (filename == null) {
+                SaveFileDialog dialog = new SaveFileDialog {
+                    Filter = "Load Injector Archive Files (*.lia)|*.lia"
+                };
+                if (dialog.ShowDialog() == true) {
+                    bool success = ExportToFile(newDoc, dialog.FileName);
+                    if (!success) {
+                        MessageBox.Show("Error creating archive. Possibly due to missing data or template file", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                    Path = dialog.FileName;
+                    string[] f = dialog.FileName.Split('\\');
+                    FileName = f[f.Length - 1];
+
+                    OnPropertyChanged("FileName");
+                    OnPropertyChanged("Path");
+                }
+            } else {
+                bool success = ExportToFile(newDoc, filename);
                 if (!success) {
                     MessageBox.Show("Error creating archive. Possibly due to missing data or template file", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+
+                Path = filename;
+                string[] f = filename.Split('\\');
+                FileName = f[f.Length - 1];
+
+                OnPropertyChanged("FileName");
+                OnPropertyChanged("Path");
             }
         }
 
@@ -1235,10 +1269,15 @@ namespace LoadInjector.ViewModels {
             Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
             Dictionary<string, string> fullfileName = new Dictionary<string, string>();
 
+            Debug.WriteLine($"CWD = {Directory.GetCurrentDirectory()}");
+
             foreach (XmlNode node in doc.SelectNodes(".//*")) {
                 if (node.Attributes["dataFile"]?.Value != null) {
                     try {
-                        string fullFile = node.Attributes["dataFile"]?.Value;
+                        string fullFile = this.ArchiveRoot + "\\" + node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        if (this.ArchiveRoot == null) {
+                            fullFile = node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        }
                         if (fullfileName.ContainsKey(fullFile)) {
                             node.Attributes["dataFile"].Value = $"./DATA/{fullfileName[fullFile]}";
                         } else {
@@ -1250,15 +1289,19 @@ namespace LoadInjector.ViewModels {
                             fullfileName.Add(fullFile, filename);
                         }
                     } catch (FileNotFoundException) {
-                        MessageBox.Show("Data file not found", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Data file not found " + fullfileName, "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return false;
-                    } catch (Exception) {
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.Message);
                         return false;
                     }
                 }
                 if (node.Attributes["templateFile"]?.Value != null) {
                     try {
-                        string fullFile = node.Attributes["templateFile"]?.Value;
+                        string fullFile = this.ArchiveRoot + "\\" + node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        if (this.ArchiveRoot == null) {
+                            fullFile = node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        }
                         if (fullfileName.ContainsKey(fullFile)) {
                             node.Attributes["templateFile"].Value = $"./TEMPLATES/{fullfileName[fullFile]}";
                         } else {
@@ -1272,23 +1315,14 @@ namespace LoadInjector.ViewModels {
                     } catch (FileNotFoundException) {
                         MessageBox.Show("Template file not found", "Archive Export Error", MessageBoxButton.OK, MessageBoxImage.Error);
                         return false;
-                    } catch (Exception) {
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.Message);
                         return false;
                     }
                 }
             }
 
-            //Pretty Print the XML config
-
-            //StringBuilder sb = new StringBuilder();
-            //TextWriter tr = new StringWriter(sb);
-            //XmlTextWriter wr = new XmlTextWriter(tr, System.Text.Encoding.UTF8) {
-            //    Formatting = Formatting.Indented,
-            //};
-            //doc.Save(wr);
-            //wr.Close();
-
-            files.Add("config.xml", Encoding.ASCII.GetBytes(doc.OuterXml));
+            files.Add("config.xml", Encoding.ASCII.GetBytes(Utils.FormatXML(doc.OuterXml)));
 
             byte[] archiveBytes = ZipFiles(files);
 
@@ -1313,9 +1347,13 @@ namespace LoadInjector.ViewModels {
         }
 
         private void SaveAs(string path) {
-            XmlDocument newDoc = DataModel.CloneNode(true) as XmlDocument;
-            using (TextWriter sw = new StreamWriter(path, false, Encoding.UTF8)) {
-                newDoc.Save(sw);
+            if (path.ToLower().EndsWith("lia")) {
+                Export(path);
+            } else {
+                XmlDocument newDoc = DataModel.CloneNode(true) as XmlDocument;
+                using (TextWriter sw = new StreamWriter(path, false, Encoding.UTF8)) {
+                    newDoc.Save(sw);
+                }
             }
 
             this.Path = path;
@@ -1340,20 +1378,6 @@ namespace LoadInjector.ViewModels {
         private void AboutLoadInjector() {
             LIAbout dlg = new LIAbout();
             dlg.ShowDialog();
-        }
-
-        public static int GetAvailablePort(int startingPort) {
-            if (startingPort > ushort.MaxValue) throw new ArgumentException($"Can't be greater than {ushort.MaxValue}", nameof(startingPort));
-            var ipGlobalProperties = IPGlobalProperties.GetIPGlobalProperties();
-
-            var connectionsEndpoints = ipGlobalProperties.GetActiveTcpConnections().Select(c => c.LocalEndPoint);
-            var tcpListenersEndpoints = ipGlobalProperties.GetActiveTcpListeners();
-            var udpListenersEndpoints = ipGlobalProperties.GetActiveUdpListeners();
-            var portsInUse = connectionsEndpoints.Concat(tcpListenersEndpoints)
-                .Concat(udpListenersEndpoints)
-                .Select(e => e.Port);
-
-            return Enumerable.Range(startingPort, ushort.MaxValue - startingPort + 1).Except(portsInUse).FirstOrDefault();
         }
     }
 }

@@ -139,7 +139,7 @@ namespace LoadInjectorCommandCentre {
                     string lir = $"{ConfigurationManager.AppSettings["RunTimeDirectory"]}\\LoadInjectorRuntime.exe";
                     process.StartInfo.WorkingDirectory = ConfigurationManager.AppSettings["RunTimeDirectory"];
                     process.StartInfo.FileName = lir;
-                    process.StartInfo.Arguments = $"-server:http://{View.SignalRIP}:{View.SignalRPort}/";
+                    process.StartInfo.Arguments = $"-server:{View.SignalRIP}  -port:{View.SignalRPort}";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 
                     process.Start();
@@ -336,6 +336,10 @@ namespace LoadInjectorCommandCentre {
             clientTabControl.OnPropertyChanged("Title");
         }
 
+        internal void retrieveReport(string selectedConnectionID) {
+            MessageHub.Hub.Clients.Client(selectedConnectionID).CompletionReport();
+        }
+
         internal void saveReport(string selectedConnectionID) {
             ClientControl control = clientControls[selectedConnectionID];
             control.SaveExcelCompletionReport();
@@ -493,6 +497,20 @@ namespace LoadInjectorCommandCentre {
             }
 
             MessageHub.Hub.Clients.All.Reset();
+        }
+
+        internal void ResetClient(string id) {
+            //Tell the client to reset
+            MessageBoxResult res = MessageBox.Show($"Do you really want to reset the selected node?", "Reset Node", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (res != MessageBoxResult.Yes) {
+                return;
+            }
+            Application.Current.Dispatcher.Invoke((Action)delegate {
+                ClearGridData(id);
+                View.VisibleDataGrid?.Items.Refresh();
+            });
+
+            MessageHub.Hub.Clients.Client(id).Reset();
         }
 
         internal void DisconnectClient(string id) {

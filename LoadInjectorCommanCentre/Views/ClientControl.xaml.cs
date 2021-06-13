@@ -177,6 +177,10 @@ namespace LoadInjectorCommandCentre.Views {
             this.cCController.DisconnectClient(ConnectionID);
         }
 
+        private void Reset_OnClick(object sender, RoutedEventArgs e) {
+            this.cCController.ResetClient(ConnectionID);
+        }
+
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
             string archiveRoot = cCController.ArchiveRoot;
             Directory.CreateDirectory(archiveRoot);

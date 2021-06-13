@@ -1,4 +1,5 @@
 ﻿using LoadInjector.Common;
+using LoadInjectorBase.Common;
 using Microsoft.Win32;
 using System;
 using System.Diagnostics;
@@ -16,8 +17,10 @@ namespace LoadInjector.Views {
         public readonly ICommand Save;
         public static MenuItem saveMenuItem;
         public static MenuItem saveAsMenuItem;
-        public static MenuItem exportMenuItem;
+
+        // public static MenuItem exportMenuItem;
         public static MenuItem aboutMenuItem;
+
         public static MenuItem executeMenuItem;
 
         public event EventHandler<DocumentLoadedEventArgs> DocumentLoaded;
@@ -66,11 +69,11 @@ namespace LoadInjector.Views {
             aboutMenuItem.Click += new RoutedEventHandler(aboutMenuItem_Click);
             aboutMenuItem.IsEnabled = true;
 
-            exportMenuItem = new MenuItem() { Header = "Export" };
-            exportMenuItem.Click += new RoutedEventHandler(exportMenuItem_Click);
-            exportMenuItem.IsEnabled = false;
-            Path export = GetResourceCopy<Path>("export");
-            exportMenuItem.Icon = export;
+            //exportMenuItem = new MenuItem() { Header = "Export Archive" };
+            //exportMenuItem.Click += new RoutedEventHandler(exportMenuItem_Click);
+            //exportMenuItem.IsEnabled = false;
+            //Path export = GetResourceCopy<Path>("export");
+            //exportMenuItem.Icon = export;
 
             fileMenuItem.Items.Add(newMenuItem);
             fileMenuItem.Items.Add(openMenuItem);
@@ -78,8 +81,8 @@ namespace LoadInjector.Views {
             fileMenuItem.Items.Add(saveMenuItem);
             fileMenuItem.Items.Add(saveAsMenuItem);
             fileMenuItem.Items.Add(new Separator());
-            fileMenuItem.Items.Add(exportMenuItem);
-            fileMenuItem.Items.Add(new Separator());
+            //fileMenuItem.Items.Add(exportMenuItem);
+            //fileMenuItem.Items.Add(new Separator());
             fileMenuItem.Items.Add(aboutMenuItem);
 
             MenuBar.Items.Add(fileMenuItem);
@@ -100,20 +103,34 @@ namespace LoadInjector.Views {
 
         private void openMenuItem_Click(object sender, RoutedEventArgs e) {
             OpenFileDialog open = new OpenFileDialog {
-                Filter = "XML Files (*.xml)|*.xml",
+                Filter = "Config and Archives (*.xml, *.lia)|*.xml;*.lia",
                 InitialDirectory = Directory.GetCurrentDirectory() + "\\Samples"
             };
 
             if (open.ShowDialog() == true) {
                 XmlDocument document = new XmlDocument();
-                try {
-                    document.Load(open.FileName);
-                    DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = open.FileName, Document = document, FileName = open.SafeFileName };
-                    saveAsArgs = null;
-                    loadedArgs = args;
-                    OnDocumentLoaded(this, args);
-                } catch (Exception ex) {
-                    Debug.WriteLine(ex.Message);
+                if (open.FileName.EndsWith("xml") || open.FileName.EndsWith("XML")) {
+                    try {
+                        document.Load(open.FileName);
+                        DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = open.FileName, Document = document, FileName = open.SafeFileName };
+                        saveAsArgs = null;
+                        loadedArgs = args;
+                        OnDocumentLoaded(this, args);
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.Message);
+                    }
+                }
+                if (open.FileName.EndsWith("lia") || open.FileName.EndsWith("LIA")) {
+                    try {
+                        string cwd = Utils.GetTemporaryDirectory();
+                        document = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectoryForEdit(open.FileName, cwd, "lia.lia");
+                        DocumentLoadedEventArgs args = new DocumentLoadedEventArgs() { Path = open.FileName, Document = document, FileName = open.SafeFileName, ArchiveRoot = cwd };
+                        saveAsArgs = null;
+                        loadedArgs = args;
+                        OnDocumentLoaded(this, args);
+                    } catch (Exception ex) {
+                        Debug.WriteLine(ex.Message);
+                    }
                 }
             }
         }
@@ -134,7 +151,7 @@ namespace LoadInjector.Views {
 
         private void saveAsMenuItem_Click(object sender, RoutedEventArgs e) {
             SaveFileDialog dialog = new SaveFileDialog {
-                Filter = "XML Files (*.xml)|*.xml"
+                Filter = "Load Injector Archive File (*.lia)|*.lia|Load Injector Config File (*.xml)|*.xml"
             };
             if (dialog.ShowDialog() == true) {
                 SaveAsEventArgs args = new SaveAsEventArgs { FileName = dialog.SafeFileName, Path = dialog.FileName };

@@ -138,13 +138,16 @@
                                        FontSize="14"
  />
                         </TabItem.Header>
-                        <Grid>
+                        <Grid Background="AliceBlue">
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="*"></RowDefinition>
                                 <RowDefinition Height="30"></RowDefinition>
                             </Grid.RowDefinitions>
                             <TextBox x:Name="completionReport"  Text="{Binding Path=CompletionReportString, Mode=OneWay}" Grid.Row="0" TextWrapping="NoWrap"  IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Visible" ScrollViewer.HorizontalScrollBarVisibility="Visible" Background="WhiteSmoke" Foreground="Black" FontFamily="Consolas" FontSize="12" Grid.ColumnSpan="5" Initialized="OutputConsole_Initialized" />
-                            <Button x:Name="saveReportBtn" Click="saveReportBtn_Click" Grid.Row="1" HorizontalAlignment="Right" Margin = "0,3,5,0"   Content="Save Report" Grid.Column="4"></Button>
+                            <StackPanel  Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button x:Name="retrieveReportBtn" Click="retrieveReportBtn_Click"  HorizontalAlignment="Right" Margin = "0,3,5,0" Width="100"  Content="Retrieve Report"></Button>
+                                <Button x:Name="saveReportBtn" Click="saveReportBtn_Click"  HorizontalAlignment="Right" Margin = "0,3,5,0"   Width="100" Content="Save Report" ></Button>
+                            </StackPanel>
                         </Grid>
                     </TabItem>
                 </TabControl>
@@ -279,7 +282,7 @@
                                 <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick" Background="Pink" Content="Disconnect" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0">Client Control - All Connected Client</Label>
+                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0">Client Control - All Connected Nodes</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -294,7 +297,7 @@
                                 <Button FontSize="10" x:Name="clearBtn" Click="clearBtn_Click"  Content="Clear Grid" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="100" Height="30"  Margin="2,0,0,0"  Visibility="Collapsed" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Execution Control - All Connected Client</Label>
+                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Execution Control - All Connected Nodes</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>

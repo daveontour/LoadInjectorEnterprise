@@ -407,5 +407,9 @@ namespace LoadInjectorCommandCentre {
         private void saveReportBtn_Click(object sender, RoutedEventArgs e) {
             cccontroller.saveReport(SelectedConnectionID);
         }
+
+        private void retrieveReportBtn_Click(object sender, RoutedEventArgs e) {
+            cccontroller.retrieveReport(SelectedConnectionID);
+        }
     }
 }
