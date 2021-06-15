@@ -34,6 +34,7 @@ namespace LoadInjectorCommandCentre {
 
         private int gridRefreshRate = 1;
         private Timer refreshTimer;
+        private string executablePath;
 
         public MainCommandCenterController(MainWindow mainWindow, int numClients, string signalRURL, string serverURL, string autoAssignArchive) {
             NumClients = numClients;
@@ -131,14 +132,20 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void StartClients(int num) {
+            string executable = GetRunTimeExecutable();
+
+            if (executable == null) {
+                MessageBox.Show("Load Injector runtime executable not provided", "Runtime Executable Client", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
             try {
                 for (int i = 0; i < num; i++) {
                     Process process = new Process();
 
                     // Configure the process using the StartInfo properties.
-                    string lir = $"{ConfigurationManager.AppSettings["RunTimeDirectory"]}\\LoadInjectorRuntime.exe";
-                    process.StartInfo.WorkingDirectory = ConfigurationManager.AppSettings["RunTimeDirectory"];
-                    process.StartInfo.FileName = lir;
+                    process.StartInfo.WorkingDirectory = executable.Replace("\\LoadInjectorRuntime.exe", "");
+                    process.StartInfo.FileName = executable;
                     process.StartInfo.Arguments = $"-server:{View.SignalRIP}  -port:{View.SignalRPort}";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 
@@ -147,6 +154,52 @@ namespace LoadInjectorCommandCentre {
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
+        }
+
+        private string GetRunTimeExecutable() {
+            string configFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml";
+            XmlDocument doc = new XmlDocument();
+            doc.Load(configFileName);
+
+            executablePath = null;
+            try {
+                executablePath = doc.SelectSingleNode(".//clientPath")?.InnerText;
+            } catch (Exception) {
+                //NO-OP
+            }
+
+            if (string.IsNullOrEmpty(executablePath)) {
+                MessageBox.Show("Load Injector runtime executable not found. Please select the executeable", "Runtime Executable Client", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+                OpenFileDialog open = new OpenFileDialog {
+                    Filter = "Load Injector Runtime Executable|LoadInjectorRuntime.exe",
+                    //InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                if (open.ShowDialog() == true) {
+                    executablePath = open.FileName;
+
+                    XmlNode path = doc.SelectSingleNode(".//clientPath");
+                    if (path == null) {
+                        XmlNode root = doc.SelectSingleNode(".//config");
+
+                        XmlElement elem = doc.CreateElement("clientPath");
+                        XmlText text = doc.CreateTextNode(executablePath);
+                        root.AppendChild(elem);
+                        root.LastChild.AppendChild(text);
+                    } else {
+                        path.InnerText = executablePath;
+                    }
+
+                    View.ExecutablePath = executablePath;
+                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre");
+                    File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml", doc.OuterXml);
+                } else {
+                    executablePath = null;
+                }
+            }
+
+            return executablePath;
         }
 
         public void ClientConnectionInitiated(HubCallerContext context) {

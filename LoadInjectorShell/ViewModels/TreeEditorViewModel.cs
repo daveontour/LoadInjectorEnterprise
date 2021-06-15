@@ -1322,7 +1322,9 @@ namespace LoadInjector.ViewModels {
                 }
             }
 
-            files.Add("config.xml", Encoding.ASCII.GetBytes(Utils.FormatXML(doc.OuterXml)));
+            string xml = Utils.FormatXML(doc.OuterXml).Replace("utf-16", "utf-8").Replace("UTF-16", "UTF-8");
+
+            files.Add("config.xml", Encoding.ASCII.GetBytes(xml));
 
             byte[] archiveBytes = ZipFiles(files);
 
@@ -1372,7 +1374,75 @@ namespace LoadInjector.ViewModels {
         }
 
         private void ExecuteLoadInjectorRuntime() {
-            //Start Executeable here
+            if (Path.ToLower().EndsWith("lia")) {
+                Export(Path);
+            } else {
+                MessageBox.Show("Please save as an archive file first", "Execute", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+            string lir = GetCommandCentreExecutable();
+            if (string.IsNullOrEmpty(lir)) {
+                MessageBox.Show("Load Injector Command Center could not be found. Please select the directory where it is installed", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            try {
+                Process process = new Process();
+                // Configure the process using the StartInfo properties.
+
+                process.StartInfo.WorkingDirectory = lir.Replace("\\LoadInjectorCommandCentre.exe", "");
+                process.StartInfo.Arguments = $"-autoAssign:{Path}";
+                process.StartInfo.FileName = lir;
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+
+                Console.WriteLine(process.StartInfo.Arguments);
+
+                process.Start();
+            } catch (Exception) {
+                MessageBox.Show("Load Injector Command Center could not be found. Please select the directory where it is installed", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+        }
+
+        private string GetCommandCentreExecutable() {
+            string configFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorConfig\\Config.xml";
+
+            if (File.Exists(configFileName)) {
+                XmlDocument doc = new XmlDocument();
+                doc.Load(configFileName);
+                string executablePath = doc.SelectSingleNode(".//clientPath")?.InnerText;
+                if (!string.IsNullOrEmpty((executablePath))) {
+                    return executablePath;
+                }
+            } else {
+                // File Does not exist
+                MessageBox.Show("Load Injector Command Centre not found. Please select the executeable", "Command Centre Executable", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+
+                OpenFileDialog open = new OpenFileDialog {
+                    Filter = "Load Injector Command Center|LoadInjectorCommandCentre.exe",
+                };
+
+                if (open.ShowDialog() == true) {
+                    string executablePath = open.FileName;
+
+                    XmlDocument doc = new XmlDocument();
+
+                    XmlElement root = doc.CreateElement("config");
+                    doc.AppendChild(root);
+
+                    XmlElement elem = doc.CreateElement("clientPath");
+                    XmlText text = doc.CreateTextNode(executablePath);
+                    root.AppendChild(elem);
+                    root.LastChild.AppendChild(text);
+                    Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorConfig");
+                    File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorConfig\\Config.xml", doc.OuterXml);
+
+                    return executablePath;
+                } else {
+                    return null;
+                }
+            }
+
+            return null;
         }
 
         private void AboutLoadInjector() {

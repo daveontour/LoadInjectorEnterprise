@@ -64,7 +64,7 @@ namespace LoadInjectorCommandCentre {
 
             try {
                 XmlDocument doc = new XmlDocument();
-                doc.Load("Config.xml");
+                doc.Load(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml");
 
                 NumClients = Int32.Parse(doc.SelectSingleNode(".//initialClient")?.InnerText);
                 SignalRIP = doc.SelectSingleNode(".//signalRIP")?.InnerText;
@@ -72,17 +72,23 @@ namespace LoadInjectorCommandCentre {
                 ServerPort = doc.SelectSingleNode(".//serverPort")?.InnerText;
                 AutoExecute = bool.Parse(doc.SelectSingleNode(".//autoStart")?.InnerText);
                 AutoAssignArchive = doc.SelectSingleNode(".//autoAssignFile")?.InnerText;
-
-                OnPropertyChanged("NoAutoAssign");
+                ExecutablePath = doc.SelectSingleNode(".//clientPath")?.InnerText;
             } catch (Exception ex) {
-                // NO-OP
+                NumClients = 1;
+                SignalRIP = "localhost";
+                SignalRPort = "6220";
+                ServerPort = "6230";
+                AutoExecute = false;
+                AutoAssignArchive = null;
+                ExecutablePath = null;
             }
+            OnPropertyChanged("NoAutoAssign");
 
             try {
                 if (args != null) {
                     foreach (string arg in args) {
                         if (arg.StartsWith("-autoAssign:")) {
-                            AutoAssignArchive = arg.Split(':')[1];
+                            AutoAssignArchive = arg.Replace("-autoAssign:", "");
                             AutoExecute = false;
                         }
                     }
@@ -128,6 +134,9 @@ namespace LoadInjectorCommandCentre {
         public string SignalRURL { get { return signalRURL; } set { signalRURL = value; } }
         public string ServerURL { get { return webServerURL; } set { webServerURL = value; } }
         public string AutoAssignArchive { get { return autoArchiveFile; } set { autoArchiveFile = value; OnPropertyChanged("AutoAssignArchive"); } }
+
+        public string ExecutablePath { get; set; }
+
         public bool AutoExecute { get { return autoExecute; } set { autoExecute = value; OnPropertyChanged("AutoExecute"); } }
 
         public int NumConnectedClients {
@@ -268,7 +277,13 @@ namespace LoadInjectorCommandCentre {
                 root.AppendChild(elem5);
                 root.LastChild.AppendChild(text5);
 
-                File.WriteAllText("Config.xml", doc.OuterXml);
+                XmlElement elem6 = doc.CreateElement("clientPath");
+                XmlText text6 = doc.CreateTextNode(ExecutablePath);
+                root.AppendChild(elem6);
+                root.LastChild.AppendChild(text6);
+
+                Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre");
+                File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml", doc.OuterXml);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }
@@ -372,13 +387,13 @@ namespace LoadInjectorCommandCentre {
                 root.AppendChild(elem);
                 root.LastChild.AppendChild(text);
 
-                XmlElement elem1 = doc.CreateElement("hubURL");
-                XmlText text1 = doc.CreateTextNode(SignalRURL);
+                XmlElement elem1 = doc.CreateElement("signalRIP");
+                XmlText text1 = doc.CreateTextNode(SignalRIP);
                 root.AppendChild(elem1);
                 root.LastChild.AppendChild(text1);
 
-                XmlElement elem2 = doc.CreateElement("webserverURL");
-                XmlText text2 = doc.CreateTextNode(ServerURL);
+                XmlElement elem2 = doc.CreateElement("serverPort");
+                XmlText text2 = doc.CreateTextNode(ServerPort);
                 root.AppendChild(elem2);
                 root.LastChild.AppendChild(text2);
 
@@ -392,7 +407,17 @@ namespace LoadInjectorCommandCentre {
                 root.AppendChild(elem4);
                 root.LastChild.AppendChild(text4);
 
-                File.WriteAllText("Config.xml", doc.OuterXml);
+                XmlElement elem5 = doc.CreateElement("signalRPort");
+                XmlText text5 = doc.CreateTextNode(SignalRPort);
+                root.AppendChild(elem5);
+                root.LastChild.AppendChild(text5);
+
+                XmlElement elem6 = doc.CreateElement("clientPath");
+                XmlText text6 = doc.CreateTextNode(ExecutablePath);
+                root.AppendChild(elem6);
+                root.LastChild.AppendChild(text6);
+
+                File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml", doc.OuterXml);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
             }

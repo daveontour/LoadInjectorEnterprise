@@ -90,7 +90,7 @@ namespace LoadInjector.Views {
             executeMenuItem = new MenuItem { Header = "_Execute..." };
             executeMenuItem.IsEnabled = false;
             executeMenuItem.Icon = GetResourceCopy<Path>("go");
-            executeMenuItem.Click += new RoutedEventHandler(experimentalMenuItem_Click);
+            executeMenuItem.Click += new RoutedEventHandler(executeMenuItem_Click);
 
             MenuBar.Items.Add(executeMenuItem);
         }
@@ -173,23 +173,8 @@ namespace LoadInjector.Views {
             AboutRequested(this, e);
         }
 
-        private void experimentalMenuItem_Click(object sender, RoutedEventArgs e) {
-            // LIExecuteRequested?.Invoke(this, e);
-            Process process = new Process();
-            // Configure the process using the StartInfo properties.
-
-            string lir = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().CodeBase) + "/LoadInjectorRuntimeExecutive.exe";
-            process.StartInfo.FileName = lir;
-            string configfile = null;
-            if (loadedArgs != null) {
-                configfile = $"{loadedArgs.Path}/{loadedArgs.FileName}";
-            } else if (saveAsArgs != null) {
-                configfile = $"{saveAsArgs.Path}/{saveAsArgs.FileName}";
-            }
-            // process.StartInfo.Arguments = configfile;
-            process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-
-            process.Start();
+        private void executeMenuItem_Click(object sender, RoutedEventArgs e) {
+            LIExecuteRequested(this, e);
         }
 
         #endregion Menu Click Handlers
