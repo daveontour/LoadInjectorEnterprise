@@ -231,7 +231,7 @@ namespace LoadInjectorCommandCentre {
             View.nodeTabHolder.SelectedItem = this.clientTabControls[connectionID];
         }
 
-        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, string archName, HubCallerContext context) {
+        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, string archName, int duration, HubCallerContext context) {
             if (!clientControls.ContainsKey(context.ConnectionId)) {
                 try {
                     Application.Current.Dispatcher.Invoke((Action)delegate {
@@ -274,6 +274,7 @@ namespace LoadInjectorCommandCentre {
             client.OSVersion = osversion;
             client.StatusText = status;
             client.XML = xml;
+            client.duration = duration;
 
             if (xml != null) {
                 XmlDocument doc = new XmlDocument();
@@ -608,8 +609,8 @@ namespace LoadInjectorCommandCentre {
             MessageHub.Hub.Clients.All.Refresh();
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, int, double>> latestDestinationReport, string archName, HubCallerContext context) {
-            InterrogateResponse(processID, ipAddress, osversion, xml, status, archName, context);
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, int, double>> latestDestinationReport, string archName, int duration, HubCallerContext context) {
+            InterrogateResponse(processID, ipAddress, osversion, xml, status, archName, duration, context);
             foreach (Tuple<string, string, string, int, double, double> rec in latestSourceReport.Values) {
                 UpdateSourceLine(rec.Item1, rec.Item2, rec.Item3, rec.Item4, rec.Item5, rec.Item6, context, true);
             }
@@ -722,6 +723,14 @@ namespace LoadInjectorCommandCentre {
             if (message == ClientState.Ready.Value && View.AutoExecute) {
                 SetRefreshRate(gridRefreshRate);
                 MessageHub.Hub.Clients.Client(context.ConnectionId).Execute();
+            }
+
+            if (message == ClientState.Executing.Value) {
+                clientControls[context.ConnectionId].StartUpdateTimer();
+            }
+
+            if (message == ClientState.ExecutionComplete.Value || message == ClientState.Stopped.Value) {
+                clientControls[context.ConnectionId].Stop();
             }
         }
 

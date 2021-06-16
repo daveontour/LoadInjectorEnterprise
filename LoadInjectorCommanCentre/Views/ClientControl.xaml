@@ -146,11 +146,13 @@
         </Style>
     </UserControl.Resources>
 
-    <Grid Height="105" Background="Brown" Margin="5,5,5,5">
+    <Grid Height="145" Background="Brown" Margin="5,5,5,5">
 
         <Grid  Grid.Row="0"   Style="{DynamicResource ExecutionNode}">
             <Grid.RowDefinitions>
                 <RowDefinition Height="25"></RowDefinition>
+                <RowDefinition Height="20"></RowDefinition>
+                <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
                 <RowDefinition Height="20"></RowDefinition>
@@ -175,7 +177,9 @@
             <Button Grid.Row="3" Grid.Column="1"  Style="{DynamicResource RoundCorner}" x:Name="disconnectBtn"  HorizontalAlignment="Left" Click="Disconnect_OnClick"  Content="Disconnect" />
             <Button Grid.Row="4" Grid.Column="0"  Style="{DynamicResource RoundCorner}" x:Name="resetBtn"  HorizontalAlignment="Left" Click="Reset_OnClick"  Content="Reset" />
 
-            <TextBlock  Style="{DynamicResource NodeText}" Grid.Row="6" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
+            <TextBlock  Style="{DynamicResource NodeText}" Grid.Row="5" Grid.ColumnSpan="3" Text="{Binding Path=StatusText}" HorizontalAlignment="Center" FontWeight="Bold" />
+
+            <ProgressBar Grid.Column="0" Grid.Row="6" Grid.ColumnSpan="3" Margin="5,0,5,0" HorizontalAlignment="Stretch" Height="10"  VerticalAlignment="Center"  Minimum="0" Maximum="100" Value="{Binding Path=PercentComplete}" Name="executionStatus" RenderTransformOrigin="0.5,0.5" />
         </Grid>
     </Grid>
 </UserControl>

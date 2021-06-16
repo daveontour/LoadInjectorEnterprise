@@ -8,7 +8,9 @@ using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
+using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -29,6 +31,18 @@ namespace LoadInjectorCommandCentre.Views {
             set {
                 executionID = value;
                 OnPropertyChanged("ExecutionNodeID");
+            }
+        }
+
+        private int percentComplete;
+
+        public int PercentComplete {
+            get {
+                return percentComplete;
+            }
+            set {
+                percentComplete = value;
+                OnPropertyChanged("PercentComplete");
             }
         }
 
@@ -138,6 +152,9 @@ namespace LoadInjectorCommandCentre.Views {
         public event PropertyChangedEventHandler PropertyChanged;
 
         private MainCommandCenterController cCController;
+        public int duration;
+        private Timer updateTimer;
+        private Stopwatch watch;
 
         public void OnPropertyChanged(string propName) {
             try {
@@ -158,15 +175,50 @@ namespace LoadInjectorCommandCentre.Views {
         private void Prep_OnClick(object sender, RoutedEventArgs e) {
             cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
             MessageHub.Hub.Clients.Client(ConnectionID).ClearAndPrepare();
+            PercentComplete = 0;
         }
 
         private void Exec_OnClick(object sender, RoutedEventArgs e) {
+            PercentComplete = 0;
             cCController.View.nodeTabHolder.SelectedItem = cCController.clientTabControls[ConnectionID];
             this.cCController.ExecuteClient(ConnectionID);
         }
 
+        public void StartUpdateTimer(int duration = -1) {
+            Console.WriteLine("StartUpdate Timer");
+            if (duration != -1) {
+                this.duration = duration;
+            }
+
+            updateTimer = new Timer {
+                Interval = 1000,
+                AutoReset = true,
+                Enabled = true
+            };
+            updateTimer.Elapsed += UpdatePercentComplete;
+            this.watch = new Stopwatch();
+            watch.Start();
+        }
+
+        private void UpdatePercentComplete(object sender, ElapsedEventArgs e) {
+            long milliSecElapsed = watch.ElapsedMilliseconds;
+            long milliDuration = duration * 1000;
+            double portion = 100 * milliSecElapsed / milliDuration;
+
+            PercentComplete = Convert.ToInt32(portion);
+
+            Console.WriteLine($"Percent Complete  {milliSecElapsed}  {milliDuration}  {portion}");
+        }
+
+        public void Stop() {
+            PercentComplete = 100;
+            watch.Stop();
+            updateTimer.Stop();
+        }
+
         private void Stop_OnClick(object sender, RoutedEventArgs e) {
             MessageHub.Hub.Clients.Client(ConnectionID).Stop();
+            PercentComplete = 100;
         }
 
         private void Status_OnClick(object sender, RoutedEventArgs e) {
@@ -179,9 +231,11 @@ namespace LoadInjectorCommandCentre.Views {
 
         private void Reset_OnClick(object sender, RoutedEventArgs e) {
             this.cCController.ResetClient(ConnectionID);
+            PercentComplete = 100;
         }
 
         private void Assign_OnClick(object sender, RoutedEventArgs e) {
+            PercentComplete = 100;
             string archiveRoot = cCController.ArchiveRoot;
             Directory.CreateDirectory(archiveRoot);
 

@@ -95,12 +95,12 @@ namespace LoadInjector.Runtime.EngineComponents {
             CentralMessagingHub.iccController.SetConsoleMessage(message, Context);
         }
 
-        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, string archName) {
-            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, status, archName, Context);
+        public void InterrogateResponse(string processID, string ipAddress, string osversion, string xml, string status, string archName, int duration) {
+            CentralMessagingHub.iccController.InterrogateResponse(processID, ipAddress, osversion, xml, status, archName, duration, Context);
         }
 
-        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, int, double>> latestDestinationReport, string archName) {
-            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, archName, Context);
+        public void RefreshResponse(string processID, string ipAddress, string osversion, string xml, string status, Dictionary<string, Tuple<string, string, string, int, double, double>> latestSourceReport, Dictionary<string, Tuple<string, string, int, int, double>> latestDestinationReport, string archName, int duration) {
+            CentralMessagingHub.iccController.RefreshResponse(processID, ipAddress, osversion, xml, status, latestSourceReport, latestDestinationReport, archName, duration, Context);
         }
 
         public void CompletionReportResponse(string executionNodeID, CompletionReport report) {

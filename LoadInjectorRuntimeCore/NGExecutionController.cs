@@ -62,7 +62,7 @@ namespace LoadInjector.RunTime {
         private Timer timer;
         private Timer timerStart;
 
-        private int duration = -1;
+        public int duration = -1;
         private string startAt;
         private bool startAtEnabled;
 
@@ -213,6 +213,8 @@ namespace LoadInjector.RunTime {
             List<string> triggersInUse = TriggersInUse(dataModel);
 
             XDocument doc = XDocument.Parse(dataModel.OuterXml);
+
+            duration = int.Parse(doc.Descendants("duration").FirstOrDefault().Value);
 
             this.executionNodeUuid = dataModel.SelectSingleNode("//settings").Attributes["executionNodeUuid"]?.Value;
 

@@ -552,7 +552,7 @@ namespace LoadInjector.GridDefinitions {
             set => SetAttribute("srcDir", value);
         }
 
-        [CategoryAttribute("Optional"), DisplayName("File Filter"), ReadOnly(false), Browsable(true), PropertyOrder(5), DescriptionAttribute("The file filter to apply to the files to be used")]
+        [CategoryAttribute("Optional"), DisplayName("File Filter"), ReadOnly(false), Browsable(true), PropertyOrder(5), DescriptionAttribute("The file name filter to apply to the files to be used")]
         public string FileFilter {
             get => GetAttribute("fileFilter");
             set => SetAttribute("fileFilter", value);

@@ -176,7 +176,8 @@ namespace LoadInjector.RunTime.EngineComponents {
                         ngExecutionController.state.Value,
                         this.latsetSourceReport,
                         this.latsetDestinationReport,
-                        ngExecutionController.archName);
+                        ngExecutionController.archName,
+                        ngExecutionController.duration);
                 });
             } catch (Exception ex) {
                 logger.Info("Error in client Prepare Aync " + ex.Message);
@@ -192,7 +193,8 @@ namespace LoadInjector.RunTime.EngineComponents {
                         Environment.OSVersion.VersionString,
                         ngExecutionController.dataModel?.OuterXml,
                         ngExecutionController.state.Value,
-                        ngExecutionController.archName);
+                        ngExecutionController.archName,
+                        ngExecutionController.duration);
                 });
             } catch (Exception ex) {
                 logger.Info("Error in client Interrogate respnse " + ex.Message);
