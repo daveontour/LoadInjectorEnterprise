@@ -44,7 +44,7 @@ namespace LoadInjectorBase {
         private int seqNum;
 
         // Random number generator for random selections
-        private readonly Random rand = new Random();
+        private static readonly Random rand = new Random();
 
         // List of supplied values, or values populated from a CSV file
         private readonly List<string> values = new List<string>();
@@ -117,6 +117,7 @@ namespace LoadInjectorBase {
                         lowerLimit = 0;
                     }
                 }
+                digits = SetVar("digits", -1);
                 try {
                     upperLimit = int.Parse(config.Attributes["upperLimit"].Value);
                 } catch (Exception) {
@@ -141,6 +142,7 @@ namespace LoadInjectorBase {
                     }
                 }
                 stdDev = SetVar("stdDev", 1.0);
+                digits = SetVar("digits", -1);
             }
 
             if (type == "doublegaussian") {
@@ -180,7 +182,7 @@ namespace LoadInjectorBase {
 
             if (type == "sequence") {
                 seqNum = SetVar("seed", 1);
-                digits = SetVar("digits", 1);
+                digits = SetVar("digits", -1);
             }
 
             if (type == "datetime") {
@@ -370,7 +372,16 @@ namespace LoadInjectorBase {
 
         private string GetValue(FlightNode flt) {
             if (type == "intRange") {
-                return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
+                if (digits == -1) {
+                    return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
+                }
+
+                string digitsStr = rand.Next(lowerLimit, upperLimit).ToString().ToString();
+                while (digitsStr.Length < digits) {
+                    digitsStr = "0" + digitsStr;
+                }
+
+                return ProcessValue(digitsStr);
             }
 
             if (type == "sequence") {
@@ -395,7 +406,18 @@ namespace LoadInjectorBase {
                              Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
                 double randNormal =
                              normalInt + stdDev * randStdNormal; //random normal(mean,stdDev^2)
-                return ProcessValue(Convert.ToInt32(randNormal).ToString());
+
+                string rtn = Convert.ToInt32(randNormal).ToString();
+
+                if (digits == -1) {
+                    return ProcessValue(rtn);
+                }
+
+                while (rtn.Length < digits) {
+                    rtn = "0" + rtn;
+                }
+
+                return ProcessValue(rtn);
             }
             if (type == "doublegaussian") {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
@@ -404,6 +426,7 @@ namespace LoadInjectorBase {
                              Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
                 double randNormal =
                              normalDouble + stdDev * randStdNormal; //random normal(mean,stdDev^2)
+
                 return ProcessValue(randNormal.ToString(CultureInfo.CurrentCulture));
             }
 

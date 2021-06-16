@@ -64,7 +64,7 @@ namespace LoadInjector.GridDefinitions {
                     break;
 
                 case "intgaussian":
-                    Show(new[] { "NormalInt", "StdDev" });
+                    Show(new[] { "NormalInt", "StdDev", "NumPlaces" });
                     break;
 
                 case "doublegaussian":
@@ -126,7 +126,7 @@ namespace LoadInjector.GridDefinitions {
                     break;
 
                 case "intRange":
-                    Show(new[] { "LowerLimit", "UpperLimit" });
+                    Show(new[] { "LowerLimit", "UpperLimit", "NumPlaces" });
                     break;
 
                 case "flightInfo":
@@ -521,7 +521,7 @@ namespace LoadInjector.GridDefinitions {
             set => SetAttribute("seed", value);
         }
 
-        [CategoryAttribute("Required"), DisplayName("Total Digits"), ReadOnly(false), Browsable(true), PropertyOrder(4), DescriptionAttribute("The total number of digits to include in sequence number. Leading zeros will be added. Non if set to -1")]
+        [CategoryAttribute("Required"), DisplayName("Total Digits"), ReadOnly(false), Browsable(true), PropertyOrder(4), DescriptionAttribute("The total number of digits to include in number. Leading zeros will be added. None if set to -1")]
         public int NumPlaces {
             get => GetIntAttribute("digits");
             set => SetAttribute("digits", value);

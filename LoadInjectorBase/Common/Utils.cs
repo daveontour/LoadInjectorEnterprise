@@ -65,19 +65,28 @@ namespace LoadInjectorBase.Common {
         }
 
         public static XmlDocument ExtractArchiveToDirectoryForEdit(string archiveFile, string archiveRoot, string archiveFileName, bool addUniqueID = true) {
-            XmlDocument document = new XmlDocument();
-            try {
-                Directory.Delete(archiveRoot, true);
-            } catch (Exception ex) {
-                // NO-OP
-            }
+            //XmlDocument document = new XmlDocument();
+            //try {
+            //    Directory.Delete(archiveRoot, true);
+            //} catch (Exception ex) {
+            //    // NO-OP
+            //}
 
-            ZipFile.ExtractToDirectory(archiveFile, archiveRoot);
-            File.Copy(archiveFile, $"{archiveRoot}/{archiveFileName}");
+            //ZipFile.ExtractToDirectory(archiveFile, archiveRoot);
+            //File.Copy(archiveFile, $"{archiveRoot}/{archiveFileName}");
 
-            string configXML = FormatXML(File.ReadAllText(archiveRoot + "/config.xml"));
-            document.LoadXml(configXML);
+            //string configXML = FormatXML(File.ReadAllText(archiveRoot + "/config.xml"));
+            //document.LoadXml(configXML);
 
+            //return document;
+
+            string temmpArchiveFileName = Path.GetTempFileName();
+
+            var archiveByteArray = File.ReadAllBytes(archiveFile);
+            File.WriteAllBytes(temmpArchiveFileName, archiveByteArray);
+
+            XmlDocument document = ExtractArchiveToDirectory(temmpArchiveFileName, archiveRoot, archiveFileName, addUniqueID);
+            File.Delete(temmpArchiveFileName);
             return document;
         }
 

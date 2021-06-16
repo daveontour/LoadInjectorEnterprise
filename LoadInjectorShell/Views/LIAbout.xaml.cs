@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Windows;
 
@@ -22,6 +23,10 @@ namespace LoadInjector.Views {
 
         public void ClickOK(object sender, RoutedEventArgs e) {
             DialogResult = true;
+        }
+
+        private void ClickClear(object sender, RoutedEventArgs e) {
+            File.Delete(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorConfig\\Config.xml");
         }
     }
 }

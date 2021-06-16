@@ -28,6 +28,7 @@
         </StackPanel>
         <!-- Accept or Cancel -->
         <StackPanel HorizontalAlignment="Right" Orientation="Horizontal" Margin="0,0,0,10" Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1">
+            <Button  Width="100" Name="clearButton" IsDefault="True" Click="ClickClear" Margin="5,0,5,0">Clear Config</Button>
             <Button  Width="100" Name="okButton" IsDefault="True" Click="ClickOK" Margin="5,0,5,0">OK</Button>
         </StackPanel>
     </Grid>

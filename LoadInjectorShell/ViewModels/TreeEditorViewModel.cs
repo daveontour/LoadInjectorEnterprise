@@ -1274,7 +1274,8 @@ namespace LoadInjector.ViewModels {
             foreach (XmlNode node in doc.SelectNodes(".//*")) {
                 if (node.Attributes["dataFile"]?.Value != null) {
                     try {
-                        string fullFile = this.ArchiveRoot + "\\" + node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        //      string fullFile = this.ArchiveRoot + "\\" + node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        string fullFile = node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
                         if (this.ArchiveRoot == null) {
                             fullFile = node.Attributes["dataFile"]?.Value.Replace("./", "").Replace("/", "\\");
                         }
@@ -1298,7 +1299,8 @@ namespace LoadInjector.ViewModels {
                 }
                 if (node.Attributes["templateFile"]?.Value != null) {
                     try {
-                        string fullFile = this.ArchiveRoot + "\\" + node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        //                      string fullFile = this.ArchiveRoot + "\\" + node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
+                        string fullFile = node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
                         if (this.ArchiveRoot == null) {
                             fullFile = node.Attributes["templateFile"]?.Value.Replace("./", "").Replace("/", "\\");
                         }
