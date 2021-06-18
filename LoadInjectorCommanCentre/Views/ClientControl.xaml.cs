@@ -1,8 +1,6 @@
 ﻿using LoadInjector.Runtime.EngineComponents;
 using LoadInjectorBase.Common;
 
-using LoadInjectorBase.Common;
-
 using Microsoft.Win32;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
@@ -203,7 +201,7 @@ namespace LoadInjectorCommandCentre.Views {
         private void UpdatePercentComplete(object sender, ElapsedEventArgs e) {
             long milliSecElapsed = watch.ElapsedMilliseconds;
             long milliDuration = duration * 1000;
-            double portion = 100 * milliSecElapsed / milliDuration;
+            double portion = 100 * (double)milliSecElapsed / milliDuration;
 
             PercentComplete = Convert.ToInt32(portion);
 

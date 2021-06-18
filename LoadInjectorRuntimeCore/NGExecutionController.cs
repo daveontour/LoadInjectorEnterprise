@@ -3,9 +3,6 @@ using LoadInjector.RunTime.ViewModels;
 using LoadInjector.RuntimeCore;
 using LoadInjectorBase;
 using LoadInjectorBase.Common;
-
-using LoadInjectorBase.Common;
-
 using NLog;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;

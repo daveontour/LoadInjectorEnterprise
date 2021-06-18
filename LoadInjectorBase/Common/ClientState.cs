@@ -26,5 +26,6 @@ namespace LoadInjectorBase.Common {
         public static ClientState ExecutionComplete { get { return new ClientState("Execution Complete"); } }
         public static ClientState Stopped { get { return new ClientState("Stopped"); } }
         public static ClientState WaitingNextIteration { get { return new ClientState("Waiting for next iteration"); } }
+        public static ClientState UpdateAfterCompletion { get { return new ClientState("Update after completion"); } }
     }
 }

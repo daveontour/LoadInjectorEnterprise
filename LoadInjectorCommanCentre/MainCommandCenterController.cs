@@ -29,8 +29,8 @@ namespace LoadInjectorCommandCentre {
         public string ServerURL { get; }
         public ClientControl SelectedClient { get; set; }
 
-        private Dictionary<string, ClientControl> clientControls = new Dictionary<string, ClientControl>();
-        public Dictionary<string, ClientTabControl> clientTabControls = new Dictionary<string, ClientTabControl>();
+        private readonly Dictionary<string, ClientControl> clientControls = new Dictionary<string, ClientControl>();
+        public readonly Dictionary<string, ClientTabControl> clientTabControls = new Dictionary<string, ClientTabControl>();
 
         private int gridRefreshRate = 1;
         private Timer refreshTimer;
@@ -60,14 +60,18 @@ namespace LoadInjectorCommandCentre {
             int configServerPort = int.Parse(View.ServerPort);
 
             int hubport = Utils.GetAvailablePort(configHubPort);
-            hubport = Utils.GetAvailablePort(configHubPort);
             if (hubport != configHubPort) {
                 MessageBox.Show($"Port {configHubPort} is unavailable. Using {hubport} instead", "Client Hub Port", MessageBoxButton.OK, MessageBoxImage.Warning);
                 View.SignalRPort = hubport.ToString();
             }
             signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
-            MessageHub = new CentralMessagingHub(this);
-            MessageHub.StartHub(signalRURL);
+
+            try {
+                MessageHub = new CentralMessagingHub(this);
+                MessageHub.StartHub(signalRURL);
+            } catch (Exception ex) {
+                Console.WriteLine("Message HUB Start Error: " + ex.Message);
+            }
 
             int webport = Utils.GetAvailablePort(configServerPort);
             if (webport != configServerPort) {
@@ -133,6 +137,7 @@ namespace LoadInjectorCommandCentre {
 
         public void StartClients(int num) {
             string executable = GetRunTimeExecutable();
+            Console.WriteLine("Using Path " + executable);
 
             if (executable == null) {
                 MessageBox.Show("Load Injector runtime executable not provided", "Runtime Executable Client", MessageBoxButton.OK, MessageBoxImage.Exclamation);
@@ -157,6 +162,12 @@ namespace LoadInjectorCommandCentre {
         }
 
         private string GetRunTimeExecutable() {
+            executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "");
+
+            if (File.Exists(executablePath + "\\LoadInjectorRuntime.exe")) {
+                return executablePath + "\\LoadInjectorRuntime.exe";
+            }
+
             string configFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml";
             XmlDocument doc = new XmlDocument();
             doc.Load(configFileName);
@@ -402,7 +413,7 @@ namespace LoadInjectorCommandCentre {
         public void PrepAll() {
             int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.Assigned.Value);
             if (ready == 0) {
-                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are ready for preparation", "Prepare All", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"No Execution Nodes are ready for preparation", "Prepare All", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
             int notready = clientControls.Values.Count<ClientControl>(x => x.StatusText != ClientState.Assigned.Value);
@@ -428,7 +439,7 @@ namespace LoadInjectorCommandCentre {
         public void ExecuteAll() {
             int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.Ready.Value);
             if (ready == 0) {
-                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are ready for execution", "Execute All", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"No Execution Nodes are ready for execution", "Execute All", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -457,7 +468,7 @@ namespace LoadInjectorCommandCentre {
         internal void RequestCompletionReports() {
             int ready = clientControls.Values.Count<ClientControl>(x => x.StatusText == ClientState.ExecutionComplete.Value);
             if (ready == 0) {
-                MessageBoxResult res = MessageBox.Show($"No Execution Nodes are in completed state", "Completion Reports", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show($"No Execution Nodes are in completed state", "Completion Reports", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -467,7 +478,7 @@ namespace LoadInjectorCommandCentre {
                 if (res == MessageBoxResult.Yes) {
                     foreach (ClientControl c in clientControls.Values) {
                         if (c.StatusText == ClientState.ExecutionComplete.Value) {
-                            MessageHub.Hub.Clients.Client(c.ConnectionID).CompletionReport()();
+                            MessageHub.Hub.Clients.Client(c.ConnectionID).CompletionReport();
                         }
                     }
                 }
@@ -503,10 +514,6 @@ namespace LoadInjectorCommandCentre {
 
                 View.VisibleDataGrid.Items.Refresh();
 
-                //foreach (ClientTabControl tabControl in clientTabControls.Values) {
-                //    tabControl.WorkPackage = open.SafeFileName;
-                //    tabControl.OnPropertyChanged("WorkPackage");
-                //}
                 MessageHub.Hub.Clients.All.RetrieveArchive(WebServerURL + "/" + open.SafeFileName);
             }
         }
@@ -583,7 +590,7 @@ namespace LoadInjectorCommandCentre {
                     View.OnPropertyChanged("NumConnectedClients");
 
                     //Remove any entries from the messaging grid
-                    var query = View.RecordsCollection.ToList<ExecutionRecordClass>().Where(rec => rec.ConnectionID == id);
+                    IEnumerable<ExecutionRecordClass> query = View.RecordsCollection.ToList<ExecutionRecordClass>().Where(rec => rec.ConnectionID == id);
                     foreach (ExecutionRecordClass x in query) {
                         View.RecordsCollection.Remove(x);
                     }
@@ -598,7 +605,6 @@ namespace LoadInjectorCommandCentre {
 
         internal void RefreshClients(bool clear = true) {
             View.RecordsCollection.Clear();
-            //View.statusGrid.Items.Refresh();
             if (clear) {
                 View.clientControlStack.Children.RemoveRange(0, View.clientControlStack.Children.Count);
                 View.OnPropertyChanged("NumConnectedClients");
@@ -709,19 +715,23 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void SetExecutionNodeStatus(string executionNodeID, string message, HubCallerContext context) {
-            Application.Current.Dispatcher.Invoke(delegate {
-                if (clientControls.ContainsKey(context.ConnectionId)) {
-                    ClientControl client = clientControls[context.ConnectionId];
-                    client.SetStatusText(message);
-                }
-            });
+            if (message != ClientState.UpdateAfterCompletion.Value) {
+                Application.Current.Dispatcher.Invoke(delegate {
+                    if (clientControls.ContainsKey(context.ConnectionId)) {
+                        ClientControl client = clientControls[context.ConnectionId];
+                        client.SetStatusText(message);
+                    }
+                });
+            }
 
             if (message == ClientState.Assigned.Value && View.AutoExecute) {
+                clientControls[context.ConnectionId].PercentComplete = 0;
                 MessageHub.Hub.Clients.Client(context.ConnectionId).ClearAndPrepare();
             }
 
             if (message == ClientState.Ready.Value && View.AutoExecute) {
                 SetRefreshRate(gridRefreshRate);
+                clientControls[context.ConnectionId].PercentComplete = 0;
                 MessageHub.Hub.Clients.Client(context.ConnectionId).Execute();
             }
 
@@ -729,8 +739,13 @@ namespace LoadInjectorCommandCentre {
                 clientControls[context.ConnectionId].StartUpdateTimer();
             }
 
-            if (message == ClientState.ExecutionComplete.Value || message == ClientState.Stopped.Value) {
+            if (message == ClientState.UnAssigned.Value) {
+                clientControls[context.ConnectionId].PercentComplete = 0;
+            }
+
+            if (message == ClientState.ExecutionComplete.Value || message == ClientState.Stopped.Value || message == ClientState.UpdateAfterCompletion.Value) {
                 clientControls[context.ConnectionId].Stop();
+                MessageHub.Hub.Clients.Client(context.ConnectionId).CompletionReport();
             }
         }
 

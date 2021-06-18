@@ -86,9 +86,9 @@ namespace LoadInjector.Runtime.EngineComponents {
             return base.OnConnected();
         }
 
-        public override Task OnDisconnected(bool stop) {
+        public override Task OnDisconnected(bool stopCalled) {
             CentralMessagingHub.iccController.Disconnect(Context);
-            return base.OnDisconnected(stop);
+            return base.OnDisconnected(stopCalled);
         }
 
         public void ConsoleMsg(string executionnodeID, string node, string message) {

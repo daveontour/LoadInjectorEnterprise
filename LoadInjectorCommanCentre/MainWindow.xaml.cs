@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+
+//using System.Windows.Controls;
 using System.Windows.Media;
 using System.Xml;
 
@@ -73,7 +75,7 @@ namespace LoadInjectorCommandCentre {
                 AutoExecute = bool.Parse(doc.SelectSingleNode(".//autoStart")?.InnerText);
                 AutoAssignArchive = doc.SelectSingleNode(".//autoAssignFile")?.InnerText;
                 ExecutablePath = doc.SelectSingleNode(".//clientPath")?.InnerText;
-            } catch (Exception ex) {
+            } catch (Exception) {
                 NumClients = 1;
                 SignalRIP = "localhost";
                 SignalRPort = "6220";
@@ -198,7 +200,6 @@ namespace LoadInjectorCommandCentre {
                     } else {
                         RecordsCollection.Add(rec);
                         OnPropertyChanged("RecordsCollection");
-                        //   statusGrid.Items.Refresh();
                     }
                 });
             } catch (Exception ex) {

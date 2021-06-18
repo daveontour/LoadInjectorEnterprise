@@ -1382,19 +1382,19 @@ namespace LoadInjector.ViewModels {
                 MessageBox.Show("Please save as an archive file first", "Execute", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            string lir = GetCommandCentreExecutable();
-            if (string.IsNullOrEmpty(lir)) {
-                MessageBox.Show("Load Injector Command Center could not be found. Please select the directory where it is installed", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return;
-            }
+            //string lir = GetCommandCentreExecutable();
+            //if (string.IsNullOrEmpty(lir)) {
+            //    MessageBox.Show("Load Injector Command Center could not be found. Please select the directory where it is installed", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            //    return;
+            //}
 
             try {
                 Process process = new Process();
                 // Configure the process using the StartInfo properties.
 
-                process.StartInfo.WorkingDirectory = lir.Replace("\\LoadInjectorCommandCentre.exe", "");
+                //   process.StartInfo.WorkingDirectory = lir.Replace("\\LoadInjectorCommandCentre.exe", "");
                 process.StartInfo.Arguments = $"-autoAssign:{Path}";
-                process.StartInfo.FileName = lir;
+                process.StartInfo.FileName = "LoadInjectorCommandCentre.exe";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 
                 Console.WriteLine(process.StartInfo.Arguments);
