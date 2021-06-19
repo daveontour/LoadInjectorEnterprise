@@ -28,7 +28,7 @@ namespace LoadInjector.RunTime {
                 }
             } catch (Exception ex) {
                 destLogger.Error(ex, $"Error: No End Point defined for {name}");
-                SetOutput("Error: No End Point Defined");
+                SetOutput("Error: No End Point Defined " + ex.Message);
                 ConfigOK = false;
                 return;
             }

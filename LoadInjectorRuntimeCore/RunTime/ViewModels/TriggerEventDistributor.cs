@@ -152,7 +152,7 @@ namespace LoadInjector.RunTime.ViewModels {
                 chain.ParentFired(rec.record);
             }
 
-            this.executionController.clientHub.DispatcherDistributeMessage(executionController.executionNodeUuid, rec);
+            //       this.executionController.clientHub.DispatcherDistributeMessage(executionController.executionNodeUuid, rec);
         }
 
         internal bool ScheduleEvent(TriggerRecord triggerRecord) {
@@ -162,7 +162,7 @@ namespace LoadInjector.RunTime.ViewModels {
             }
             triggerRecords.Add(triggerRecord);
 
-            this.executionController.clientHub.AddSchedTrigger(executionController.executionNodeUuid, triggerRecord);
+            //      this.executionController.clientHub.AddSchedTrigger(executionController.executionNodeUuid, triggerRecord);
 
             return true;
         }
@@ -203,7 +203,7 @@ namespace LoadInjector.RunTime.ViewModels {
 
             sortedTriggers.Sort((x, y) => { return x.TIME.CompareTo(y.TIME); });
 
-            this.executionController.clientHub.SetSchedTrigger(executionController.executionNodeUuid, sortedTriggers);
+            //   this.executionController.clientHub.SetSchedTrigger(executionController.executionNodeUuid, sortedTriggers);
 
             triggerQueue = new Queue<TriggerRecord>(sortedTriggers);
 

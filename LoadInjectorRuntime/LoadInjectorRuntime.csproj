@@ -68,8 +68,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="NLog.config">
+    <None Include="..\..\..\..\Desktop\LIInstall\NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      <Link>NLog.config</Link>
     </None>
     <None Include="packages.config" />
   </ItemGroup>

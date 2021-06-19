@@ -1388,13 +1388,22 @@ namespace LoadInjector.ViewModels {
             //    return;
             //}
 
+            string executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "");
+
+            //if (File.Exists(executablePath + "\\LoadInjectorRuntime.exe")) {
+            //    return executablePath + "\\LoadInjectorRuntime.exe";
+            //}
+
             try {
                 Process process = new Process();
                 // Configure the process using the StartInfo properties.
 
-                //   process.StartInfo.WorkingDirectory = lir.Replace("\\LoadInjectorCommandCentre.exe", "");
+                Console.WriteLine("Starting Command Center");
+                Console.WriteLine(executablePath + "\\LoadInjectorCommandCentre.exe");
+
+                process.StartInfo.WorkingDirectory = executablePath;
                 process.StartInfo.Arguments = $"-autoAssign:{Path}";
-                process.StartInfo.FileName = "LoadInjectorCommandCentre.exe";
+                process.StartInfo.FileName = executablePath + "\\LoadInjectorCommandCentre.exe";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
 
                 Console.WriteLine(process.StartInfo.Arguments);

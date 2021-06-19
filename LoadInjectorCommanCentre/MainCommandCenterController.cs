@@ -43,6 +43,16 @@ namespace LoadInjectorCommandCentre {
             ArchiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre";
             this.AutoAssignArchive = autoAssignArchive;
 
+            int configHubPort = int.Parse(View.SignalRPort);
+            int configServerPort = int.Parse(View.ServerPort);
+            int hubport = Utils.GetAvailablePort(configHubPort);
+            signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
+            int webport = Utils.GetAvailablePort(configServerPort);
+
+            //MessageBox.Show($"Config {NumClients} {AutoAssignArchive} {hubport} {webport} ", "Debug", MessageBoxButton.OK, MessageBoxImage.Warning);
+
+            //Debug.WriteLine($"Config {NumClients} {AutoAssignArchive} {hubport} {webport} ");
+
             ClientTabControl tabControl = new ClientTabControl("Summary", this) { IsSummary = true, ConnectionID = "summary" };
             clientTabControls.Add("summary", tabControl);
             View.AddClientTab(tabControl);
@@ -56,31 +66,29 @@ namespace LoadInjectorCommandCentre {
                 AutoAssignArchive = null;
             }
 
-            int configHubPort = int.Parse(View.SignalRPort);
-            int configServerPort = int.Parse(View.ServerPort);
-
-            int hubport = Utils.GetAvailablePort(configHubPort);
             if (hubport != configHubPort) {
                 MessageBox.Show($"Port {configHubPort} is unavailable. Using {hubport} instead", "Client Hub Port", MessageBoxButton.OK, MessageBoxImage.Warning);
                 View.SignalRPort = hubport.ToString();
             }
-            signalRURL = $"http://{View.SignalRIP}:{View.SignalRPort}/";
 
             try {
                 MessageHub = new CentralMessagingHub(this);
-                MessageHub.StartHub(signalRURL);
+                string res = MessageHub.StartHub(signalRURL);
+                if (res != null) {
+                    MessageBox.Show(res);
+                }
             } catch (Exception ex) {
-                Console.WriteLine("Message HUB Start Error: " + ex.Message);
+                MessageBox.Show("Message HUB Start Error: " + ex.Message);
             }
 
-            int webport = Utils.GetAvailablePort(configServerPort);
             if (webport != configServerPort) {
                 MessageBox.Show($"Port {configServerPort} is unavailable. Using {webport} instead", "Archive Server Port", MessageBoxButton.OK, MessageBoxImage.Warning);
                 View.ServerPort = webport.ToString();
             }
-            WebServerURL = $"http://{View.SignalRIP}:{View.ServerPort}/";
 
+            WebServerURL = $"http://{View.SignalRIP}:{View.ServerPort}/";
             WebServer = new SimpleHTTPServer(ArchiveRoot, View.SignalRIP, View.ServerPort);
+
             StartClients(NumClients);
         }
 

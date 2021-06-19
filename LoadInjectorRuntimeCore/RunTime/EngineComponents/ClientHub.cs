@@ -35,6 +35,27 @@ namespace LoadInjector.RunTime.EngineComponents {
             });
         }
 
+        public async Task StartSignalRClientHub() {
+            bool started = false;
+
+            while (!started) {
+                try {
+                    hubConnection.Start().Wait();
+                    logger.Info($"{hubConnection.State} ({hubURL})");
+                    if (hubConnection.State == ConnectionState.Connected) {
+                        started = true;
+                    } else {
+                        Thread.Sleep(5000);
+                    }
+                } catch (Exception ex) {
+                    logger.Error(ex.Message);
+                    logger.Error(ex.StackTrace);
+                    logger.Info($"Waiting.. ({hubURL})");
+                    Thread.Sleep(5000);
+                }
+            }
+        }
+
         public ClientHub(NgExecutionController ngExecutionController) {
             this.ngExecutionController = ngExecutionController;
             this.localOnly = true;
@@ -147,24 +168,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        public async Task StartSignalRClientHub() {
-            bool started = false;
-
-            while (!started) {
-                try {
-                    hubConnection.Start().Wait();
-                    logger.Info($"{hubConnection.State} ({hubURL})");
-                    if (hubConnection.State == ConnectionState.Connected) {
-                        started = true;
-                    } else {
-                        Thread.Sleep(5000);
-                    }
-                } catch (Exception) {
-                    logger.Info($"Waiting.. ({hubURL})");
-                }
-            }
-        }
-
         internal void RefreshResponse() {
             try {
                 Process currentProcess = Process.GetCurrentProcess();
@@ -201,30 +204,6 @@ namespace LoadInjector.RunTime.EngineComponents {
             }
         }
 
-        internal void SetMsgPerMin(string executionNodeID, string uuid, string s) {
-            //if (localOnly) {
-            //    logger.Info(s);
-            //} else {
-            //    Task.Run(() => { this.hubProxy.Invoke("MessagesPerMinute", executionNodeID, uuid, s); });
-            //}
-        }
-
-        internal void SetConfiguredMsgPerMin(string executionNodeID, string uuid, string s) {
-            //if (localOnly) {
-            //    logger.Info(s);
-            //} else {
-            //    Task.Run(() => { this.hubProxy.Invoke("ConfiguredMessagesPerMinute", executionNodeID, uuid, s); });
-            //}
-        }
-
-        internal void SetTriggerLabel(string executionNodeID, string uuid, string s) {
-            //if (localOnly) {
-            //    logger.Info(s);
-            //} else {
-            //    Task.Run(() => { this.hubProxy.Invoke("SetTriggerLabel", executionNodeID, uuid, s); });
-            //}
-        }
-
         internal void SetSourceLineOutput(string executionNodeID, string uuid, string s) {
             ConsoleMsg(executionNodeID, uuid, s);
         }
@@ -246,14 +225,6 @@ namespace LoadInjector.RunTime.EngineComponents {
                 } else {
                     consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
                 }
-            }
-        }
-
-        internal void ClearTriggerData(string executionNodeID, string uuid) {
-            if (localOnly) {
-                sourceLogger.Info("Clear Data Triggers");
-            } else {
-                Task.Run(() => { this.hubProxy.Invoke("ClearTriggerData", executionNodeID, uuid); });
             }
         }
 
@@ -331,56 +302,8 @@ namespace LoadInjector.RunTime.EngineComponents {
         internal void SourceReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {
         }
 
-        internal void DispatcherDistributeMessage(string executionNodeID, TriggerRecord rec) {
-            if (localOnly) {
-                logger.Info("Dispatcher Message Distribute");
-            } else {
-                Task.Run(() => { this.hubProxy.Invoke("DispatcherDistributeMessage", executionNodeID, rec); });
-            }
-        }
-
-        //internal void LockVM(string executionNodeID, string uuid, bool l) {
-        //    if (localOnly) {
-        //        logger.Info("Lock VM");
-        //    } else {
-        //        Task.Run(() => { this.hubProxy.Invoke("LockVM", executionNodeID, uuid, l); });
-        //    }
-        //}
-
         internal void SetDestinationOutput(string executionNodeID, string uuid, string s) {
             ConsoleMsg(executionNodeID, uuid, s);
-        }
-
-        //internal void SetDestinationRate(string executionNodeID, string uuid, double s) {
-        //    if (localOnly) {
-        //        destLogger.Info(s);
-        //    } else {
-        //        Task.Run(() => { this.hubProxy.Invoke("SetDestinationRate", executionNodeID, uuid, s); });
-        //    }
-        //}
-
-        //internal void SetDestinationSent(string executionNodeID, string uuid, int s) {
-        //    if (localOnly) {
-        //        destLogger.Info(s);
-        //    } else {
-        //        Task.Run(() => { this.hubProxy.Invoke("SetDestinationSent", executionNodeID, uuid, s); });
-        //    }
-        //}
-
-        internal void AddSchedTrigger(string executionNodeUuid, TriggerRecord triggerRecord) {
-            //if (localOnly) {
-            //    logger.Info("Add trigger Record");
-            //} else {
-            //    Task.Run(() => { this.hubProxy.Invoke("AddSchedTrigger", executionNodeUuid, triggerRecord); });
-            //}
-        }
-
-        internal void SetSchedTrigger(string executionNodeUuid, List<TriggerRecord> sortedTriggers) {
-            //if (localOnly) {
-            //    logger.Info("Set Sched Trigger");
-            //} else {
-            //    Task.Run(() => { this.hubProxy.Invoke("SetSchedTrigger", executionNodeUuid, sortedTriggers); });
-            //}
         }
     }
 }

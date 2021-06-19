@@ -40,7 +40,7 @@ namespace LoadInjector.Runtime.EngineComponents {
             this.port = port;
         }
 
-        public void StartHub(string url) {
+        public string StartHub(string url) {
             // This will *ONLY* bind to localhost, if you want to bind to all addresses
             // use http://*:8080 to bind to all addresses.
             // See http://msdn.microsoft.com/library/system.net.httplistener.aspx
@@ -49,7 +49,10 @@ namespace LoadInjector.Runtime.EngineComponents {
                 hubServer = WebApp.Start<StartupHub>(url);
             } catch (Exception ex) {
                 Console.WriteLine(ex.Message);
+                return ex.Message;
             }
+
+            return null;
         }
 
         public void StoptHub() {
@@ -147,6 +150,9 @@ namespace LoadInjector.Runtime.EngineComponents {
     public class LoggingPipelineModule : HubPipelineModule {
 
         protected override bool OnBeforeIncoming(IHubIncomingInvokerContext context) {
+            if (string.IsNullOrWhiteSpace(context.MethodDescriptor.Name)) {
+                Console.WriteLine("Error");
+            }
             Console.WriteLine("=> Invoking " + context.MethodDescriptor.Name + " on hub " + context.MethodDescriptor.Hub.Name);
             return base.OnBeforeIncoming(context);
         }

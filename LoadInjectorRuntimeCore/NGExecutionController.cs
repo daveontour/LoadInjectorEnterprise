@@ -1458,7 +1458,7 @@ namespace LoadInjector.RunTime {
         }
 
         private void SetTriggerLabel(string label) {
-            clientHub.SetTriggerLabel(this.executionNodeUuid, null, label);
+            //       clientHub.SetTriggerLabel(this.executionNodeUuid, null, label);
         }
 
         private void ConsoleMsg(string msg) {
@@ -1466,7 +1466,7 @@ namespace LoadInjector.RunTime {
         }
 
         private void ClearTriggerData() {
-            clientHub.ClearTriggerData(this.executionNodeUuid, null);
+            //          clientHub.ClearTriggerData(this.executionNodeUuid, null);
         }
 
         public void ProduceCompletionReport() {

@@ -496,11 +496,11 @@ namespace LoadInjector.RunTime.ViewModels {
         }
 
         public void SetMsgPerMin(String s) {
-            clientHub.SetMsgPerMin(this.executionNodeID, this.uuid, s);
+            //            clientHub.SetMsgPerMin(this.executionNodeID, this.uuid, s);
         }
 
         public void SetConfiguredMsgPerMin(String s) {
-            clientHub.SetConfiguredMsgPerMin(this.executionNodeID, this.uuid, s);
+            //         clientHub.SetConfiguredMsgPerMin(this.executionNodeID, this.uuid, s);
         }
 
         public void SetSourceLineOutput(String s) {
