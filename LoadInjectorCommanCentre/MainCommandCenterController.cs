@@ -93,6 +93,7 @@ namespace LoadInjectorCommandCentre {
         }
 
         public void Close() {
+            MessageHub.Hub.Clients.All.LocalDisconnect();
             WebServer.Stop();
             MessageHub.StoptHub();
         }
@@ -159,8 +160,8 @@ namespace LoadInjectorCommandCentre {
                     // Configure the process using the StartInfo properties.
                     process.StartInfo.WorkingDirectory = executable.Replace("\\LoadInjectorRuntime.exe", "");
                     process.StartInfo.FileName = executable;
-                    process.StartInfo.Arguments = $"-server:{View.SignalRIP}  -port:{View.SignalRPort}";
-                    process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
+                    process.StartInfo.Arguments = $"-server:{View.SignalRIP}  -port:{View.SignalRPort} -localStart:true";
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
 
                     process.Start();
                 }

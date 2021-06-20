@@ -53,6 +53,7 @@ namespace LoadInjectorCommandCentre {
         private bool autoExecute = false;
         private DataGrid _visdataGrid;
         private string[] args;
+        private readonly bool runFromConfig = false;
 
         public ExecutionRecords RecordsCollection {
             get { return this._records; }
@@ -60,9 +61,31 @@ namespace LoadInjectorCommandCentre {
 
         public MainWindow(string[] args = null) {
             this.args = args;
+
+            foreach (string arg in args) {
+                if (arg.Contains("runFromConfig")) {
+                    this.runFromConfig = true;
+                }
+                if (arg.StartsWith("-autoAssign:")) {
+                    AutoAssignArchive = arg.Replace("-autoAssign:", "");
+                    AutoExecute = false;
+                }
+            }
+
             InitializeComponent();
             DataContext = this;
             this.ClientTabDatas = new ObservableCollection<object>();
+
+            if (this.runFromConfig) {
+                NumClients = 1;
+                SignalRIP = "localhost";
+                SignalRPort = "6220";
+                ServerPort = "6230";
+                ExecutablePath = null;
+                OnPropertyChanged("NoAutoAssign");
+
+                return;
+            }
 
             try {
                 XmlDocument doc = new XmlDocument();
@@ -233,11 +256,13 @@ namespace LoadInjectorCommandCentre {
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
-            LoadInjectorCommandCentreWelcome welcome = new LoadInjectorCommandCentreWelcome(this) {
-                Owner = this,
-                DataContext = this
-            };
-            welcome.ShowDialog();
+            if (!runFromConfig) {
+                LoadInjectorCommandCentreWelcome welcome = new LoadInjectorCommandCentreWelcome(this) {
+                    Owner = this,
+                    DataContext = this
+                };
+                welcome.ShowDialog();
+            }
 
             ServerURL = $"http://{SignalRIP}:{ServerPort}/";
             SignalRURL = $"http://{SignalRIP}:{SignalRPort}";

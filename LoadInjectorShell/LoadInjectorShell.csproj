@@ -28,7 +28,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <AutorunEnabled>true</AutorunEnabled>
-    <ApplicationRevision>1</ApplicationRevision>
+    <ApplicationRevision>2</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <PublishWizardCompleted>true</PublishWizardCompleted>
@@ -45,7 +45,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
+    <PlatformTarget>x64</PlatformTarget>
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -63,6 +63,9 @@
   <PropertyGroup>
     <Win32Resource>
     </Win32Resource>
+  </PropertyGroup>
+  <PropertyGroup>
+    <GenerateManifests>true</GenerateManifests>
   </PropertyGroup>
   <!--  <PropertyGroup>
     <ManifestCertificateThumbprint>E4637A20FFAF712709D48E8E6B7A656959B2853C</ManifestCertificateThumbprint>
@@ -534,6 +537,18 @@
     <ProjectReference Include="..\LoadInjectorCommanCentre\LoadInjectorCommandCentre.csproj">
       <Project>{4fcd0242-6009-473b-a27b-d74fba009c37}</Project>
       <Name>LoadInjectorCommandCentre</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorDestinations\LoadInjectorDestinations.csproj">
+      <Project>{fa9eebc1-cf82-4ed1-bed2-442f301b3d20}</Project>
+      <Name>LoadInjectorDestinations</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorRuntimeCore\LoadInjectorRuntimeCore.csproj">
+      <Project>{13f3f3b0-0861-436b-ba84-deb709a3d33f}</Project>
+      <Name>LoadInjectorRuntimeCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\LoadInjectorRuntime\LoadInjectorRuntime.csproj">
+      <Project>{73beabce-0b45-4076-9b57-3012397c20c4}</Project>
+      <Name>LoadInjectorRuntime</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

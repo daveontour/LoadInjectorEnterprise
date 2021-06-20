@@ -119,6 +119,8 @@ namespace LoadInjector.RunTime {
         private bool standAloneMode;
         private string reportFile;
 
+        public string LocalStart { get; }
+
         public string ArchiveDirectory {
             get {
                 if (archiveDirectory == null) {
@@ -129,10 +131,12 @@ namespace LoadInjector.RunTime {
             }
         }
 
-        public NgExecutionController(ExecutionControllerType type, string serverHub = null, string executeFile = null, string reportFile = null) {
+        public NgExecutionController(ExecutionControllerType type, string serverHub = null, string executeFile = null, string reportFile = null, string localStart = null) {
             // Client Server Mode
 
             this.reportFile = reportFile;
+            this.LocalStart = localStart;
+
             if (type == ExecutionControllerType.Client || type == ExecutionControllerType.Local) {
                 try {
                     this.clientHub = new ClientHub(serverHub, this);

@@ -1269,8 +1269,6 @@ namespace LoadInjector.ViewModels {
             Dictionary<string, byte[]> files = new Dictionary<string, byte[]>();
             Dictionary<string, string> fullfileName = new Dictionary<string, string>();
 
-            Debug.WriteLine($"CWD = {Directory.GetCurrentDirectory()}");
-
             foreach (XmlNode node in doc.SelectNodes(".//*")) {
                 if (node.Attributes["dataFile"]?.Value != null) {
                     try {
@@ -1382,17 +1380,12 @@ namespace LoadInjector.ViewModels {
                 MessageBox.Show("Please save as an archive file first", "Execute", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return;
             }
-            //string lir = GetCommandCentreExecutable();
-            //if (string.IsNullOrEmpty(lir)) {
-            //    MessageBox.Show("Load Injector Command Center could not be found. Please select the directory where it is installed", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-            //    return;
-            //}
-
             string executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "");
 
-            //if (File.Exists(executablePath + "\\LoadInjectorRuntime.exe")) {
-            //    return executablePath + "\\LoadInjectorRuntime.exe";
-            //}
+            if (!File.Exists(executablePath + "\\LoadInjectorRuntime.exe")) {
+                MessageBox.Show("Load Injector Command Center could not be found. \nPlease install the Load Injector suite or run the Load INjectorCommand Center sepearately", "Command Center Not Found", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
 
             try {
                 Process process = new Process();
@@ -1402,11 +1395,9 @@ namespace LoadInjector.ViewModels {
                 Console.WriteLine(executablePath + "\\LoadInjectorCommandCentre.exe");
 
                 process.StartInfo.WorkingDirectory = executablePath;
-                process.StartInfo.Arguments = $"-autoAssign:{Path}";
+                process.StartInfo.Arguments = $"-autoAssign:{Path} -runFromConfig:true";
                 process.StartInfo.FileName = executablePath + "\\LoadInjectorCommandCentre.exe";
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Normal;
-
-                Console.WriteLine(process.StartInfo.Arguments);
 
                 process.Start();
             } catch (Exception) {

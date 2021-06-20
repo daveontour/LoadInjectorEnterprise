@@ -145,6 +145,14 @@ namespace LoadInjector.RunTime.EngineComponents {
                     System.Environment.Exit(1);
                 });
 
+                hubProxy.On("LocalDisconnect", () => {
+                    if (ngExecutionController.LocalStart != null)
+                        hubConnection.Stop();
+                    ngExecutionController.ProgramStop();
+                    logger.Warn("Disconnection requested by host");
+                    System.Environment.Exit(1);
+                });
+
                 hubProxy.On("Cancel", (mode) => {
                     ngExecutionController.Cancel();
                 });

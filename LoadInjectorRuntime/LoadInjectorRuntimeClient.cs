@@ -32,12 +32,14 @@ namespace LoadInjectorRuntime {
         }
 
         public string Report { get; set; }
+        public string LocalStart { get; private set; }
 
-        public LoadInjectorRuntimeClient(string executeFile, string server, string port, string report) {
+        public LoadInjectorRuntimeClient(string executeFile, string server, string port, string report, string localStart) {
             ExecuteFile = executeFile;
             Server = server;
             Port = port;
             Report = report;
+            LocalStart = localStart;
         }
 
         public void OnStop() {
@@ -69,11 +71,11 @@ namespace LoadInjectorRuntime {
         }
 
         private void ExecuteLocal() {
-            controller = new NgExecutionController(ExecutionControllerType.StandAlone, executeFile: ExecuteFile, reportFile: Report);
+            controller = new NgExecutionController(ExecutionControllerType.StandAlone, executeFile: ExecuteFile, reportFile: Report, localStart: LocalStart);
         }
 
         private void StartClientMode() {
-            controller = new NgExecutionController(ExecutionControllerType.Client, serverHub: $"http://{Server}:{Port}/");
+            controller = new NgExecutionController(ExecutionControllerType.Client, serverHub: $"http://{Server}:{Port}/", localStart: LocalStart);
         }
     }
 }

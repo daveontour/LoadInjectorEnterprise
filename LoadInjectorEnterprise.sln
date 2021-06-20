@@ -15,7 +15,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorDestinations", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LoadInjectorCommandCentre", "LoadInjectorCommanCentre\LoadInjectorCommandCentre.csproj", "{4FCD0242-6009-473B-A27B-D74FBA009C37}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Setup2", "Setup2\Setup2.vdproj", "{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "SuiteInstaller", "SuiteInstaller\SuiteInstaller.vdproj", "{4F324DA2-B961-43F1-AC1E-88337CE9839F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -151,16 +151,16 @@ Global
 		{4FCD0242-6009-473B-A27B-D74FBA009C37}.Release|x64.Build.0 = Release|Any CPU
 		{4FCD0242-6009-473B-A27B-D74FBA009C37}.Release|x86.ActiveCfg = Release|Any CPU
 		{4FCD0242-6009-473B-A27B-D74FBA009C37}.Release|x86.Build.0 = Release|Any CPU
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Debug|Any CPU.ActiveCfg = Debug
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Debug|ARM.ActiveCfg = Debug
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Debug|ARM64.ActiveCfg = Debug
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Debug|x64.ActiveCfg = Debug
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Debug|x86.ActiveCfg = Debug
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Release|Any CPU.ActiveCfg = Release
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Release|ARM.ActiveCfg = Release
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Release|ARM64.ActiveCfg = Release
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Release|x64.ActiveCfg = Release
-		{2ACD2C15-30D8-4FD1-8510-2649554B4E3A}.Release|x86.ActiveCfg = Release
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Debug|Any CPU.ActiveCfg = Debug
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Debug|ARM.ActiveCfg = Debug
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Debug|ARM64.ActiveCfg = Debug
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Debug|x64.ActiveCfg = Debug
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Debug|x86.ActiveCfg = Debug
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Release|Any CPU.ActiveCfg = Release
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Release|ARM.ActiveCfg = Release
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Release|ARM64.ActiveCfg = Release
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Release|x64.ActiveCfg = Release
+		{4F324DA2-B961-43F1-AC1E-88337CE9839F}.Release|x86.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
