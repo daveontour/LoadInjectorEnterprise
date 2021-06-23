@@ -1,18 +1,42 @@
 ﻿using LoadInjector.RunTime.Views;
 using LoadInjectorCommandCentre.Views;
+using NLog;
 using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-
-//using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 using System.Xml;
 
 namespace LoadInjectorCommandCentre {
+
+    [ValueConversion(typeof(bool), typeof(GridLength))]
+    public class BoolToGridRowHeightConverter : IValueConverter {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            return ((Visibility)value != Visibility.Collapsed) ? new GridLength(5, GridUnitType.Star) : new GridLength(0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {    // Don't need any convert back
+            return null;
+        }
+    }
+
+    public class BoolToGridRowHeightConverter2 : IValueConverter {
+
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
+            return ((Visibility)value != Visibility.Collapsed) ? new GridLength(5) : new GridLength(0);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {    // Don't need any convert back
+            return null;
+        }
+    }
 
     public class TabContentSelector : DataTemplateSelector {
 
@@ -41,6 +65,7 @@ namespace LoadInjectorCommandCentre {
     }
 
     public partial class MainWindow : Window, INotifyPropertyChanged {
+        public static readonly Logger logger = LogManager.GetLogger("consoleLogger");
         private MainCommandCenterController cccontroller;
 
         private ExecutionRecords _records;
@@ -62,13 +87,15 @@ namespace LoadInjectorCommandCentre {
         public MainWindow(string[] args = null) {
             this.args = args;
 
-            foreach (string arg in args) {
-                if (arg.Contains("runFromConfig")) {
-                    this.runFromConfig = true;
-                }
-                if (arg.StartsWith("-autoAssign:")) {
-                    AutoAssignArchive = arg.Replace("-autoAssign:", "");
-                    AutoExecute = false;
+            if (args != null) {
+                foreach (string arg in args) {
+                    if (arg.Contains("runFromConfig")) {
+                        this.runFromConfig = true;
+                    }
+                    if (arg.StartsWith("-autoAssign:")) {
+                        AutoAssignArchive = arg.Replace("-autoAssign:", "");
+                        AutoExecute = false;
+                    }
                 }
             }
 
@@ -136,6 +163,15 @@ namespace LoadInjectorCommandCentre {
                 return _visdataGrid;
             }
             set { _visdataGrid = value; }
+        }
+
+        private Canvas _visConfigCanvas;
+
+        public Canvas VisibleConfigCanvas {
+            get {
+                return _visConfigCanvas;
+            }
+            set { _visConfigCanvas = value; }
         }
 
         public ObservableCollection<object> ClientTabDatas { get; set; }
@@ -256,12 +292,18 @@ namespace LoadInjectorCommandCentre {
         }
 
         private void Window_ContentRendered(object sender, EventArgs e) {
-            if (!runFromConfig) {
-                LoadInjectorCommandCentreWelcome welcome = new LoadInjectorCommandCentreWelcome(this) {
-                    Owner = this,
-                    DataContext = this
-                };
-                welcome.ShowDialog();
+            logger.Info("Window_ContentRendered");
+
+            try {
+                if (!runFromConfig) {
+                    LoadInjectorCommandCentreWelcome welcome = new LoadInjectorCommandCentreWelcome(this) {
+                        Owner = this,
+                        DataContext = this
+                    };
+                    welcome.ShowDialog();
+                }
+            } catch (Exception ex) {
+                logger.Error(ex, "Welcome window error");
             }
 
             ServerURL = $"http://{SignalRIP}:{ServerPort}/";
@@ -311,7 +353,7 @@ namespace LoadInjectorCommandCentre {
                 Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre");
                 File.WriteAllText(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml", doc.OuterXml);
             } catch (Exception ex) {
-                Console.WriteLine(ex.Message);
+                logger.Error(ex.Message, "XMLDoc");
             }
 
             OnPropertyChanged("NoAutoAssign");
@@ -331,7 +373,7 @@ namespace LoadInjectorCommandCentre {
 
             if (clientTabData.ConnectionID == "summary") {
                 nodeTabHolder.SelectedIndex = 0;
-                EnumVisual(nodeTabHolder);
+                EnumVisualDataGrid(nodeTabHolder);
             }
         }
 
@@ -368,11 +410,11 @@ namespace LoadInjectorCommandCentre {
                 }
             }
 
-            EnumVisual(nodeTabHolder);
+            EnumVisualDataGrid(nodeTabHolder);
             VisibleDataGrid?.Items.Refresh();
         }
 
-        public void EnumVisual(Visual myVisual) {
+        public void EnumVisualDataGrid(Visual myVisual) {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(myVisual); i++) {
                 // Retrieve child visual at specified index value.
                 Visual childVisual = (Visual)VisualTreeHelper.GetChild(myVisual, i);
@@ -387,7 +429,7 @@ namespace LoadInjectorCommandCentre {
                 // Do processing of the child visual object.
 
                 // Enumerate children of the child visual object.
-                EnumVisual(childVisual);
+                EnumVisualDataGrid(childVisual);
             }
         }
 

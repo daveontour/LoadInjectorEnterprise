@@ -40,10 +40,10 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
+    <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>x64</PlatformTarget>
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -298,6 +298,9 @@
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
+    <Content Include="NLog.config">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -314,9 +317,9 @@
       <Project>{37db7b6c-b40e-4f08-ae46-d2a46ff9d951}</Project>
       <Name>LoadInjectorBase</Name>
     </ProjectReference>
-    <ProjectReference Include="..\LoadInjectorRuntime\LoadInjectorRuntime.csproj">
-      <Project>{73beabce-0b45-4076-9b57-3012397c20c4}</Project>
-      <Name>LoadInjectorRuntime</Name>
+    <ProjectReference Include="..\LoadInjectorDestinations\LoadInjectorDestinations.csproj">
+      <Project>{fa9eebc1-cf82-4ed1-bed2-442f301b3d20}</Project>
+      <Name>LoadInjectorDestinations</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

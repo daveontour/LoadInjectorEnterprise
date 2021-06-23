@@ -479,30 +479,33 @@ namespace LoadInjector.RunTime {
                 logger.Warn("Iteration record Created");
 
                 foreach (LineExecutionController line in destLines) {
-                    LineRecord lr = new LineRecord();
-                    lr.DestinationType = line.LineType;
-                    lr.Name = line.name;
-                    lr.MessagesSent = line.messagesSent;
-                    lr.MessagesFailed = line.messagesFail;
-                    lr.Description = line.destinationEndPoint.endPointDestination.GetDestinationDescription();
+                    LineRecord lr = new LineRecord {
+                        DestinationType = line.LineType,
+                        Name = line.name,
+                        MessagesSent = line.messagesSent,
+                        MessagesFailed = line.messagesFail,
+                        Description = line.destinationEndPoint.endPointDestination.GetDestinationDescription()
+                    };
 
                     itRecord.DestinationLineRecords.Add(lr);
                 }
                 foreach (AmsDirectExecutionController line in amsLines) {
-                    LineRecord lr = new LineRecord();
-                    lr.DestinationType = line.LineType;
-                    lr.Name = line.name;
-                    lr.MessagesSent = line.messagesSent;
-                    lr.MessagesFailed = line.messagesFail;
+                    LineRecord lr = new LineRecord {
+                        DestinationType = line.LineType,
+                        Name = line.name,
+                        MessagesSent = line.messagesSent,
+                        MessagesFailed = line.messagesFail
+                    };
 
                     itRecord.DestinationLineRecords.Add(lr);
                 }
 
                 foreach (RateDrivenSourceController line in rateDrivenLines) {
-                    LineRecord lr = new LineRecord();
-                    lr.SourceType = "Rate Driven";
-                    lr.Name = line.name;
-                    lr.MessagesSent = line.messagesSent;
+                    LineRecord lr = new LineRecord {
+                        SourceType = "Rate Driven",
+                        Name = line.name,
+                        MessagesSent = line.messagesSent
+                    };
                     switch (line.dataSourceType) {
                         case "CSV":
                         case "Excel":
@@ -527,10 +530,11 @@ namespace LoadInjector.RunTime {
 
                 foreach (List<DataDrivenSourceController> controller in new List<List<DataDrivenSourceController>>() { amsDataDrivenLines, csvDataDrivenLines, excelDataDrivenLines, xmlDataDrivenLines, jsonDataDrivenLines, databaseDataDrivenLines }) {
                     foreach (DataDrivenSourceController line in controller) {
-                        LineRecord lr = new LineRecord();
-                        lr.SourceType = line.dataSourceType + "Data Driven";
-                        lr.Name = line.name;
-                        lr.MessagesSent = line.messagesSent;
+                        LineRecord lr = new LineRecord {
+                            SourceType = line.dataSourceType + "Data Driven",
+                            Name = line.name,
+                            MessagesSent = line.messagesSent
+                        };
 
                         switch (line.dataSourceType) {
                             case "CSV":
@@ -1379,7 +1383,9 @@ namespace LoadInjector.RunTime {
         public void ProgramStop() {
             try {
                 Directory.Delete(ArchiveDirectory, true);
-            } catch (Exception) { }
+            } catch (Exception) {
+                //NO-OP
+            }
         }
 
         public void StopLines() {
@@ -1476,11 +1482,9 @@ namespace LoadInjector.RunTime {
         public void ProduceCompletionReport() {
             try {
                 Process currentProcess = Process.GetCurrentProcess();
-                //CompletionReport report = new CompletionReport(executionNodeUuid, Utils.GetLocalIPAddress(), currentProcess.Id.ToString());
                 this.iterationRecords.IPAddress = Utils.GetLocalIPAddress();
                 this.iterationRecords.ProcessID = currentProcess.Id.ToString();
                 this.iterationRecords.WorkPacakage = this.archName;
-                this.iterationRecords = this.iterationRecords;
                 clientHub.SendCompletionReport(executionNodeUuid, iterationRecords);
             } catch (Exception ex) {
                 logger.Warn($"Produce completion report error {ex.Message}");

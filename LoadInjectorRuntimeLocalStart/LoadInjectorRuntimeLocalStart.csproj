@@ -4,17 +4,17 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{37DB7B6C-B40E-4F08-AE46-D2A46FF9D951}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>LoadInjectorBase</RootNamespace>
-    <AssemblyName>LoadInjectorBase</AssemblyName>
+    <ProjectGuid>{15253A69-97C1-4D82-A37B-FB1A795EA1FB}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>LoadInjectorRuntimeLocalStart</RootNamespace>
+    <AssemblyName>LoadInjectorRuntimeLocalStart</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -22,70 +22,50 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <PlatformTarget>AnyCPU</PlatformTarget>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="NLog, Version=4.0.0.0, Culture=neutral, PublicKeyToken=5120e14c03d0593c, processorArchitecture=MSIL">
       <HintPath>..\packages\NLog.4.7.10\lib\net45\NLog.dll</HintPath>
     </Reference>
-    <Reference Include="PresentationCore" />
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
-    <Reference Include="System.Data" />
     <Reference Include="System.IO.Compression" />
-    <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
-    <Reference Include="System.Threading.Tasks" />
     <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Common\ClientState.cs" />
-    <Compile Include="Common\DocumentLoadedEventArgs.cs" />
-    <Compile Include="Common\CompletionReport.cs" />
-    <Compile Include="Common\RelayCommand.cs" />
-    <Compile Include="Common\Structures.cs" />
-    <Compile Include="Common\Utils.cs" />
-    <Compile Include="Filters\Expression.cs" />
-    <Compile Include="Filters\FilterBool.cs" />
-    <Compile Include="Filters\FilterContains.cs" />
-    <Compile Include="Filters\FilterDateRange.cs" />
-    <Compile Include="Filters\FilterEquals.cs" />
-    <Compile Include="Filters\FilterLength.cs" />
-    <Compile Include="Filters\FilterMatches.cs" />
-    <Compile Include="Filters\FilterXPathEquals.cs" />
-    <Compile Include="Filters\FilterXPathExists.cs" />
-    <Compile Include="Interfaces\IDestinationEndPointController.cs" />
-    <Compile Include="FlightNode.cs" />
-    <Compile Include="Interfaces\IDestinationType.cs" />
-    <Compile Include="Interfaces\IExcelProcessor.cs" />
-    <Compile Include="Interfaces\IChainedSourceController.cs" />
+    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Abstracts\DestinationAbstract.cs" />
-    <Compile Include="TriggerRecord.cs" />
-    <Compile Include="Variable.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="NLog.config">
+    <None Include="App.config" />
+    <Content Include="NLog.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="..\LoadInjectorRuntimeCore\LoadInjectorRuntimeCore.csproj">
+      <Project>{13f3f3b0-0861-436b-ba84-deb709a3d33f}</Project>
+      <Name>LoadInjectorRuntimeCore</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

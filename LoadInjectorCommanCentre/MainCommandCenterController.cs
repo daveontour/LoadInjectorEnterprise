@@ -122,7 +122,7 @@ namespace LoadInjectorCommandCentre {
                 }
             }
             if (View.VisibleDataGrid == null) {
-                View.EnumVisual(View.nodeTabHolder);
+                View.EnumVisualDataGrid(View.nodeTabHolder);
             }
             View.VisibleDataGrid?.Items.Refresh();
         }
@@ -158,7 +158,7 @@ namespace LoadInjectorCommandCentre {
                     Process process = new Process();
 
                     // Configure the process using the StartInfo properties.
-                    process.StartInfo.WorkingDirectory = executable.Replace("\\LoadInjectorRuntime.exe", "");
+                    //    process.StartInfo.WorkingDirectory = executable.Replace("\\..\\Load Injextor Runtime Client\\LoadInjectorRuntimeLocalStart.exe", "");
                     process.StartInfo.FileName = executable;
                     process.StartInfo.Arguments = $"-server:{View.SignalRIP}  -port:{View.SignalRPort} -localStart:true";
                     process.StartInfo.WindowStyle = ProcessWindowStyle.Minimized;
@@ -171,10 +171,12 @@ namespace LoadInjectorCommandCentre {
         }
 
         private string GetRunTimeExecutable() {
-            executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "");
-
-            if (File.Exists(executablePath + "\\LoadInjectorRuntime.exe")) {
-                return executablePath + "\\LoadInjectorRuntime.exe";
+            executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "") + "\\..\\Load Injector Runtime Client\\LoadInjectorRuntimeLocalStart.exe";
+#if DEBUG
+            executablePath = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().GetName().CodeBase).Replace(@"file:\", "") + "\\..\\..\\..\\LoadInjectorRuntimeLocalStart\\bin\\Debug\\LoadInjectorRuntimeLocalStart.exe";
+#endif
+            if (File.Exists(executablePath)) {
+                return executablePath;
             }
 
             string configFileName = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "\\LoadInjectorCommandCentre\\Config.xml";
@@ -518,7 +520,7 @@ namespace LoadInjectorCommandCentre {
                 View.nodeTabHolder.SelectedIndex = 0;
                 ClearGridData();
                 if (View.VisibleDataGrid == null) {
-                    View.EnumVisual(View.nodeTabHolder);
+                    View.EnumVisualDataGrid(View.nodeTabHolder);
                 }
 
                 View.VisibleDataGrid.Items.Refresh();
@@ -699,7 +701,7 @@ namespace LoadInjectorCommandCentre {
             Application.Current.Dispatcher.Invoke(delegate {
                 try {
                     if (View.VisibleDataGrid == null) {
-                        View.EnumVisual(View.nodeTabHolder);
+                        View.EnumVisualDataGrid(View.nodeTabHolder);
                     }
                     View.VisibleDataGrid?.Items.Refresh();
                 } catch (Exception ex) {

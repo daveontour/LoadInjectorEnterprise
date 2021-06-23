@@ -220,19 +220,15 @@ namespace LoadInjector.RunTime.EngineComponents {
             if (localOnly) {
                 logger.Info(s);
             } else {
-                if (true) {
-                    Task.Run(() => {
-                        logger.Info($"ConsoleMag: {uuid}, {s}");
-                        try {
-                            this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, $"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
-                        } catch (Exception ex) {
-                            logger.Info($"Console Message Error. {ex.Message}");
-                        }
-                    });
-                    consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
-                } else {
-                    consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
-                }
+                Task.Run(() => {
+                    logger.Info($"ConsoleMag: {uuid}, {s}");
+                    try {
+                        this.hubProxy.Invoke("ConsoleMsg", executionNodeID, uuid, $"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
+                    } catch (Exception ex) {
+                        logger.Info($"Console Message Error. {ex.Message}");
+                    }
+                });
+                consoleMessages.AppendLine($"[{DateTime.Now:HH:mm:ss.ffff}] {s}");
             }
         }
 
@@ -308,6 +304,7 @@ namespace LoadInjector.RunTime.EngineComponents {
         }
 
         internal void SourceReportChain(string executionNodeID, string uuid, string v1, int messagesSent1, string v2, int messagesSent2) {
+            //NO-OP
         }
 
         internal void SetDestinationOutput(string executionNodeID, string uuid, string s) {

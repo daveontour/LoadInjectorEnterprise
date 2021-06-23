@@ -91,6 +91,129 @@
         <local:TabContentSelector x:Key="myDataTemplateSelector" />
         <local:TabItemSelector x:Key="myItemTemplateSelector" />
 
+        <Path x:Key="arrow" Stroke="Black" Panel.ZIndex="10" />
+        <Polygon x:Key="arrowHead" Fill="SteelBlue" StrokeThickness = "1" Stroke="Black"
+                HorizontalAlignment = "Left"
+                VerticalAlignment = "Center" Panel.ZIndex="10" />
+
+        <Border x:Key="qxLabel" CornerRadius="4" Background="MidnightBlue" Width="300" Height="60" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <Border.LayoutTransform>
+                <RotateTransform Angle="90" />
+            </Border.LayoutTransform>
+            <Label x:Name="label" Foreground="White" FontSize="24" FontStyle="Italic"  HorizontalAlignment="Center" VerticalAlignment="Center">Load Injector</Label>
+        </Border>
+
+        <Border x:Key="fltSource" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="LightYellow">
+                <Label Content="AMS Flights" FontWeight="DemiBold" FontStyle="Italic" />
+                <Label x:Name="minOff" />
+                <Label x:Name="maxOff" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="amsDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(AMS Data) "  Foreground="Black" />
+                <Label x:Name="amsDataDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="amsDataDrivenLineVars" FontWeight="Normal"  Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="csvDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(CSV Data) " Foreground="Black" />
+                <Label x:Name="csvDataDrivenLineName" FontWeight="DemiBold"  Foreground="Black" />
+                <Label x:Name="csvDataDrivenLineVars" FontWeight="Normal"  Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="excelDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(Excel Data) " Foreground="Black" />
+                <Label x:Name="excelDataDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="excelDataDrivenLineVars" FontWeight="Normal" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="xmlDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(XML Data) " Foreground="Black" />
+                <Label x:Name="xmlDataDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="xmlDataDrivenLineVars" FontWeight="Normal" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="jsonDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(JSON Data) " Foreground="Black" />
+                <Label x:Name="jsonDataDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="jsonDataDrivenLineVars" FontWeight="Normal" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="dbDataDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DeepSkyBlue">
+                <Label Content="(Database Data) " Foreground="Black" />
+                <Label x:Name="dbDataDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="dbDataDrivenLineVars" FontWeight="Normal" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="rateDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="SkyBlue">
+                <Label x:Name="rateDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="chainDriven" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel x:Name="chainDrivenStack" Orientation="Horizontal" Height="26" Width="346" Background="LightGray">
+                <Label x:Name="chainDrivenLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="chainDrivenLineDelay"  Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="amsDirect" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="DarkSeaGreen">
+                <Label x:Name="amsLineName" FontWeight="DemiBold" Foreground="Black" />
+                <Label x:Name="amsLineVars" FontWeight="Normal" Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <Border x:Key="dest" Height="30" Width="350"  Background="MidnightBlue">
+            <StackPanel Orientation="Horizontal" Height="26" Width="346" Background="MediumSeaGreen">
+                <Label x:Name="directLineName" FontWeight="DemiBold"  Foreground="Black" />
+                <Label x:Name="directLineProtocol" FontWeight="Normal"  Foreground="Black" />
+                <Label x:Name="directLineVars" FontWeight="Normal"  Foreground="Black" />
+            </StackPanel>
+        </Border>
+
+        <StackPanel x:Key="amsHolder" Panel.ZIndex="1" Orientation="Vertical" Width="350" Background="#0D88F3" Margin="5,5,5,5">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel }">
+                    <Setter Property="Margin" Value="5,0,5,5" />
+                </Style>
+            </StackPanel.Resources>
+        </StackPanel>
+
+        <StackPanel x:Key="destHolder" Panel.ZIndex="1" Orientation="Vertical" Width="350" Background="#0D88F3"  Margin="5,5,5,5">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel }">
+                    <Setter Property="Margin" Value="5,0,5,5" />
+                </Style>
+            </StackPanel.Resources>
+        </StackPanel>
+
+        <StackPanel x:Key="csvSourceHolder" Panel.ZIndex="1" Orientation="Vertical" Width="350" Background="#0D6CF3"  Margin="5,5,5,5">
+            <StackPanel.Resources>
+                <Style TargetType="{x:Type StackPanel }">
+                    <Setter Property="Margin" Value="5,0,5,5" />
+                </Style>
+            </StackPanel.Resources>
+        </StackPanel>
+
+        <local:BoolToGridRowHeightConverter x:Key="BoolToGridRowHeightConverter" />
+        <local:BoolToGridRowHeightConverter2 x:Key="BoolToGridRowHeightConverter2" />
+
         <DataTemplate x:Key="ClientTabItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding Path=Header}" />
@@ -98,9 +221,23 @@
         </DataTemplate>
         <DataTemplate x:Key="ClientTabContentTemplate">
 
-            <DockPanel  LastChildFill="True" Background="AliceBlue">
+            <!--   <DockPanel  LastChildFill="True" Background="AliceBlue">  -->
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="5*" />
+                    <RowDefinition Height="{Binding DetailVisibility, Converter={StaticResource BoolToGridRowHeightConverter2}}" />
+                    <RowDefinition Height="{Binding DetailVisibility, Converter={StaticResource BoolToGridRowHeightConverter}}" />
+                </Grid.RowDefinitions>
 
-                <TabControl DockPanel.Dock="Bottom" Height="300" Margin="0,5,0,0" Grid.Row="0" x:Name="tabControl" Visibility="{Binding Path=DetailVisibility}">
+                <GridSplitter
+            Grid.Row="1"
+            Background="Gray"
+            Height="Auto" Width="Auto"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Cursor="SizeNS" />
+
+                <TabControl Grid.Row="2" DockPanel.Dock="Bottom"  Margin="0,5,0,0"  x:Name="tabControl" Visibility="{Binding Path=DetailVisibility}">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Output"  FontSize="14" />
@@ -121,7 +258,8 @@
                         <TabItem.Header>
                             <TextBlock Text="Configuration"  FontSize="14" />
                         </TabItem.Header>
-                        <TextBox x:Name="configConsole"
+
+                        <TextBox  x:Name="configConsole"
                                  TextWrapping="NoWrap"
                                  IsReadOnly="True"
                                  ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -134,9 +272,15 @@
                     </TabItem>
                     <TabItem>
                         <TabItem.Header>
-                            <TextBlock Text="Completion Report"
-                                       FontSize="14"
- />
+                            <TextBlock Text="Message Flow"  FontSize="14" />
+                        </TabItem.Header>
+                        <ScrollViewer  VerticalScrollBarVisibility="Auto">
+                            <ContentPresenter Content="{Binding FlowCanvas}" />
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem>
+                        <TabItem.Header>
+                            <TextBlock Text="Completion Report" FontSize="14" />
                         </TabItem.Header>
                         <Grid Background="AliceBlue">
                             <Grid.RowDefinitions>
@@ -152,7 +296,7 @@
                     </TabItem>
                 </TabControl>
 
-                <Grid Background="AliceBlue">
+                <Grid Grid.Row="0" Background="AliceBlue">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="35"></RowDefinition>
                         <RowDefinition Height="*" />
@@ -261,7 +405,8 @@
                         </DataGrid.GroupStyle>
                     </DataGrid>
                 </Grid>
-            </DockPanel>
+            </Grid>
+            <!--   </DockPanel>  -->
         </DataTemplate>
     </Window.Resources>
     <Grid>

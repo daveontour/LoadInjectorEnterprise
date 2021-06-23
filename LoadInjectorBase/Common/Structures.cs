@@ -56,7 +56,7 @@ namespace LoadInjectorBase.Common {
             int index = 0;
             foreach (IterationRecord itRec in Records) {
                 index++;
-                if (Records.Count() > 1) {
+                if (Records.Count > 1) {
                     sb.AppendLine($"\nExecution Iteration Number: {index}");
                 }
 
