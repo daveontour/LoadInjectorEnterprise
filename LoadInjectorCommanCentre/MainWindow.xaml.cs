@@ -15,39 +15,20 @@ using System.Xml;
 
 namespace LoadInjectorCommandCentre {
 
-    [ValueConversion(typeof(bool), typeof(GridLength))]
-    public class BoolToGridRowHeightConverter : IValueConverter {
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return ((Visibility)value != Visibility.Collapsed) ? new GridLength(5, GridUnitType.Star) : new GridLength(0);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {    // Don't need any convert back
-            return null;
-        }
-    }
-
-    public class BoolToGridRowHeightConverter2 : IValueConverter {
-
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture) {
-            return ((Visibility)value != Visibility.Collapsed) ? new GridLength(5) : new GridLength(0);
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture) {    // Don't need any convert back
-            return null;
-        }
-    }
-
     public class TabContentSelector : DataTemplateSelector {
 
         public override DataTemplate SelectTemplate(object item, DependencyObject container) {
             Window win = Application.Current.MainWindow;
 
-            if (item is ClientTabControl) {
-                return win.FindResource("ClientTabContentTemplate") as DataTemplate;
-            }
+            return win.FindResource("ClientTabContentTemplate") as DataTemplate;
 
-            return win.FindResource("SummaryTabContentTemplate") as DataTemplate;
+            //if (item is ClientTabControl control) {
+            //    if (control.DetailVisibility == Visibility.Visible) {
+            //        return win.FindResource("ClientTabContentTemplate") as DataTemplate;
+            //    }
+            //}
+
+            //return win.FindResource("SummaryTabContentTemplate") as DataTemplate;
         }
     }
 
@@ -166,13 +147,6 @@ namespace LoadInjectorCommandCentre {
         }
 
         private Canvas _visConfigCanvas;
-
-        public Canvas VisibleConfigCanvas {
-            get {
-                return _visConfigCanvas;
-            }
-            set { _visConfigCanvas = value; }
-        }
 
         public ObservableCollection<object> ClientTabDatas { get; set; }
 
@@ -421,6 +395,10 @@ namespace LoadInjectorCommandCentre {
 
                 if (childVisual is DataGrid) {
                     if (((DataGrid)childVisual).Name == "statusGrid") {
+                        VisibleDataGrid = childVisual as DataGrid;
+                        break;
+                    }
+                    if (((DataGrid)childVisual).Name == "summaryGrid") {
                         VisibleDataGrid = childVisual as DataGrid;
                         break;
                     }

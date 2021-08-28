@@ -665,6 +665,7 @@ namespace LoadInjectorCommandCentre {
                         if (r != null) {
                             r.Sent = messagesSent;
                             r.Fail = messageFail;
+
                             if (this.gridRefreshRate == 0 || forceUpdate) {
                                 View.VisibleDataGrid?.Items.Refresh();
                             }

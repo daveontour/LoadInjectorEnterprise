@@ -88,9 +88,6 @@
             </CollectionViewSource.SortDescriptions>
         </CollectionViewSource>
 
-        <local:TabContentSelector x:Key="myDataTemplateSelector" />
-        <local:TabItemSelector x:Key="myItemTemplateSelector" />
-
         <Path x:Key="arrow" Stroke="Black" Panel.ZIndex="10" />
         <Polygon x:Key="arrowHead" Fill="SteelBlue" StrokeThickness = "1" Stroke="Black"
                 HorizontalAlignment = "Left"
@@ -211,33 +208,25 @@
             </StackPanel.Resources>
         </StackPanel>
 
-        <local:BoolToGridRowHeightConverter x:Key="BoolToGridRowHeightConverter" />
-        <local:BoolToGridRowHeightConverter2 x:Key="BoolToGridRowHeightConverter2" />
+        <local:TabContentSelector x:Key="myDataTemplateSelector" />
+        <local:TabItemSelector x:Key="myItemTemplateSelector" />
 
         <DataTemplate x:Key="ClientTabItemTemplate">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="{Binding Path=Header}" />
             </StackPanel>
         </DataTemplate>
+
+        <!-- Template for the individual node tabs-->
         <DataTemplate x:Key="ClientTabContentTemplate">
 
-            <!--   <DockPanel  LastChildFill="True" Background="AliceBlue">  -->
-            <Grid>
-                <Grid.RowDefinitions>
+            <DockPanel LastChildFill="True">
+                <!--   <Grid.RowDefinitions>
                     <RowDefinition Height="5*" />
-                    <RowDefinition Height="{Binding DetailVisibility, Converter={StaticResource BoolToGridRowHeightConverter2}}" />
-                    <RowDefinition Height="{Binding DetailVisibility, Converter={StaticResource BoolToGridRowHeightConverter}}" />
-                </Grid.RowDefinitions>
-
-                <GridSplitter
-            Grid.Row="1"
-            Background="Gray"
-            Height="Auto" Width="Auto"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            Cursor="SizeNS" />
-
-                <TabControl Grid.Row="2" DockPanel.Dock="Bottom"  Margin="0,5,0,0"  x:Name="tabControl" Visibility="{Binding Path=DetailVisibility}">
+                    <RowDefinition Height="5" />
+                    <RowDefinition Height="5*" />
+                </Grid.RowDefinitions>  -->
+                <TabControl DockPanel.Dock="Bottom" Height="300" Grid.Row="2" Margin="0,5,0,0"  x:Name="tabControl" Visibility="{Binding Path=DetailVisibility}">
                     <TabItem>
                         <TabItem.Header>
                             <TextBlock Text="Output"  FontSize="14" />
@@ -296,18 +285,14 @@
                     </TabItem>
                 </TabControl>
 
-                <Grid Grid.Row="0" Background="AliceBlue">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="35"></RowDefinition>
-                        <RowDefinition Height="*" />
-                        <!--  <RowDefinition Height="30" />-->
-                    </Grid.RowDefinitions>
-                    <DockPanel LastChildFill="True" Grid.Row="0">
+                <DockPanel  Grid.Row="0" LastChildFill="True"  Background="AliceBlue" VerticalAlignment="Stretch">
+
+                    <DockPanel  DockPanel.Dock="Top" LastChildFill="True" Height="35">
                         <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
                         <Label HorizontalAlignment="Center" FontWeight="DemiBold" FontSize="14" Content="{Binding Path=Title}" />
                     </DockPanel>
 
-                    <DataGrid Grid.Row="1" Name="statusGrid"
+                    <DataGrid  Name="statusGrid"
                           ItemsSource="{Binding Source={StaticResource executionLines}}"
                           AutoGenerateColumns="False"
                           IsReadOnly="True"
@@ -315,7 +300,7 @@
                           ScrollViewer.VerticalScrollBarVisibility="Auto"
                           ScrollViewer.HorizontalScrollBarVisibility="Auto"
                           CanUserAddRows="False"
-                          Margin="0,0,2,0">
+                          Margin="0,0,2,0" VerticalAlignment="Stretch">
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Type" Binding="{Binding Protocol}" Width="200">
                                 <DataGridTextColumn.ElementStyle>
@@ -404,11 +389,130 @@
                             </GroupStyle>
                         </DataGrid.GroupStyle>
                     </DataGrid>
-                </Grid>
-            </Grid>
-            <!--   </DockPanel>  -->
+                </DockPanel>
+
+                <!--    <GridSplitter
+            Grid.Row="1"
+            Background="Gray"
+            Height="Auto" Width="Auto"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            Cursor="SizeNS" />  -->
+            </DockPanel>
+        </DataTemplate>
+
+        <!-- Template for the summary tab -->
+        <DataTemplate x:Key="SummaryTabContentTemplate">
+            <DockPanel  LastChildFill="True">
+                <DockPanel LastChildFill="True"  Background="AliceBlue" VerticalAlignment="Stretch">
+
+                    <DockPanel  DockPanel.Dock="Top" LastChildFill="True" Height="35">
+                        <Label DockPanel.Dock="Left" FontWeight="Bold" FontSize="14">Messaging Status</Label>
+                        <Label HorizontalAlignment="Center" FontWeight="DemiBold" FontSize="14" Content="{Binding Path=Title}" />
+                    </DockPanel>
+
+                    <DataGrid  Name="summaryGrid"
+                          ItemsSource="{Binding Source={StaticResource executionLines}}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          ScrollViewer.CanContentScroll="True"
+                          ScrollViewer.VerticalScrollBarVisibility="Auto"
+                          ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                          CanUserAddRows="False"
+                          Margin="0,0,2,0" VerticalAlignment="Stretch">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Type" Binding="{Binding Protocol}" Width="200">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="300">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Left" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Conf Msgs/min"   Binding="{Binding ConfigMM}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Messages Sent"   Binding="{Binding Sent}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Messages Failed"   Binding="{Binding Fail}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <Setter Property="Foreground" Value="Red" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Messages Per Minute" Binding="{Binding MM}">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Center" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                        </DataGrid.Columns>
+                        <DataGrid.GroupStyle>
+                            <!-- Style for groups at top level. -->
+                            <GroupStyle>
+                                <GroupStyle.ContainerStyle>
+                                    <Style TargetType="{x:Type GroupItem}">
+                                        <Setter Property="Margin" Value="0,0,0,5" />
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type GroupItem}">
+                                                    <Expander IsExpanded="True" Background="#FF112255" BorderBrush="#FF002255" Foreground="#FFEEEEEE" BorderThickness="1,1,1,5">
+                                                        <Expander.Header>
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <TextBlock FontWeight="Bold" Text="{Binding Path=Name}" Margin="5,0,0,0" />
+                                                                <!--          <Button Grid.Row="1" Grid.Column="0" Style="{DynamicResource RoundCorner}" x:Name="assignBtn" Click="assignBtn_Click" HorizontalAlignment="Left" Content="Stop" /> -->
+                                                            </StackPanel>
+                                                        </Expander.Header>
+                                                        <Expander.Content>
+                                                            <ItemsPresenter />
+                                                        </Expander.Content>
+                                                    </Expander>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                    </Style>
+                                </GroupStyle.ContainerStyle>
+                            </GroupStyle>
+                            <!-- Style for groups under the top level.-->
+                            <GroupStyle>
+                                <GroupStyle.HeaderTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Background="LightBlue">
+                                            <TextBlock Text="{Binding Path=Name}" Foreground="Blue" Margin="5,0,0,0" />
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </GroupStyle.HeaderTemplate>
+                            </GroupStyle>
+                        </DataGrid.GroupStyle>
+                    </DataGrid>
+                </DockPanel>
+            </DockPanel>
         </DataTemplate>
     </Window.Resources>
+
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="60" />
@@ -422,27 +526,27 @@
                     <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="LightSalmon" Margin="2,2,2,2">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                                <Button FontSize="10" x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="resetAllBtn" Click="resetAllBtn_Click"  Background="Pink" Content="Reset" HorizontalAlignment="Center" ToolTip="Reset the client to initial state and clear any assigned work package"  VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick" Background="Pink" Content="Disconnect" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="refreshBtn" Click="RefreshBtn_OnClick"  Content="Refresh" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="resetAllBtn" Click="resetAllBtn_Click"  Background="Pink" Content="Reset" HorizontalAlignment="Center" ToolTip="Reset the client to initial state and clear any assigned work package"  VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="disconnectAllBtn" Click="DisconnectAllBtn_OnClick" Background="Pink" Content="Disconnect" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0">Client Control - All Connected Nodes</Label>
+                                <Label FontSize="12" FontWeight="Bold" Padding="2,0,2,0">Client Control - All Connected Nodes</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
                     <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="PaleGreen" Margin="4,2,2,2">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                                <Button FontSize="10" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare" HorizontalAlignment="Left"   Width="80" Height="30" Margin="2,0,0,0" />
-                                <Button FontSize="10" Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute" HorizontalAlignment="Left"   Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="Completion Reports" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="100" Height="30"  Margin="2,0,0,0" />
-                                <Button FontSize="10" x:Name="clearBtn" Click="clearBtn_Click"  Content="Clear Grid" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="100" Height="30"  Margin="2,0,0,0"  Visibility="Collapsed" />
+                                <Button FontSize="12" FontWeight="DemiBold" x:Name="assignAllBtn" Click="AssignBtn_OnClick"  Content="Assign" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  Grid.Column="0" Grid.Row="0" x:Name="prepAllBtn" Click="PrepAllBtn_OnClick"  Content="Prepare" HorizontalAlignment="Left"   Width="80" Height="30" Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  Grid.Column="1" Grid.Row="0" x:Name="execAllBtn" Click="ExecAllBtn_OnClick"  Content="Execute" HorizontalAlignment="Left"   Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="stopAllBtn" Click="StopAllBtn_OnClick"  Content="Stop" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="80" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="completionReportBtn" Click="completionReportBtn_Click"  Content="Completion Reports"   VerticalAlignment="Center" Width="128" Height="30"  Margin="2,0,0,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="clearBtn" Click="clearBtn_Click"  Content="Clear Grid" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="10" Height="30"  Margin="2,0,0,0"  Visibility="Collapsed" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Execution Control - All Connected Nodes</Label>
+                                <Label FontSize="12" FontWeight="Bold" Padding="2,0,2,0" >Execution Control - All Connected Nodes</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>
@@ -450,10 +554,10 @@
                     <Border BorderThickness="1" CornerRadius="5" BorderBrush="Black" Background="PaleTurquoise" Margin="2,2,2,2">
                         <StackPanel Orientation="Vertical" VerticalAlignment="Top"  Margin="0,2">
                             <StackPanel Orientation="Horizontal" Margin="2,2,2,2">
-                                <Button FontSize="10" x:Name="statusBtn" Click="statusBtn_Click"  Content="Status and Control" HorizontalAlignment="Center"   VerticalAlignment="Center" Width="130" Height="30"  Margin="2,0,2,0" />
+                                <Button FontSize="12" FontWeight="DemiBold"  x:Name="statusBtn" Click="statusBtn_Click"  Content="Status and Control"   VerticalAlignment="Center" Width="156" Height="30"  Margin="2,0,2,0" />
                             </StackPanel>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                                <Label FontSize="10" FontWeight="Bold" Padding="2,0,2,0" >Command Center Control</Label>
+                                <Label FontSize="12" FontWeight="Bold" Padding="2,0,2,0" >Command Center Control</Label>
                             </StackPanel>
                         </StackPanel>
                     </Border>

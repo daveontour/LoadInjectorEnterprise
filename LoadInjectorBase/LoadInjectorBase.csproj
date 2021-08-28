@@ -71,7 +71,6 @@
     <Compile Include="Filters\FilterXPathEquals.cs" />
     <Compile Include="Filters\FilterXPathExists.cs" />
     <Compile Include="Interfaces\IDestinationEndPointController.cs" />
-    <Compile Include="FlightNode.cs" />
     <Compile Include="Interfaces\IDestinationType.cs" />
     <Compile Include="Interfaces\IExcelProcessor.cs" />
     <Compile Include="Interfaces\IChainedSourceController.cs" />

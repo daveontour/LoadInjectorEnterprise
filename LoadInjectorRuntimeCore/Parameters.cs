@@ -6,7 +6,8 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace LoadInjector.RuntimeCore {
+namespace LoadInjector.RuntimeCore
+{
     /*
      * Class to make the configuration parameters available.
      * The static constructor makes sure the parameters are initialised the first time the
@@ -14,7 +15,8 @@ namespace LoadInjector.RuntimeCore {
      *
      */
 
-    public static class Parameters {
+    public static class Parameters
+    {
         public static readonly Dictionary<string, string> descriptionToProtocol = new Dictionary<string, string>();
 
         public static readonly int MAXREPORTRATE = InitMaxReportRate();
@@ -29,25 +31,24 @@ namespace LoadInjector.RuntimeCore {
 
         public static readonly int REPORTEPOCH = InitReportEpoch();
 
-        public static readonly bool SITAAMS = InitSitaAMS();
-
-        public static string Template {
-            get {
-                if (SITAAMS) {
-                    return ReadResource("LoadInjector.assets.AMSTemplate.xml");
-                } else {
-                    return ReadResource("LoadInjector.assets.Template.xml");
-                }
+        public static string Template
+        {
+            get
+            {
+                return ReadResource("LoadInjector.assets.Template.xml");
             }
         }
 
-        static Parameters() {
+        static Parameters()
+        {
             var type = typeof(IDestinationType);
             IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies()
                             .SelectMany(s => s.GetTypes())
                             .Where(p => type.IsAssignableFrom(p));
-            foreach (Type t in types) {
-                if (!t.IsAbstract && !t.IsInterface) {
+            foreach (Type t in types)
+            {
+                if (!t.IsAbstract && !t.IsInterface)
+                {
                     IDestinationType dest = (IDestinationType)Activator.CreateInstance(t);
                     protocolDictionary.Add(dest.ProtocolName, dest);
                     protocolDescriptionDictionary.Add(dest.ProtocolDescription, dest);
@@ -57,42 +58,48 @@ namespace LoadInjector.RuntimeCore {
             }
         }
 
-        public static string ReadResource(string name) {
+        public static string ReadResource(string name)
+        {
             using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream(name))
-            using (StreamReader reader = new StreamReader(stream)) {
+            using (StreamReader reader = new StreamReader(stream))
+            {
                 return reader.ReadToEnd();
             }
         }
 
-        private static int InitMaxReportRate() {
-            try {
+        private static int InitMaxReportRate()
+        {
+            try
+            {
                 return int.Parse(ConfigurationManager.AppSettings["MAXREPORTRATE"]);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return 1000;
             }
         }
 
-        private static int InitProgressEpoch() {
-            try {
+        private static int InitProgressEpoch()
+        {
+            try
+            {
                 return int.Parse(ConfigurationManager.AppSettings["PROGRESSEPOCH"]);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return 5;
             }
         }
 
-        private static int InitReportEpoch() {
-            try {
+        private static int InitReportEpoch()
+        {
+            try
+            {
                 return int.Parse(ConfigurationManager.AppSettings["REPORTEPOCH"]);
-            } catch (Exception) {
-                return 100;
             }
-        }
-
-        private static bool InitSitaAMS() {
-            try {
-                return bool.Parse(ConfigurationManager.AppSettings["SITAAMS"]);
-            } catch (Exception) {
-                return false;
+            catch (Exception)
+            {
+                return 100;
             }
         }
     }
