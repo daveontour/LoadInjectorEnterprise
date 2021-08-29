@@ -914,6 +914,8 @@ namespace LoadInjector.RunTime
                 {
                     foreach (RateDrivenSourceController line in rateDrivenLines)
                     {
+                        bool result = line.Prepare();
+                        logger.Info($"Rate Source Prepare  = {result}");
                         if (!line.InUse())
                         {
                             line.SetSourceLineOutput("No Destinations Using this Source");
