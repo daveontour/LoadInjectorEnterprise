@@ -5,59 +5,80 @@ using System.Collections.Generic;
 using System.Net;
 using System.Xml;
 
-namespace LoadInjector.Destinations {
-
-    public class DestinationFtp : DestinationAbstract {
+namespace LoadInjector.Destinations
+{
+    public class DestinationFtp : DestinationAbstract
+    {
         private string ftpURL;
         private string ftpUser;
         private string ftpPass;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
 
-            try {
+            try
+            {
                 ftpURL = defn.Attributes["ftpURL"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"No FTP URL defined for { defn.Attributes["name"].Value}");
                 return false;
             }
 
-            try {
-                ftpUser = defn.Attributes["ftpUser"].Value;
-            } catch (Exception) {
+            try
+            {
+                ftpUser = defn.Attributes["username"].Value;
+            }
+            catch (Exception)
+            {
                 ftpUser = null;
             }
 
-            try {
-                ftpPass = defn.Attributes["ftpPass"].Value;
-            } catch (Exception) {
+            try
+            {
+                ftpPass = defn.Attributes["password"].Value;
+            }
+            catch (Exception)
+            {
                 ftpPass = null;
             }
 
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"FTP Destination: {ftpURL}";
         }
 
-        public override bool Send(string val, List<Variable> vars) {
+        public override bool Send(string val, List<Variable> vars)
+        {
             string uri = string.Copy(ftpURL);
 
-            foreach (Variable v in vars) {
-                try {
+            foreach (Variable v in vars)
+            {
+                try
+                {
                     uri = uri.Replace(v.token, v.value);
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // NO-OP
                 }
             }
 
-            try {
-                using (var client = new WebClient()) {
+            try
+            {
+                using (var client = new WebClient())
+                {
                     client.Credentials = new NetworkCredential(ftpUser, ftpPass);
                     client.UploadString(uri, WebRequestMethods.Ftp.UploadFile, val);
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 return false;
             }
 

@@ -276,14 +276,11 @@ namespace LoadInjector.RunTime
 
         public void RunLocal()
         {
-            if (!standAloneMode)
+            if (!standAloneMode && state.Value != ClientState.Ready.Value)
             {
-                if (state.Value != ClientState.Ready.Value)
-                {
-                    logger.Warn("Execute requested, but not in ready state " + state.Value);
-                    clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state " + state.Value);
-                    return;
-                }
+                logger.Warn("Execute requested, but not in ready state " + state.Value);
+                clientHub.ConsoleMsg(executionNodeUuid, null, "Execute requested, but not in ready state " + state.Value);
+                return;
             }
 
             repeatsExecuted = 0;
@@ -508,17 +505,16 @@ namespace LoadInjector.RunTime
                     };
                     switch (line.dataSourceType)
                     {
-                        case "CSV":
-                        case "Excel":
-                        case "XML":
-                        case "JSON":
+                        case "csv":
+                        case "excel":
+                        case "xml":
+                        case "json":
                             lr.Description = $"{line.dataSourceType}: {line.dataFile}, Configured Rate: {line.messagesPerMinute} msgs/min";
                             break;
 
-                        case "DATABASE":
-                        case "MSSQL":
-                        case "MySQL":
-                        case "ORACLE":
+                        case "mssql":
+                        case "mysql":
+                        case "oracle":
                             lr.Description = $"{line.dataSourceType}: {line.connStr}, Configured Rate: {line.messagesPerMinute} msgs/min";
                             break;
 
@@ -531,32 +527,34 @@ namespace LoadInjector.RunTime
 
                 foreach (List<DataDrivenSourceController> controller in new List<List<DataDrivenSourceController>>() { null, csvDataDrivenLines, excelDataDrivenLines, xmlDataDrivenLines, jsonDataDrivenLines, databaseDataDrivenLines })
                 {
-                    foreach (DataDrivenSourceController line in controller)
+                    if (controller != null)
                     {
-                        LineRecord lr = new LineRecord
+                        foreach (DataDrivenSourceController line in controller)
                         {
-                            SourceType = line.dataSourceType + "Data Driven",
-                            Name = line.name,
-                            MessagesSent = line.messagesSent
-                        };
+                            LineRecord lr = new LineRecord
+                            {
+                                SourceType = line.dataSourceType + "Data Driven",
+                                Name = line.name,
+                                MessagesSent = line.messagesSent
+                            };
 
-                        switch (line.dataSourceType)
-                        {
-                            case "CSV":
-                            case "Excel":
-                            case "XML":
-                            case "JSON":
-                                lr.Description = $"{line.dataSourceType}: {line.dataFile}";
-                                break;
+                            switch (line.dataSourceType)
+                            {
+                                case "csv":
+                                case "excel":
+                                case "xml":
+                                case "json":
+                                    lr.Description = $"{line.dataSourceType}: {line.dataFile}";
+                                    break;
 
-                            case "DATABASE":
-                            case "MSSQL":
-                            case "MySQL":
-                            case "ORACLE":
-                                lr.Description = $"{line.dataSourceType}: {line.connStr}";
-                                break;
+                                case "mssql":
+                                case "mysql":
+                                case "oracle":
+                                    lr.Description = $"{line.dataSourceType}: {line.connStr}";
+                                    break;
+                            }
+                            itRecord.SourceLineRecords.Add(lr);
                         }
-                        itRecord.SourceLineRecords.Add(lr);
                     }
                 }
 

@@ -5,25 +5,33 @@ using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Xml;
 
-namespace LoadInjector.Destinations {
-
-    public class DestinationTCPClient : DestinationAbstract {
+namespace LoadInjector.Destinations
+{
+    public class DestinationTCPClient : DestinationAbstract
+    {
         private string tcpServerIP;
         private int tcpServerPort;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
 
-            try {
-                tcpServerIP = defn.Attributes["tcpServerIP"].Value;
-            } catch (Exception) {
+            try
+            {
+                tcpServerIP = defn.Attributes["hostP"].Value;
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"No TCP Server IP for {defn.Attributes["name"].Value}");
                 Console.WriteLine("Using '127.0.0.1' for TCP Server IP");
                 tcpServerIP = "127.0.0.1";
             }
-            try {
-                tcpServerPort = int.Parse(defn.Attributes["tcpServerPort"].Value);
-            } catch (Exception) {
+            try
+            {
+                tcpServerPort = int.Parse(defn.Attributes["port"].Value);
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"No TCP Server Port correctly defined for {defn.Attributes["name"].Value}");
                 return false;
             }
@@ -31,12 +39,15 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"Server: {tcpServerIP}, Port: {tcpServerPort}";
         }
 
-        public override bool Send(string message, List<Variable> vars) {
-            try {
+        public override bool Send(string message, List<Variable> vars)
+        {
+            try
+            {
                 TcpClient client = new TcpClient(tcpServerIP, tcpServerPort);
 
                 // Translate the passed message into ASCII and store it as a Byte array.
@@ -54,10 +65,14 @@ namespace LoadInjector.Destinations {
                 // Close everything.
                 stream.Close();
                 client.Close();
-            } catch (ArgumentNullException e) {
+            }
+            catch (ArgumentNullException e)
+            {
                 Console.WriteLine($"ArgumentNullException: {e.Message}");
                 return false;
-            } catch (SocketException e) {
+            }
+            catch (SocketException e)
+            {
                 Console.WriteLine($"SocketException: {e.Message}");
                 return false;
             }

@@ -4,25 +4,29 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LoadInjectorBase.Common {
-
-    public struct LineRecord {
+namespace LoadInjectorBase.Common
+{
+    public struct LineRecord
+    {
         public bool IsDestination, IsRateDriven, IsDataDriven, IsChained, IsSource;
         public string UUID, ExecutionNodeUUID, Name, DestinationType, SourceType, Description;
         public int MessagesSent, MessagesFailed, ExecutionElapsedTime;
         public DateTime ExecutionStart, ExecutionEnd;
     }
 
-    public class IterationRecord {
+    public class IterationRecord
+    {
         private List<LineRecord> sourceLineRecords = new List<LineRecord>();
         private List<LineRecord> destinationLineRecords = new List<LineRecord>();
 
-        public List<LineRecord> SourceLineRecords {
+        public List<LineRecord> SourceLineRecords
+        {
             get { return sourceLineRecords; }
             set { sourceLineRecords = value; }
         }
 
-        public List<LineRecord> DestinationLineRecords {
+        public List<LineRecord> DestinationLineRecords
+        {
             get { return destinationLineRecords; }
             set { destinationLineRecords = value; }
         }
@@ -32,7 +36,8 @@ namespace LoadInjectorBase.Common {
         public int IterationNumber { get; set; }
     }
 
-    public class CompletionReport {
+    public class CompletionReport
+    {
         public string ExecutionNodeID { get; set; }
         public string IPAddress { get; set; }
         public string ProcessID { get; set; }
@@ -41,12 +46,14 @@ namespace LoadInjectorBase.Common {
         private List<IterationRecord> iterationRecords = new List<IterationRecord>();
         public List<IterationRecord> Records { get { return iterationRecords; } set { iterationRecords = value; } }
 
-        public void Clear() {
+        public void Clear()
+        {
             iterationRecords.Clear();
             WorkPacakage = null;
         }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine(string.Format("{0,27} {1}", "Execution Node IP:", IPAddress));
@@ -54,9 +61,11 @@ namespace LoadInjectorBase.Common {
             sb.AppendLine(string.Format("{0,27} {1}", "Work Package:", WorkPacakage));
 
             int index = 0;
-            foreach (IterationRecord itRec in Records) {
+            foreach (IterationRecord itRec in Records)
+            {
                 index++;
-                if (Records.Count > 1) {
+                if (Records.Count > 1)
+                {
                     sb.AppendLine($"\nExecution Iteration Number: {index}");
                 }
 
@@ -65,13 +74,15 @@ namespace LoadInjectorBase.Common {
 
                 sb.AppendLine("\nSources:");
                 sb.AppendLine(string.Format("{0, -15}{1, -50}{2, -32} Source", "Type", "Description", "Trigers Fired"));
-                foreach (LineRecord rec in itRec.SourceLineRecords) {
+                foreach (LineRecord rec in itRec.SourceLineRecords)
+                {
                     sb.AppendLine(string.Format("{0, -15}{1, -50}{2, -32} {3}", rec.SourceType, rec.Name, rec.MessagesSent, rec.Description));
                 }
 
                 sb.AppendLine("\nDestination:");
                 sb.AppendLine(string.Format("{0, -15}{1, -50}{2, -15}{3, -17} Destination", "Type", "Description", "Messages Sent", "Messages Failed"));
-                foreach (LineRecord rec in itRec.DestinationLineRecords) {
+                foreach (LineRecord rec in itRec.DestinationLineRecords)
+                {
                     sb.AppendLine(string.Format("{0, -15}{1, -50}{2, -15}{3,-17} {4}", rec.DestinationType, rec.Name, rec.MessagesSent, rec.MessagesFailed, rec.Description));
                 }
             }

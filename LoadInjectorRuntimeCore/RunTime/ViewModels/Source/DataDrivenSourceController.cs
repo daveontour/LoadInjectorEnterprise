@@ -56,7 +56,9 @@ namespace LoadInjector.RunTime
                 }
             }
 
-            if (node.Name == "csvdatadriven")
+            string dataType = node.Attributes["dataType"].Value;
+
+            if (dataType == "csv")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
@@ -64,7 +66,7 @@ namespace LoadInjector.RunTime
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }
-            if (node.Name == "exceldatadriven")
+            if (dataType == "excel")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 excelSheet = node.Attributes["excelSheet"]?.Value;
@@ -73,7 +75,7 @@ namespace LoadInjector.RunTime
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }
-            if (node.Name == "xmldatadriven")
+            if (dataType == "xml")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 dataRestURL = node.Attributes["dataRestURL"]?.Value;
@@ -90,7 +92,7 @@ namespace LoadInjector.RunTime
                     xmlToString = false;
                 }
             }
-            if (node.Name == "jsondatadriven")
+            if (dataType == "json")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 dataRestURL = node.Attributes["dataRestURL"]?.Value;
@@ -99,11 +101,11 @@ namespace LoadInjector.RunTime
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }
-            if (node.Name == "databasedatadriven")
+            if (dataType.Contains("mssql") || dataType.Contains("oracle") || dataType.Contains("mysql"))
             {
                 connStr = node.Attributes["connStr"]?.Value;
                 sql = node.Attributes["sql"]?.Value;
-                dbType = node.Attributes["sourceType"]?.Value;
+                dbType = node.Attributes["dataType"]?.Value;
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }

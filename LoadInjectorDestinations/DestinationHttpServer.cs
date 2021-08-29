@@ -8,9 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace LoadInjector.Destinations {
-
-    internal class DestinationHttpServer : DestinationAbstract {
+namespace LoadInjector.Destinations
+{
+    internal class DestinationHttpServer : DestinationAbstract
+    {
         private HttpListener listener;
         private string serverURL;
         private readonly Queue<string> messageQueue = new Queue<string>();
@@ -18,33 +19,43 @@ namespace LoadInjector.Destinations {
         private CancellationTokenSource source;
         private string name;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
 
             name = defn.Attributes["name"]?.Value;
-            try {
-                serverURL = defn.Attributes["serverURL"]?.Value;
-            } catch (Exception ex) {
+            try
+            {
+                serverURL = defn.Attributes["httpURL"]?.Value;
+            }
+            catch (Exception ex)
+            {
                 serverURL = null;
                 Console.WriteLine($"HTTP Server URL Invalid. {ex.Message}");
             }
-            if (serverURL == null) {
+            if (serverURL == null)
+            {
                 return false;
             }
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"URL: {serverURL}";
         }
 
-        public override void Prepare() {
+        public override void Prepare()
+        {
             source = new CancellationTokenSource();
             CancellationToken token = source.Token;
             StartSimpleListener().Wait();
-            Task.Factory.StartNew(() => {
-                while (true) {
-                    if (token.IsCancellationRequested && threadToCancel != null) {
+            Task.Factory.StartNew(() =>
+            {
+                while (true)
+                {
+                    if (token.IsCancellationRequested && threadToCancel != null)
+                    {
                         threadToCancel.Abort();
                         return;
                     }
@@ -52,56 +63,74 @@ namespace LoadInjector.Destinations {
             });
         }
 
-        public override void Stop() {
+        public override void Stop()
+        {
             source.Cancel();
             listener.Abort();
         }
 
-        public override bool Send(string val, List<Variable> vars) {
-            try {
+        public override bool Send(string val, List<Variable> vars)
+        {
+            try
+            {
                 messageQueue.Enqueue(val);
                 return true;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex);
                 return false;
             }
         }
 
-        public async Task<string> StartSimpleListener() {
-            if (!HttpListener.IsSupported) {
+        public async Task<string> StartSimpleListener()
+        {
+            if (!HttpListener.IsSupported)
+            {
                 logger.Error("Windows XP SP2 or Server 2003 is required to use the HttpListener class.");
                 return "Windows XP SP2 or Server 2003 is required to use the HttpListener class.";
             }
 
             var tcs = new TaskCompletionSource<string>();
-            await Task.Factory.StartNew(async () => {
+            await Task.Factory.StartNew(async () =>
+            {
                 threadToCancel = Thread.CurrentThread;
 
-                try {
+                try
+                {
                     listener = new HttpListener();
                     listener.Prefixes.Add(serverURL);
                     listener.Start();
                     logger.Trace("Listening on " + serverURL + "...");
                     Console.WriteLine($"{name} Listening on " + serverURL + "...");
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     logger.Error($"Could not start HTTP Listener {ex.Message}");
                     Console.WriteLine($"Could not start HTTP Listener {ex.Message}");
                 }
 
                 // Received messages are written to a buffer queue
                 // The written records are read in the main Listen method and returned
-                while (true) {
+                while (true)
+                {
                     HttpListenerContext context = null;
-                    try {
+                    try
+                    {
                         context = await listener.GetContextAsync();
-                    } catch (Exception) {
+                    }
+                    catch (Exception)
+                    {
                         break;
                     }
 
                     string message;
-                    try {
+                    try
+                    {
                         message = messageQueue.Dequeue();
-                    } catch (Exception) {
+                    }
+                    catch (Exception)
+                    {
                         Console.WriteLine($"{name} No Data Available for HTTP Request");
                         message = "No Data Available";
                     }

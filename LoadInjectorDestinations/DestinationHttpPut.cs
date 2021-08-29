@@ -10,9 +10,10 @@ using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace LoadInjector.Destinations {
-
-    internal class DestinationHttpPut : DestinationAbstract {
+namespace LoadInjector.Destinations
+{
+    internal class DestinationHttpPut : DestinationAbstract
+    {
         private readonly Dictionary<string, string> headers = new Dictionary<string, string>();
         private string httpLogPath;
         private string postURL;
@@ -22,38 +23,52 @@ namespace LoadInjector.Destinations {
         private int timeout;
         public HttpMethod httpVerb = HttpMethod.Put;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
             USE_ASYNC_SEND = true;
             name = defn.Attributes["name"].Value;
 
-            try {
-                postURL = defn.Attributes["postURL"].Value;
-            } catch (Exception) {
+            try
+            {
+                postURL = defn.Attributes["httpURL"].Value;
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"No HTTP URL defined for {name}");
                 return false;
             }
 
-            try {
+            try
+            {
                 httpLogPath = defn.Attributes["httpLogPath"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 httpLogPath = null;
             }
-            try {
+            try
+            {
                 maxRetry = Convert.ToInt32(defn.Attributes["maxRetry"].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 maxRetry = 2;
             }
 
-            try {
+            try
+            {
                 timeout = Convert.ToInt32(defn.Attributes["timeout"].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 timeout = 5;
             }
 
             XElement xElem = XElement.Load(defn.CreateNavigator().ReadSubtree());
             IEnumerable<XElement> headerDefn = from value in xElem.Descendants("header") select value;
-            foreach (XElement v in headerDefn) {
+            foreach (XElement v in headerDefn)
+            {
                 string key = v.Attribute("name").Value;
                 string value = v.Attribute("value").Value;
                 headers.Add(key, value);
@@ -62,19 +77,25 @@ namespace LoadInjector.Destinations {
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"URL: {postURL}";
         }
 
-        public override async Task<bool> SendAsync(string message, List<Variable> vars) {
+        public override async Task<bool> SendAsync(string message, List<Variable> vars)
+        {
             string messageXML = message;
             string url = postURL;
 
-            foreach (Variable v in vars) {
-                try {
+            foreach (Variable v in vars)
+            {
+                try
+                {
                     //Before getting here, the value of the variable was set in the template substitution
                     url = url.Replace(v.token, v.value);
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     //NO-OP
                 }
             }
@@ -84,73 +105,101 @@ namespace LoadInjector.Destinations {
             bool sent = false;
             int tries = 1;
 
-            do {
-                if (tries > maxRetry && maxRetry > 0) {
+            do
+            {
+                if (tries > maxRetry && maxRetry > 0)
+                {
                     return sent;
                 }
 
-                try {
-                    using (var client = new HttpClient()) {
+                try
+                {
+                    using (var client = new HttpClient())
+                    {
                         client.Timeout = TimeSpan.FromSeconds(timeout);
 
-                        HttpRequestMessage requestMessage = new HttpRequestMessage(httpVerb, url) {
+                        HttpRequestMessage requestMessage = new HttpRequestMessage(httpVerb, url)
+                        {
                             Content = new StringContent(messageXML, Encoding.UTF8, "text/xml")
                         };
 
-                        if (headers != null) {
-                            foreach (var item in headers) {
+                        if (headers != null)
+                        {
+                            foreach (var item in headers)
+                            {
                                 requestMessage.Headers.Add(item.Key, item.Value);
                             }
                         }
                         string uuid = Guid.NewGuid().ToString();
 
-                        using (requestMessage) {
-                            try {
+                        using (requestMessage)
+                        {
+                            try
+                            {
                                 logger.Info($"Destination: {name}, Send HTTP Request. ID = {uuid}");
                                 Console.WriteLine($"Destination: {name}, Send HTTP Request. ID = {uuid}");
-                                if (httpLogPath != null) {
-                                    try {
+                                if (httpLogPath != null)
+                                {
+                                    try
+                                    {
                                         string logfile = $"{httpLogPath}/{uuid}.Request.log";
                                         await Task.Run(() => System.IO.File.WriteAllText(logfile, $"URL: {url}\nMessage:\n{messageXML}"));
-                                    } catch (Exception) {
+                                    }
+                                    catch (Exception)
+                                    {
                                         logger.Info("Unable to write response to log file");
                                     }
                                 }
-                                using (HttpResponseMessage response = await client.SendAsync(requestMessage)) {
-                                    if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Accepted || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.NoContent) {
+                                using (HttpResponseMessage response = await client.SendAsync(requestMessage))
+                                {
+                                    if (response.StatusCode == HttpStatusCode.OK || response.StatusCode == HttpStatusCode.Accepted || response.StatusCode == HttpStatusCode.Created || response.StatusCode == HttpStatusCode.NoContent)
+                                    {
                                         numHttpOK++;
                                         logger.Info($"Destination: {name}, HTTP Response Code = {response.StatusCode == HttpStatusCode.OK}. ID = {uuid}");
-                                        if (httpLogPath != null) {
+                                        if (httpLogPath != null)
+                                        {
                                             _ = ProcessResponse(response, uuid, logger, response.StatusCode, url);
                                         }
                                         sent = true;
                                         return sent;
-                                    } else {
+                                    }
+                                    else
+                                    {
                                         logger.Warn($"Destination: {name}, HTTP Put Response Code was not  2XX. HTTP Response Code: {response.StatusCode}. ID = {uuid}");
                                         Console.WriteLine($"Destination: {name}, HTTP Put Response Code was not  2XX. HTTP Response Code: {response.StatusCode}. ID = {uuid}");
-                                        try {
+                                        try
+                                        {
                                             string logfile = $"{httpLogPath}/{uuid}.Error.log";
                                             await Task.Run(() => System.IO.File.WriteAllText(logfile, $"URL: {url}, HTTP Response Code was not  2XX. HTTP Response {response}. ID = {uuid}"));
-                                        } catch (Exception) {
+                                        }
+                                        catch (Exception)
+                                        {
                                             logger.Info("Unable to write response to log file");
                                         }
                                         tries++;
                                     }
                                 }
-                            } catch (Exception ex) {
+                            }
+                            catch (Exception ex)
+                            {
                                 logger.Warn($"Error posting request {ex.Message}. Probably timeout of request.  ID = {uuid}");
                                 Console.WriteLine($"Error posting request {ex.Message}. Probably timeout of request.  ID = {uuid}");
-                                try {
+                                try
+                                {
                                     string logfile = $"{httpLogPath}/{uuid}.Error.log";
                                     await Task.Run(() => System.IO.File.WriteAllText(logfile, $"Error Sending Request: {ex.Message}. Probably timeout of request.  ID = {uuid}"));
-                                } catch (Exception) {
+                                }
+                                catch (Exception)
+                                {
                                     logger.Info("Unable to write response to log file");
                                 }
                                 tries++;
                             }
                         }
                     }
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     logger.Info("Unable to send message to : " + name + " : " + ex.Message);
                     tries++;
                 }
@@ -159,13 +208,17 @@ namespace LoadInjector.Destinations {
             return sent;
         }
 
-        public async Task ProcessResponse(HttpResponseMessage response, string uuid, Logger logger, HttpStatusCode statusCode, string url) {
+        public async Task ProcessResponse(HttpResponseMessage response, string uuid, Logger logger, HttpStatusCode statusCode, string url)
+        {
             string res = await response.Content.ReadAsStringAsync();
 
-            try {
+            try
+            {
                 string logfile = $"{httpLogPath}/{uuid}.Response.log";
                 await Task.Run(() => System.IO.File.WriteAllText(logfile, $"URL: {url}\nStatus Code: {statusCode}\nContent:\n{res}"));
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 logger.Info("Unable to write response to log file");
             }
         }

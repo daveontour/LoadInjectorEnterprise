@@ -6,10 +6,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
-namespace LoadInjector.Destinations {
-
+namespace LoadInjector.Destinations
+{
     //Class that implements the sending of the message
-    public class DestinationRabbit : DestinationAbstract {
+    public class DestinationRabbit : DestinationAbstract
+    {
         private string queueName;
         private string connection;
         private string user;
@@ -17,59 +18,86 @@ namespace LoadInjector.Destinations {
         private string vhost;
         private int port;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
 
-            try {
-                connection = defn.Attributes["connection"].Value;
-            } catch (Exception) {
+            try
+            {
+                connection = defn.Attributes["host"].Value;
+            }
+            catch (Exception)
+            {
                 return false;
             }
-            try {
+            try
+            {
                 queueName = defn.Attributes["queue"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 queueName = null;
             }
 
-            try {
-                user = defn.Attributes["rabbitUser"].Value;
-            } catch (Exception) {
+            try
+            {
+                user = defn.Attributes["username"].Value;
+            }
+            catch (Exception)
+            {
                 user = "guest";
             }
-            try {
-                pass = defn.Attributes["rabbitPass"].Value;
-            } catch (Exception) {
+            try
+            {
+                pass = defn.Attributes["password"].Value;
+            }
+            catch (Exception)
+            {
                 pass = "guest";
             }
-            try {
+            try
+            {
                 vhost = defn.Attributes["rabbitVHost"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 vhost = "/";
             }
-            try {
-                port = int.Parse(defn.Attributes["rabbitPort"].Value);
-            } catch (Exception) {
+            try
+            {
+                port = int.Parse(defn.Attributes["port"].Value);
+            }
+            catch (Exception)
+            {
                 port = 5672;
             }
 
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"Host: {vhost}, Queue: {queueName}";
         }
 
-        public override bool Send(string val, List<Variable> vars) {
-            foreach (Variable v in vars) {
-                try {
+        public override bool Send(string val, List<Variable> vars)
+        {
+            foreach (Variable v in vars)
+            {
+                try
+                {
                     queueName = queueName.Replace(v.token, v.value);
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // NO-OP
                 }
             }
 
-            try {
-                var factory = new ConnectionFactory {
+            try
+            {
+                var factory = new ConnectionFactory
+                {
                     UserName = user,
                     Password = pass,
                     VirtualHost = vhost,
@@ -77,34 +105,44 @@ namespace LoadInjector.Destinations {
                     Port = port
                 };
 
-                using (var conn = factory.CreateConnection()) {
-                    using (var channel = conn.CreateModel()) {
-                        try {
+                using (var conn = factory.CreateConnection())
+                {
+                    using (var channel = conn.CreateModel())
+                    {
+                        try
+                        {
                             channel.QueueDeclare(queue: queueName,
                                                                       durable: true,
                                                                       exclusive: false,
                                                                       autoDelete: false,
                                                                       arguments: null);
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex)
+                        {
                             logger.Error(ex.Message);
                             logger.Error(ex.StackTrace);
                             return false;
                         }
                         var body = Encoding.UTF8.GetBytes(val);
 
-                        try {
+                        try
+                        {
                             channel.BasicPublish(exchange: "",
                                                  routingKey: queueName,
                                                  basicProperties: null,
                                                  body: body);
-                        } catch (Exception ex) {
+                        }
+                        catch (Exception ex)
+                        {
                             logger.Error(ex.Message);
                             logger.Error(ex.StackTrace);
                             return false;
                         }
                     }
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 logger.Error(ex.Message);
                 logger.Error(ex.StackTrace);
                 return false;

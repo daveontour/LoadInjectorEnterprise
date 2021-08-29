@@ -9,71 +9,95 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace LoadInjector.Destinations {
-
-    public class DestinationTcpServer : DestinationAbstract {
+namespace LoadInjector.Destinations
+{
+    public class DestinationTcpServer : DestinationAbstract
+    {
         private int tcpServerPort;
         private string tcpServerIP;
         private bool closeConnection;
         private AsynchronousSocketListener sockListner;
 
-        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log) {
+        public override bool Configure(XmlNode node, IDestinationEndPointController cont, Logger log)
+        {
             base.Configure(node, cont, log);
 
-            try {
-                tcpServerPort = int.Parse(defn.Attributes["tcpServerPort"].Value);
-            } catch (Exception) {
+            try
+            {
+                tcpServerPort = int.Parse(defn.Attributes["port"].Value);
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"No TCP Server Port correctly defined for {defn.Attributes["name"].Value}");
                 return false;
             }
 
-            try {
-                tcpServerIP = defn.Attributes["tcpServerIP"].Value;
-                if (tcpServerIP == "localhost") {
+            try
+            {
+                tcpServerIP = defn.Attributes["host"].Value;
+                if (tcpServerIP == "localhost")
+                {
                     tcpServerIP = "127.0.0.1";
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine("Using '127.0.0.1' for TCP Server IP");
                 tcpServerIP = "127.0.0.1";
             }
 
-            try {
+            try
+            {
                 closeConnection = bool.Parse(defn.Attributes["closeConnection"].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 closeConnection = false;
             }
 
             return true;
         }
 
-        public override string GetDestinationDescription() {
+        public override string GetDestinationDescription()
+        {
             return $"Server: {tcpServerIP}, Port: {tcpServerPort}";
         }
 
-        public override void Prepare() {
-            if (sockListner != null) {
-                try {
+        public override void Prepare()
+        {
+            if (sockListner != null)
+            {
+                try
+                {
                     Stop();
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // Do Nothing
                 }
             }
         }
 
-        public override string Listen() {
+        public override string Listen()
+        {
             sockListner = new AsynchronousSocketListener();
             Task.Run(() => sockListner.StartListening(tcpServerIP, tcpServerPort, closeConnection));
             return "OK";
         }
 
-        public override void Stop() {
+        public override void Stop()
+        {
             sockListner.Stop();
         }
 
-        public override bool Send(string val, List<Variable> vars) {
-            try {
+        public override bool Send(string val, List<Variable> vars)
+        {
+            try
+            {
                 sockListner.SendTCPServer(val, closeConnection);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 logger.Error($"Error Sending TCP Message to Clients. {e.Message}");
                 return false;
             }
@@ -81,8 +105,8 @@ namespace LoadInjector.Destinations {
         }
     }
 
-    public class AsynchronousSocketListener : IDisposable {
-
+    public class AsynchronousSocketListener : IDisposable
+    {
         // Thread signal.
         public ManualResetEvent allDone = new ManualResetEvent(false);
 
@@ -90,12 +114,17 @@ namespace LoadInjector.Destinations {
         public bool closeAfterSend;
         public List<Socket> serverSockets = new List<Socket>();
 
-        public void Stop() {
-            foreach (Socket serverSocket in serverSockets) {
-                try {
+        public void Stop()
+        {
+            foreach (Socket serverSocket in serverSockets)
+            {
+                try
+                {
                     serverSocket.Disconnect(false);
                     serverSocket.Dispose();
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     Console.WriteLine(ex.Message);
                 }
             }
@@ -103,10 +132,13 @@ namespace LoadInjector.Destinations {
             allDone.Set();
         }
 
-        public void SendTCPServer(string message, bool closeConnection) {
-            foreach (Socket serverSocket in serverSockets.ToArray()) {
+        public void SendTCPServer(string message, bool closeConnection)
+        {
+            foreach (Socket serverSocket in serverSockets.ToArray())
+            {
                 SendTCPServer(serverSocket, message);
-                if (closeConnection) {
+                if (closeConnection)
+                {
                     serverSockets.Remove(serverSocket);
                     serverSocket.Disconnect(false);
                     serverSocket.Dispose();
@@ -114,46 +146,61 @@ namespace LoadInjector.Destinations {
             }
         }
 
-        public void SendTCPServer(Socket serverSocket, string message) {
-            if (serverSocket == null) {
+        public void SendTCPServer(Socket serverSocket, string message)
+        {
+            if (serverSocket == null)
+            {
                 Console.WriteLine("No current client connection to TCP Server");
                 return;
             }
 
-            if (serverSocket.Poll(10, SelectMode.SelectWrite)) {
-                try {
+            if (serverSocket.Poll(10, SelectMode.SelectWrite))
+            {
+                try
+                {
                     Send(serverSocket, message);
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     Console.WriteLine(e.StackTrace);
                 }
-            } else {
+            }
+            else
+            {
                 Console.WriteLine("SOCKET NOT AVAILABLE");
             }
         }
 
-        public void StartListening(string tcpServerIP, int tcpServerPort, bool closeConnection) {
+        public void StartListening(string tcpServerIP, int tcpServerPort, bool closeConnection)
+        {
             // Establish the local endpoint for the socket.
             IPAddress ipAddress = null;
-            try {
+            try
+            {
                 closeAfterSend = closeConnection;
                 ipAddress = IPAddress.Parse(tcpServerIP);
                 Console.WriteLine("*****************************************");
                 Console.WriteLine($"* TCP Server Listen on {ipAddress}:{tcpServerPort}");
                 Console.WriteLine("*****************************************");
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
             }
 
             IPEndPoint localEndPoint = new IPEndPoint(ipAddress, tcpServerPort);
 
             // Create a TCP/IP socket.
-            using (Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp)) {
+            using (Socket listener = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp))
+            {
                 // Bind the socket to the local endpoint and listen for incoming connections.
-                try {
+                try
+                {
                     listener.Bind(localEndPoint);
                     listener.Listen(100);
 
-                    while (continueToListen) {
+                    while (continueToListen)
+                    {
                         // Set the event to nonsignaled state.
                         allDone.Reset();
 
@@ -164,55 +211,73 @@ namespace LoadInjector.Destinations {
                         // Wait until a connection is made before continuing.
                         allDone.WaitOne();
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     Console.WriteLine(e.Message);
                 }
             }
         }
 
-        public void AcceptCallback(IAsyncResult ar) {
+        public void AcceptCallback(IAsyncResult ar)
+        {
             // Signal the main thread to continue.
             allDone.Set();
             Console.WriteLine("TCP Server Accepted Connection");
             // Get the socket that handles the client request.
 
-            try {
+            try
+            {
                 Socket listener = (Socket)ar.AsyncState;
                 Socket serverSocket = listener.EndAccept(ar);
                 serverSockets.Add(serverSocket);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
             }
         }
 
-        private void Send(Socket serverSocket, String data) {
+        private void Send(Socket serverSocket, String data)
+        {
             // Convert the string data to byte data using ASCII encoding.
             byte[] byteData = Encoding.ASCII.GetBytes(data);
 
-            if (!serverSocket.Poll(10000, SelectMode.SelectWrite)) {
+            if (!serverSocket.Poll(10000, SelectMode.SelectWrite))
+            {
                 Console.WriteLine("Connection No Longer Available");
-                try {
+                try
+                {
                     serverSocket = null;
                     return;
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // NO-OP
                 }
             }
             // Begin sending the data to the remote device.
-            try {
+            try
+            {
                 var bytesSent = serverSocket.Send(byteData, SocketFlags.None);
                 Console.WriteLine($"TCP Server Sent {bytesSent} bytes to client.");
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine("Connection No Longer Available");
-                try {
+                try
+                {
                     serverSocket = null;
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     // NO-OP
                 }
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             // NO-OP
         }
     }
