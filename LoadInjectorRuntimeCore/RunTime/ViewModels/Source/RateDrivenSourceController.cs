@@ -412,30 +412,30 @@ namespace LoadInjector.RunTime
 
             switch (dataSourceType)
             {
-                case "CSV":
+                case "csv":
                     prepOK = PrepareCSV();
                     break;
 
-                case "DATABASE":
-                case "MSSQL":
-                case "MySQL":
-                case "ORACLE":
+                case "database":
+                case "mssql":
+                case "mysql":
+                case "oracle":
                     prepOK = PrepareDB();
                     break;
 
-                case "XML":
+                case "xml":
                     prepOK = PrepareXML();
                     break;
 
-                case "Excel":
+                case "excel":
                     prepOK = PrepareExcel();
                     break;
 
-                case "JSON":
+                case "json":
                     prepOK = PrepareJSON();
                     break;
 
-                case "PULSAR":
+                case "none":
                     prepOK = true;
                     break;
             }

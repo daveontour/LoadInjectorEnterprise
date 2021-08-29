@@ -42,21 +42,21 @@ namespace LoadInjectorBase.Common
 
             foreach (XmlNode node in document.SelectNodes(".//*"))
             {
-                if (node.Attributes["dataFile"]?.Value != null)
-                {
-                    string fullFile = node.Attributes["dataFile"]?.Value;
-                    string[] f2 = fullFile.Split('/');
-                    string filename = f2[f2.Length - 1];
-                    node.Attributes["dataFile"].Value = $"{archiveRoot}/DATA/{filename}";
-                }
+                //if (node.Attributes["dataFile"]?.Value != null)
+                //{
+                //    string fullFile = node.Attributes["dataFile"]?.Value;
+                //    string[] f2 = fullFile.Split('/');
+                //    string filename = f2[f2.Length - 1];
+                //    node.Attributes["dataFile"].Value = $"{archiveRoot}/DATA/{filename}";
+                //}
 
-                if (node.Attributes["templateFile"]?.Value != null)
-                {
-                    string fullFile = node.Attributes["templateFile"]?.Value;
-                    string[] f2 = fullFile.Split('/');
-                    string filename = f2[f2.Length - 1];
-                    node.Attributes["templateFile"].Value = $"{archiveRoot}/TEMPLATES/{filename}";
-                }
+                //if (node.Attributes["templateFile"]?.Value != null)
+                //{
+                //    string fullFile = node.Attributes["templateFile"]?.Value;
+                //    string[] f2 = fullFile.Split('/');
+                //    string filename = f2[f2.Length - 1];
+                //    node.Attributes["templateFile"].Value = $"{archiveRoot}/TEMPLATES/{filename}";
+                //}
 
                 XmlAttribute newAttribute2 = document.CreateAttribute("executionNodeUuid");
                 newAttribute2.Value = executionNodeID;

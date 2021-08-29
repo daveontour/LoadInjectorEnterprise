@@ -308,9 +308,9 @@ namespace LoadInjectorBase
                 listLength = fileEntries.Count;
             }
 
-            if (type == "csvfield")
+            if (type == "csvField")
             {
-                field = SetVar("field", null);
+                field = SetVar("csvField", null);
             }
 
             if (type == "excelCol")
@@ -336,7 +336,7 @@ namespace LoadInjectorBase
 
         public string GetValue(Dictionary<string, string> dict, List<Variable> vars = null)
         {
-            if (type == "csvfield"
+            if (type == "csvField"
                 || type == "jsonElement"
                 || type == "xmlElement"
                 || type == "excelCol"

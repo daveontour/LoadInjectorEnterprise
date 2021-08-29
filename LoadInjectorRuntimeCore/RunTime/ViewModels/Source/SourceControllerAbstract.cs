@@ -76,28 +76,28 @@ namespace LoadInjector.RunTime.ViewModels
             name = node.Attributes["name"]?.Value;
             triggerID = node.Attributes["triggerID"]?.Value;
 
-            dataSourceType = node.Attributes["dataSource"]?.Value;
+            dataSourceType = node.Attributes["dataType"]?.Value;
 
             executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
             uuid = node.Attributes["uuid"]?.Value;
 
             switch (dataSourceType)
             {
-                case "CSV":
-                    dataFile = node.Attributes["dataFile"]?.Value;
+                case "csv":
+                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
                     dataRestURL = node.Attributes["dataRestURL"]?.Value;
                     break;
 
-                case "Excel":
-                    dataFile = node.Attributes["dataFile"]?.Value;
+                case "excel":
+                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     excelSheet = node.Attributes["excelSheet"]?.Value;
                     excelRowStart = node.Attributes["excelRowStart"]?.Value;
                     excelRowEnd = node.Attributes["excelRowEnd"]?.Value;
                     break;
 
-                case "XML":
-                    dataFile = node.Attributes["dataFile"]?.Value;
+                case "xml":
+                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     dataRestURL = node.Attributes["dataRestURL"]?.Value;
                     repeatingElement = node.Attributes["repeatingElement"]?.Value;
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
@@ -111,17 +111,17 @@ namespace LoadInjector.RunTime.ViewModels
                     }
                     break;
 
-                case "JSON":
-                    dataFile = node.Attributes["dataFile"]?.Value;
+                case "json":
+                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     dataRestURL = node.Attributes["dataRestURL"]?.Value;
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
                     repeatingElement = node.Attributes["repeatingElement"]?.Value;
                     break;
 
-                case "DATABASE":
-                case "MSSQL":
-                case "MySQL":
-                case "ORACLE":
+                case "database":
+                case "mssql":
+                case "mysql":
+                case "oracle":
                     connStr = node.Attributes["connStr"]?.Value;
                     sql = node.Attributes["sql"]?.Value;
                     dbType = node.Attributes["sourceType"]?.Value;
@@ -436,11 +436,11 @@ namespace LoadInjector.RunTime.ViewModels
                 dataPointsInUse = new List<string> {
                     timeInUse
                 };
-                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "csvfield", "field");
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "csvField", "field");
             }
             else
             {
-                dataPointsInUse = GetDataPointsInUse("csvfield", "field");
+                dataPointsInUse = GetDataPointsInUse("csvField", "csvField");
             }
             if (dataPointsInUse.Count == 0)
             {
