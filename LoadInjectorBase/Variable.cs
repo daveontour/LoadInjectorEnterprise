@@ -313,18 +313,18 @@ namespace LoadInjectorBase
                 field = SetVar("csvField", null);
             }
 
-            if (type == "excelCol")
+            if (type == "excelField")
             {
-                field = SetVar("excelCol", null);
+                field = SetVar("excelColumn", null);
             }
 
             if (type == "xmlElement")
             {
-                field = SetVar("xmlXPath", null);
+                field = SetVar("element", null);
             }
             if (type == "jsonElement")
             {
-                field = SetVar("field", null);
+                field = SetVar("element", null);
             }
 
             if (type == "dbField")
@@ -339,7 +339,7 @@ namespace LoadInjectorBase
             if (type == "csvField"
                 || type == "jsonElement"
                 || type == "xmlElement"
-                || type == "excelCol"
+                || type == "excelField"
                 || type == "dbField"
                 || type == "excelCol")
             {

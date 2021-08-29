@@ -37,8 +37,8 @@ namespace LoadInjector.RunTime.ViewModels
         public string dbType;
 
         public string excelSheet;
-        public string excelRowStart;
-        public string excelRowEnd;
+        public string excelStartRow;
+        public string excelEndRow;
 
         public string dataSourceType;
 
@@ -92,8 +92,8 @@ namespace LoadInjector.RunTime.ViewModels
                 case "excel":
                     dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     excelSheet = node.Attributes["excelSheet"]?.Value;
-                    excelRowStart = node.Attributes["excelRowStart"]?.Value;
-                    excelRowEnd = node.Attributes["excelRowEnd"]?.Value;
+                    excelStartRow = node.Attributes["excelStartRow"]?.Value;
+                    excelEndRow = node.Attributes["excelEndRow"]?.Value;
                     break;
 
                 case "xml":
@@ -403,11 +403,11 @@ namespace LoadInjector.RunTime.ViewModels
                 dataPointsInUse = new List<string> {
                     timeInUse
                 };
-                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "excelCol", "excelCol");
+                dataPointsInUse = GetDataPointsInUse(dataPointsInUse, "excelField", "excelColumn");
             }
             else
             {
-                dataPointsInUse = GetDataPointsInUse("excelCol", "excelCol");
+                dataPointsInUse = GetDataPointsInUse("excelField", "excelColumn");
             }
             if (dataPointsInUse.Count == 0)
             {
@@ -417,7 +417,7 @@ namespace LoadInjector.RunTime.ViewModels
 
             try
             {
-                dataRecords = excelProcessor.GetRecords(dataFile, excelSheet, dataPointsInUse, "Text", null, int.Parse(excelRowStart), int.Parse(excelRowEnd), true);
+                dataRecords = excelProcessor.GetRecords(dataFile, excelSheet, dataPointsInUse, "Text", null, int.Parse(excelStartRow), int.Parse(excelEndRow), true);
             }
             catch (Exception ex)
             {

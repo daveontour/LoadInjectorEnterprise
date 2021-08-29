@@ -68,8 +68,8 @@ namespace LoadInjector.RunTime
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 excelSheet = node.Attributes["excelSheet"]?.Value;
-                excelRowStart = node.Attributes["excelRowStart"]?.Value;
-                excelRowEnd = node.Attributes["excelRowEnd"]?.Value;
+                excelStartRow = node.Attributes["excelStartRow"]?.Value;
+                excelEndRow = node.Attributes["excelEndRow"]?.Value;
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }
