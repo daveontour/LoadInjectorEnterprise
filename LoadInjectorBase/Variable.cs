@@ -9,12 +9,14 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace LoadInjectorBase {
+namespace LoadInjectorBase
+{
     /*
      * Supplies the variables that will be substituted in for the defined tokens or external name
      */
 
-    public class Variable {
+    public class Variable
+    {
         public string token;
         public string externalName;
 
@@ -79,19 +81,24 @@ namespace LoadInjectorBase {
         private readonly int csvValueField;
         private readonly string xpath;
 
-        public Variable(XmlNode config) {
+        public Variable(XmlNode config)
+        {
             this.config = config;
 
-            try {
+            try
+            {
                 type = config.Attributes["type"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine("Variable defined without a \"type\" attribute");
                 ConfigOK = false;
                 return;
             }
 
             variableLookup = SetVar("variableLookup", false);
-            if (variableLookup) {
+            if (variableLookup)
+            {
                 lookupSource = SetVar("lookupSource", null);
             }
 
@@ -106,38 +113,58 @@ namespace LoadInjectorBase {
             csvKeyField = SetVar("csvKeyField", -1);
             csvValueField = SetVar("csvValueField", -1);
 
-            if (type == "intRange") {
-                try {
+            if (type == "intRange")
+            {
+                try
+                {
                     lowerLimit = int.Parse(config.Attributes["lowerLimit"].Value);
-                } catch (Exception) {
-                    if (config.Attributes["lowerLimit"] != null && config.Attributes["lowerLimit"].Value.StartsWith("@@")) {
+                }
+                catch (Exception)
+                {
+                    if (config.Attributes["lowerLimit"] != null && config.Attributes["lowerLimit"].Value.StartsWith("@@"))
+                    {
                         varSubstitionRequired = true;
                         subDict.Add("lowerLimit", config.Attributes["lowerLimit"].Value);
-                    } else {
+                    }
+                    else
+                    {
                         lowerLimit = 0;
                     }
                 }
                 digits = SetVar("digits", -1);
-                try {
+                try
+                {
                     upperLimit = int.Parse(config.Attributes["upperLimit"].Value);
-                } catch (Exception) {
-                    if (config.Attributes["upperLimit"] != null && config.Attributes["upperLimit"].Value.StartsWith("@@")) {
+                }
+                catch (Exception)
+                {
+                    if (config.Attributes["upperLimit"] != null && config.Attributes["upperLimit"].Value.StartsWith("@@"))
+                    {
                         varSubstitionRequired = true;
                         subDict.Add("upperLimit", config.Attributes["upperLimit"].Value);
-                    } else {
+                    }
+                    else
+                    {
                         upperLimit = 0;
                     }
                 }
             }
 
-            if (type == "intgaussian") {
-                try {
+            if (type == "intgaussian")
+            {
+                try
+                {
                     normalInt = int.Parse(config.Attributes["normalInt"].Value);
-                } catch (Exception) {
-                    if (config.Attributes["normalInt"] != null && config.Attributes["normalInt"].Value.StartsWith("@@")) {
+                }
+                catch (Exception)
+                {
+                    if (config.Attributes["normalInt"] != null && config.Attributes["normalInt"].Value.StartsWith("@@"))
+                    {
                         varSubstitionRequired = true;
                         subDict.Add("normalInt", config.Attributes["normalInt"].Value);
-                    } else {
+                    }
+                    else
+                    {
                         normalInt = 0;
                     }
                 }
@@ -145,47 +172,64 @@ namespace LoadInjectorBase {
                 digits = SetVar("digits", -1);
             }
 
-            if (type == "doublegaussian") {
-                try {
+            if (type == "doublegaussian")
+            {
+                try
+                {
                     normalDouble = double.Parse(config.Attributes["normalDouble"].Value);
-                } catch (Exception) {
-                    if (config.Attributes["normalDouble"] != null && config.Attributes["normalDouble"].Value.StartsWith("@@")) {
+                }
+                catch (Exception)
+                {
+                    if (config.Attributes["normalDouble"] != null && config.Attributes["normalDouble"].Value.StartsWith("@@"))
+                    {
                         varSubstitionRequired = true;
                         subDict.Add("normalDouble", config.Attributes["normalDouble"].Value);
-                    } else {
+                    }
+                    else
+                    {
                         normalDouble = 0.0;
                     }
                 }
                 stdDev = SetVar("stdDev", 1.0);
             }
 
-            if (token == null && externalName == null) {
+            if (token == null && externalName == null)
+            {
                 ErrorMsg = "Variable defined without a token or externalName value defined";
                 ConfigOK = false;
                 return;
             }
 
-            try {
-                if (config.ParentNode.Attributes["stopOnDataEnd"] != null) {
+            try
+            {
+                if (config.ParentNode.Attributes["stopOnDataEnd"] != null)
+                {
                     abortOnListEnd = bool.Parse(config.ParentNode.Attributes["stopOnDataEnd"].Value);
-                } else {
+                }
+                else
+                {
                     abortOnListEnd = false;
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 abortOnListEnd = false;
             }
 
-            if (type == "flightInfo") {
+            if (type == "flightInfo")
+            {
                 xpath = SetVar("xpath", null);
                 sub = SetVar("sub", null);
             }
 
-            if (type == "sequence") {
+            if (type == "sequence")
+            {
                 seqNum = SetVar("seed", 1);
                 digits = SetVar("digits", -1);
             }
 
-            if (type == "datetime") {
+            if (type == "datetime")
+            {
                 lowerOffset = SetVar("lowerOffset", 0);
                 upperOffset = SetVar("upperOffset", 0);
                 format = SetVar("format", "yyyy-MM-ddTHH:mm:ss.fffK");
@@ -193,53 +237,69 @@ namespace LoadInjectorBase {
                 delta = SetVar("delta", 0);
             }
 
-            if (type == "timestamp") {
+            if (type == "timestamp")
+            {
                 format = SetVar("format", "yyyy-MM-ddTHH:mm:ss.fffK");
             }
 
-            if (type == "fixed") {
+            if (type == "fixed")
+            {
                 fixedValue = SetVar("fixedValue", "");
             }
 
-            if (type == "value" || type == "valueSequence") {
+            if (type == "value" || type == "valueSequence")
+            {
                 XElement xElem = XElement.Load(config.CreateNavigator().ReadSubtree());
                 IEnumerable<XElement> valueDefn = from value in xElem.Descendants("value") select value;
-                foreach (XElement v in valueDefn) {
+                foreach (XElement v in valueDefn)
+                {
                     values.Add(v.Value);
                 }
                 listLength = values.Count;
             }
 
-            if (type == "file") {
-                try {
+            if (type == "file")
+            {
+                try
+                {
                     srcDir = config.Attributes["srcDir"]?.Value;
-                    if (srcDir == null) {
+                    if (srcDir == null)
+                    {
                         Console.WriteLine("File type defined without a \"srcDir\" attribute");
                         return;
                     }
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     Console.WriteLine("File type defined without a \"srcDir\" attribute");
                     return;
                 }
 
-                if (!Directory.Exists(srcDir)) {
+                if (!Directory.Exists(srcDir))
+                {
                     Console.WriteLine($"Source Directory {srcDir} not valid ");
                     return;
                 }
 
                 string fileFilter = "*.*";
 
-                try {
+                try
+                {
                     fileFilter = config.Attributes["fileFilter"].Value;
-                } catch (Exception) {
+                }
+                catch (Exception)
+                {
                     fileFilter = "*.*";
                 }
 
                 Regex regex = FindFilesPatternToRegex.Convert(fileFilter);
 
-                foreach (string file in Directory.GetFiles(srcDir)) {
-                    if (File.Exists(file)) {
-                        if (regex.IsMatch(file)) {
+                foreach (string file in Directory.GetFiles(srcDir))
+                {
+                    if (File.Exists(file))
+                    {
+                        if (regex.IsMatch(file))
+                        {
                             fileEntries.Add(file);
                         }
                     }
@@ -248,96 +308,126 @@ namespace LoadInjectorBase {
                 listLength = fileEntries.Count;
             }
 
-            if (type == "csvfield") {
+            if (type == "csvfield")
+            {
                 field = SetVar("field", null);
             }
 
-            if (type == "excelCol") {
+            if (type == "excelCol")
+            {
                 field = SetVar("excelCol", null);
             }
 
-            if (type == "xmlElement") {
+            if (type == "xmlElement")
+            {
                 field = SetVar("xmlXPath", null);
             }
-            if (type == "jsonElement") {
+            if (type == "jsonElement")
+            {
                 field = SetVar("field", null);
             }
 
-            if (type == "dbField") {
+            if (type == "dbField")
+            {
                 field = SetVar("field", null);
             }
             ConfigOK = true;
         }
 
-        public string GetValue(FlightNode flt, Dictionary<string, string> dict, List<Variable> vars = null) {
+        public string GetValue(Dictionary<string, string> dict, List<Variable> vars = null)
+        {
             if (type == "csvfield"
                 || type == "jsonElement"
                 || type == "xmlElement"
                 || type == "excelCol"
                 || type == "dbField"
-                || type == "excelCol") {
+                || type == "excelCol")
+            {
                 return dict[field];
-            } else {
-                return GetValue(flt, vars);
+            }
+            else
+            {
+                return GetValue(vars);
             }
         }
 
-        private string GetValue(FlightNode fl, List<Variable> vars = null) {
-            if (vars == null) {
-                return GetValue(fl);
-            }
-
+        private string GetValue(List<Variable> vars = null)
+        {
             subDict.TryGetValue("lowerLimit", out string ll);
             subDict.TryGetValue("upperLimit", out string ul);
             subDict.TryGetValue("normalInt", out string ni);
             subDict.TryGetValue("normalDouble", out string nd);
 
-            if (ll != null) {
+            if (ll != null)
+            {
                 string toke = ll.Substring(2);
-                foreach (Variable v in vars) {
-                    if (v.token == toke) {
-                        try {
+                foreach (Variable v in vars)
+                {
+                    if (v.token == toke)
+                    {
+                        try
+                        {
                             lowerLimit = int.Parse(v.value);
-                        } catch (Exception) {
+                        }
+                        catch (Exception)
+                        {
                             lowerLimit = Int32.MinValue;
                         }
                         break;
                     }
                 }
             }
-            if (ul != null) {
+            if (ul != null)
+            {
                 string toke = ul.Substring(2);
-                foreach (Variable v in vars) {
-                    if (v.token == toke) {
-                        try {
+                foreach (Variable v in vars)
+                {
+                    if (v.token == toke)
+                    {
+                        try
+                        {
                             upperLimit = int.Parse(v.value);
-                        } catch (Exception) {
+                        }
+                        catch (Exception)
+                        {
                             upperLimit = Int32.MaxValue;
                         }
                         break;
                     }
                 }
             }
-            if (ni != null) {
+            if (ni != null)
+            {
                 string toke = ni.Substring(2);
-                foreach (Variable v in vars) {
-                    if (v.token == toke) {
-                        try {
+                foreach (Variable v in vars)
+                {
+                    if (v.token == toke)
+                    {
+                        try
+                        {
                             normalInt = int.Parse(v.value);
-                        } catch (Exception) {
+                        }
+                        catch (Exception)
+                        {
                             normalInt = 0;
                         }
                         break;
                     }
                 }
             }
-            if (nd != null) {
+            if (nd != null)
+            {
                 string toke = nd.Substring(2);
-                foreach (Variable v in vars) {
-                    if (v.token == toke) {
-                        try {
+                foreach (Variable v in vars)
+                {
+                    if (v.token == toke)
+                    {
+                        try
+                        {
                             normalDouble = int.Parse(v.value);
-                        } catch (Exception) {
+                        }
+                        catch (Exception)
+                        {
                             normalDouble = 0.0;
                         }
                         break;
@@ -345,10 +435,12 @@ namespace LoadInjectorBase {
                 }
             }
 
-            if (type == "intRange") {
+            if (type == "intRange")
+            {
                 return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
             }
-            if (type == "intgaussian") {
+            if (type == "intgaussian")
+            {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
                 double u2 = 1.0 - rand.NextDouble();
                 double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
@@ -357,7 +449,8 @@ namespace LoadInjectorBase {
                              normalInt + stdDev * randStdNormal; //random normal(mean,stdDev^2)
                 return ProcessValue(Convert.ToInt32(randNormal).ToString());
             }
-            if (type == "doublegaussian") {
+            if (type == "doublegaussian")
+            {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
                 double u2 = 1.0 - rand.NextDouble();
                 double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
@@ -370,28 +463,35 @@ namespace LoadInjectorBase {
             return null;
         }
 
-        private string GetValue(FlightNode flt) {
-            if (type == "intRange") {
-                if (digits == -1) {
+        private string GetValue()
+        {
+            if (type == "intRange")
+            {
+                if (digits == -1)
+                {
                     return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
                 }
 
                 string digitsStr = rand.Next(lowerLimit, upperLimit).ToString().ToString();
-                while (digitsStr.Length < digits) {
+                while (digitsStr.Length < digits)
+                {
                     digitsStr = "0" + digitsStr;
                 }
 
                 return ProcessValue(digitsStr);
             }
 
-            if (type == "sequence") {
-                if (digits == -1) {
+            if (type == "sequence")
+            {
+                if (digits == -1)
+                {
                     seqNum++;
                     return ProcessValue(seqNum.ToString());
                 }
 
                 string digitsStr = seqNum.ToString();
-                while (digitsStr.Length < digits) {
+                while (digitsStr.Length < digits)
+                {
                     digitsStr = "0" + digitsStr;
                 }
 
@@ -399,7 +499,8 @@ namespace LoadInjectorBase {
                 return ProcessValue(digitsStr);
             }
 
-            if (type == "intgaussian") {
+            if (type == "intgaussian")
+            {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
                 double u2 = 1.0 - rand.NextDouble();
                 double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
@@ -409,17 +510,20 @@ namespace LoadInjectorBase {
 
                 string rtn = Convert.ToInt32(randNormal).ToString();
 
-                if (digits == -1) {
+                if (digits == -1)
+                {
                     return ProcessValue(rtn);
                 }
 
-                while (rtn.Length < digits) {
+                while (rtn.Length < digits)
+                {
                     rtn = "0" + rtn;
                 }
 
                 return ProcessValue(rtn);
             }
-            if (type == "doublegaussian") {
+            if (type == "doublegaussian")
+            {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
                 double u2 = 1.0 - rand.NextDouble();
                 double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
@@ -430,236 +534,234 @@ namespace LoadInjectorBase {
                 return ProcessValue(randNormal.ToString(CultureInfo.CurrentCulture));
             }
 
-            if (type == "uuid") {
+            if (type == "uuid")
+            {
                 return ProcessValue(Guid.NewGuid().ToString());
             }
 
-            if (type == "datetime") {
+            if (type == "datetime")
+            {
                 int offset = rand.Next(lowerOffset, upperOffset);
-                if (dtRelative && flt != null) {
-                    return ProcessValue(flt.dateTime.AddMinutes(offset).AddMinutes(delta).ToString(format));
-                } else {
-                    return ProcessValue(DateTime.Now.AddMinutes(offset).AddMinutes(delta).ToString(format));
-                }
+                return ProcessValue(DateTime.Now.AddMinutes(offset).AddMinutes(delta).ToString(format));
             }
 
-            if (type == "fixed") {
+            if (type == "fixed")
+            {
                 return ProcessValue(fixedValue);
             }
 
-            if (type == "timestamp") {
+            if (type == "timestamp")
+            {
                 return ProcessValue(DateTime.Now.ToString(format));
             }
 
-            if (type == "value") {
+            if (type == "value")
+            {
                 return ProcessValue(values[rand.Next(0, values.Count)]);
             }
 
-            if (type == "file") {
-                if (seq >= listLength && abortOnListEnd) {
+            if (type == "file")
+            {
+                if (seq >= listLength && abortOnListEnd)
+                {
                     throw new ArgumentException("Ran out of iteration data");
                 }
                 return ProcessValue(File.ReadAllText(fileEntries[seq++ % listLength]));
             }
 
-            if (type == "flightInfo") {
-                if (flt == null) {
-                    return "";
-                }
-                switch (sub) {
-                    case "airlineCode":
-                        return ProcessValue(flt.airlineCode);
-
-                    case "airlineCodeICAO":
-                        return ProcessValue(flt.airlineCodeICAO);
-
-                    case "fltNumber":
-                        return ProcessValue(flt.fltNumber);
-
-                    case "arrivalAirport":
-                        return ProcessValue(flt.arrivalAirport);
-
-                    case "departureAirport":
-                        return ProcessValue(flt.departureAirport);
-
-                    case "arrivalAirportICAO":
-                        return ProcessValue(flt.arrivalAirportICAO);
-
-                    case "departureAirportICAO":
-                        return ProcessValue(flt.departureAirportICAO);
-
-                    case "schedDate":
-                        return ProcessValue(flt.schedDate);
-
-                    case "schedTime":
-                        return ProcessValue(flt.schedTime);
-
-                    case "kind":
-                        return ProcessValue(flt.nature);
-
-                    case "xpath":
-                        return ProcessValue(flt.GetXPath(xpath));
-
-                    case "property":
-                        string v;
-                        try {
-                            v = flt.externals[externalName];
-                        } catch (Exception) {
-                            v = null;
-                        }
-                        return ProcessValue(v);
-
-                    default:
-                        return null;
-                }
-            }
-
             return null;
         }
 
-        private bool SetVar(string attrib, bool defaultValue) {
+        private bool SetVar(string attrib, bool defaultValue)
+        {
             bool value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = bool.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        private string SetVar(string attrib, string defaultValue) {
+        private string SetVar(string attrib, string defaultValue)
+        {
             string value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = config.Attributes[attrib].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        private double SetVar(string attrib, double defaultValue) {
+        private double SetVar(string attrib, double defaultValue)
+        {
             double value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = double.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        private int SetVar(string attrib, int defaultValue) {
+        private int SetVar(string attrib, int defaultValue)
+        {
             int value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = int.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        private string ProcessValue(string value) {
+        private string ProcessValue(string value)
+        {
             //Returns the lookup value if the variable has been configured to use a lookup, otherwise, just return the value;
 
-            if (!variableLookup) {
+            if (!variableLookup)
+            {
                 return value;
             }
             dataFile = SetVar("dataFile", null);
 
-            if (lookupSource == "csv") {
+            if (lookupSource == "csv")
+            {
                 return LookupCSV(value);
             }
-            if (lookupSource == "excel") {
+            if (lookupSource == "excel")
+            {
                 return LookupExcel(value);
             }
             return value;
         }
 
-        private string LookupExcel(string value) {
+        private string LookupExcel(string value)
+        {
             IExcelProcessor xlProcessor = null;
 
-            try {
+            try
+            {
                 var type = typeof(IExcelProcessor);
 
                 IEnumerable<Type> types = AppDomain.CurrentDomain.GetAssemblies()
                                 .SelectMany(s => s.GetTypes())
                                 .Where(p => type.IsAssignableFrom(p));
-                foreach (Type t in types) {
-                    if (!t.IsAbstract && !t.IsInterface) {
+                foreach (Type t in types)
+                {
+                    if (!t.IsAbstract && !t.IsInterface)
+                    {
                         xlProcessor = (IExcelProcessor)Activator.CreateInstance(t);
                     }
                 }
 
-                if (xlProcessor == null) {
+                if (xlProcessor == null)
+                {
                     return value;
                 }
 
                 return xlProcessor.Lookup(value, dataFile, excelLookupSheet, excelKeyColumn, excelValueColumn);
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 Console.WriteLine(ex.Message);
                 return value;
             }
         }
 
-        private string LookupCSV(string value) {
-            if (csvKeyField == -1 || csvValueField == -1) {
+        private string LookupCSV(string value)
+        {
+            if (csvKeyField == -1 || csvValueField == -1)
+            {
                 return value;
             }
-            try {
-                using (TextFieldParser parser = new TextFieldParser(dataFile)) {
+            try
+            {
+                using (TextFieldParser parser = new TextFieldParser(dataFile))
+                {
                     parser.TextFieldType = FieldType.Delimited;
                     parser.SetDelimiters(",");
 
-                    while (!parser.EndOfData) {
-                        try {
+                    while (!parser.EndOfData)
+                    {
+                        try
+                        {
                             string[] fields = parser.ReadFields();
-                            if (fields[csvKeyField] == value) {
+                            if (fields[csvKeyField] == value)
+                            {
                                 return fields[csvValueField];
                             }
-                        } catch {
+                        }
+                        catch
+                        {
                             // Do nothing, try the next line
                         }
                     }
 
                     return value;
                 }
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine($"Error reading CSV Lookup File {dataFile}");
                 return value;
             }
         }
 
-        internal static class FindFilesPatternToRegex {
+        internal static class FindFilesPatternToRegex
+        {
             private static readonly Regex HasQuestionMarkRegEx = new Regex(@"\?", RegexOptions.Compiled);
             private static readonly Regex IllegalCharactersRegex = new Regex("[" + @"\/:<>|" + "\"]", RegexOptions.Compiled);
             private static readonly Regex CatchExtentionRegex = new Regex(@"^\s*.+\.([^\.]+)\s*$", RegexOptions.Compiled);
             private static readonly string NonDotCharacters = @"[^.]*";
 
-            public static Regex Convert(string pattern) {
-                if (pattern == null) {
+            public static Regex Convert(string pattern)
+            {
+                if (pattern == null)
+                {
                     throw new ArgumentNullException();
                 }
                 pattern = pattern.Trim();
-                if (pattern.Length == 0) {
+                if (pattern.Length == 0)
+                {
                     throw new ArgumentException("Pattern is empty.");
                 }
-                if (IllegalCharactersRegex.IsMatch(pattern)) {
+                if (IllegalCharactersRegex.IsMatch(pattern))
+                {
                     throw new ArgumentException("Pattern contains illegal characters.");
                 }
                 bool hasExtension = CatchExtentionRegex.IsMatch(pattern);
                 bool matchExact = false;
-                if (HasQuestionMarkRegEx.IsMatch(pattern)) {
+                if (HasQuestionMarkRegEx.IsMatch(pattern))
+                {
                     matchExact = true;
-                } else if (hasExtension) {
+                }
+                else if (hasExtension)
+                {
                     matchExact = CatchExtentionRegex.Match(pattern).Groups[1].Length != 3;
                 }
                 string regexString = Regex.Escape(pattern);
                 regexString = "^" + Regex.Replace(regexString, @"\\\*", ".*");
                 regexString = Regex.Replace(regexString, @"\\\?", ".");
-                if (!matchExact && hasExtension) {
+                if (!matchExact && hasExtension)
+                {
                     regexString += NonDotCharacters;
                 }
                 regexString += "$";

@@ -51,7 +51,7 @@ namespace LoadInjector.RunTime.ViewModels
         public Expression expression;
         public string filterTime;
 
-        public string id;
+        public string triggerID;
         public bool refreshFlight;
         public List<IChainedSourceController> chainedController = new List<IChainedSourceController>();
 
@@ -74,7 +74,7 @@ namespace LoadInjector.RunTime.ViewModels
             this.executionController = executionController;
             this.serverOffset = serverOffset;
             name = node.Attributes["name"]?.Value;
-            id = node.Attributes["ID"]?.Value;
+            triggerID = node.Attributes["triggerID"]?.Value;
 
             dataSourceType = node.Attributes["dataSource"]?.Value;
 
@@ -209,7 +209,7 @@ namespace LoadInjector.RunTime.ViewModels
                 return false;
             }
 
-            if (id != null && triggersInUse.Contains(id))
+            if (triggerID != null && triggersInUse.Contains(triggerID))
             {
                 return true;
             }
@@ -221,13 +221,13 @@ namespace LoadInjector.RunTime.ViewModels
         {
             List<string> inUse = new List<string>();
             List<string> triggerIDS = new List<string> {
-                id
+                triggerID
             };
             foreach (XmlNode chain in node.SelectNodes("./chained"))
             {
                 if (chain.Attributes["useParentData"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    triggerIDS.Add(chain.Attributes["ID"].Value);
+                    triggerIDS.Add(chain.Attributes["triggerID"].Value);
                 }
             }
 
@@ -256,18 +256,18 @@ namespace LoadInjector.RunTime.ViewModels
             try
             {
                 List<string> triggerIDS = new List<string> {
-                    id
+                    triggerID
                 };
                 foreach (XmlNode chain in node.SelectNodes("./chained"))
                 {
                     if (chain.Attributes["useParentData"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
                     {
-                        triggerIDS.Add(chain.Attributes["ID"].Value);
+                        triggerIDS.Add(chain.Attributes["triggerID"].Value);
                     }
                 }
                 foreach (XmlNode trigger in node.SelectNodes("trigger"))
                 {
-                    triggerIDS.Add(trigger.Attributes["id"].Value);
+                    triggerIDS.Add(trigger.Attributes["triggerID"].Value);
                 }
                 foreach (string triggerID in triggerIDS)
                 {

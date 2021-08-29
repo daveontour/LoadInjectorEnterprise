@@ -7,64 +7,83 @@ using System.IO;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace LoadInjector.RunTime {
-
-    public class LineExecutionController : DestinationControllerAbstract {
+namespace LoadInjector.RunTime
+{
+    public class LineExecutionController : DestinationControllerAbstract
+    {
         public Stopwatch stopwatch = new Stopwatch();
 
-        public LineExecutionController(XmlNode node, NgExecutionController executionController) : base(node, executionController) {
-            if (!ConfigOK) {
+        public LineExecutionController(XmlNode node, NgExecutionController executionController) : base(node, executionController)
+        {
+            if (!ConfigOK)
+            {
                 return;
             }
             LineName = config.Attributes["name"].Value;
             LineType = config.Attributes["protocol"].Value;
 
-            try {
+            try
+            {
                 destinationEndPoint = new DestinationEndPoint(config, logger);
-                if (!destinationEndPoint.OK_TO_RUN) {
+                if (!destinationEndPoint.OK_TO_RUN)
+                {
                     destLogger.Error($"Error: End Point Configuration Problem for {name}");
                     ConfigOK = false;
                     return;
                 }
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 destLogger.Error(ex, $"Error: No End Point defined for {name}");
                 SetOutput("Error: No End Point Defined " + ex.Message);
                 ConfigOK = false;
                 return;
             }
 
-            try {
-                templateFile = config.Attributes["templateFile"].Value;
-            } catch (Exception ex) {
-                if (LineType != "HTTPGET") {
+            try
+            {
+                templateFile = config.Attributes["templateID"].Value;
+            }
+            catch (Exception ex)
+            {
+                if (LineType != "HTTPGET")
+                {
                     destLogger.Error(ex, $"Template File not defined for {name}");
                     SetOutput("Error: No Template File Defined");
                     ConfigOK = false;
                     return;
                 }
             }
-            try {
-                template = File.ReadAllText(templateFile);
-            } catch (Exception ex) {
-                if (LineType != "HTTPGET") {
+            try
+            {
+                template = executionController.GetFileContent(templateFile);
+            }
+            catch (Exception ex)
+            {
+                if (LineType != "HTTPGET")
+                {
                     destLogger.Error(ex, $"Template File {templateFile} cannot be read for {name}.");
                     SetOutput("Error: Template File Could Not Be Read");
                     return;
-                } else {
+                }
+                else
+                {
                     template = "";
                 }
             }
             destLogger.Info($"Controller and View Created for {LineName}");
         }
 
-        public new bool PrePrepare() {
+        public new bool PrePrepare()
+        {
             messagesSent = 0;
             messagesFail = 0;
             Report(0, 0, 0);
             return base.PrePrepare();
         }
 
-        public new bool Prepare() {
+        public new bool Prepare()
+        {
             messagesSent = 0;
             messagesFail = 0;
             Report(0, 0, 0);
@@ -73,49 +92,65 @@ namespace LoadInjector.RunTime {
             return base.Prepare();
         }
 
-        public override void Execute() {
+        public override void Execute()
+        {
             messagesSent = 0;
             messagesFail = 0;
             Report(0, 0, 0);
-            foreach (string trigger in triggerIDs) {
+            foreach (string trigger in triggerIDs)
+            {
                 eventDistributor.AddLineHandler(trigger, this);
             }
             stopwatch.Restart();
             SetOutput("Waiting for next triggering event");
         }
 
-        internal void TriggerHandler(object sender, TriggerFiredEventArgs e) {
+        internal void TriggerHandler(object sender, TriggerFiredEventArgs e)
+        {
             ProcessIteration(e.record).Wait();
         }
 
-        public override async Task<bool> ProcessIteration(Tuple<Dictionary<string, string>, FlightNode> record) {
+        public override async Task<bool> ProcessIteration(Tuple<Dictionary<string, string>> record)
+        {
             string message = (string)template.Clone();
-            FlightNode fl = record.Item2;
+
             Dictionary<string, string> dict = record.Item1;
 
             // Process the data records
-            foreach (Variable v in vars) {
-                try {
-                    if (v.varSubstitionRequired) {
-                        v.value = v.GetValue(fl, dict, vars);
-                        message = message.Replace(v.token, v.value);
-                    } else {
-                        v.value = v.GetValue(fl, dict);    //Special veriosn of GetValues which returns the correct field from the supplied values, if it is a CSV field
+            foreach (Variable v in vars)
+            {
+                try
+                {
+                    if (v.varSubstitionRequired)
+                    {
+                        v.value = v.GetValue(dict, vars);
                         message = message.Replace(v.token, v.value);
                     }
-                } catch (ArgumentException) {
+                    else
+                    {
+                        v.value = v.GetValue(dict);    //Special veriosn of GetValues which returns the correct field from the supplied values, if it is a CSV field
+                        message = message.Replace(v.token, v.value);
+                    }
+                }
+                catch (ArgumentException)
+                {
                     break;
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     destLogger.Error(ex, $"Token Substitution Exception");
                 }
             }
 
             logger.Trace($"Message to be sent: \n{message}\n");
 
-            if (destinationEndPoint.Send(message, vars)) {
+            if (destinationEndPoint.Send(message, vars))
+            {
                 messagesSent += 1;
                 destLogger.Info("Message Sent " + messagesSent);
-            } else {
+            }
+            else
+            {
                 messagesFail += 1;
                 destLogger.Error("Message Failed " + messagesFail);
             }
@@ -125,11 +160,15 @@ namespace LoadInjector.RunTime {
 
             Report(messagesSent, messagesFail, rate);
 
-            if (saveMessageFile != null) {
+            if (saveMessageFile != null)
+            {
                 string fullPath = saveMessageFile.Replace(".", $"{messagesSent}.");
-                try {
+                try
+                {
                     File.WriteAllText(fullPath, message);
-                } catch (Exception ex) {
+                }
+                catch (Exception ex)
+                {
                     destLogger.Warn($"Unable to record message to file ${fullPath}. {ex.Message}");
                 }
             }

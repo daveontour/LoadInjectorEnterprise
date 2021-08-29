@@ -12,18 +12,15 @@ namespace LoadInjector.RunTime.ViewModels
     public class TriggerFiredEventArgs : EventArgs
     {
         public string triggerID;
-        public Tuple<Dictionary<string, string>, FlightNode> record;
+        public Tuple<Dictionary<string, string>> record;
 
-        public TriggerFiredEventArgs(string triggerID, Tuple<Dictionary<string, string>, FlightNode> record)
+        public TriggerFiredEventArgs(string triggerID, Tuple<Dictionary<string, string>> record)
         {
             TriggerName = triggerID;
             this.record = record;
-            Flight = record.Item2;
         }
 
         public string TriggerName { get; set; }
-
-        public FlightNode Flight { get; set; }
 
         public string FiredString(string name)
         {
@@ -38,7 +35,6 @@ namespace LoadInjector.RunTime.ViewModels
         public List<Timer> timers = new List<Timer>();
         private readonly Dictionary<DataDrivenSourceController, DataDrivenSourceController> execCntlMap = new Dictionary<DataDrivenSourceController, DataDrivenSourceController>();
         private readonly Dictionary<RateDrivenSourceController, RateDrivenSourceController> rateCntlMap = new Dictionary<RateDrivenSourceController, RateDrivenSourceController>();
-        private readonly Dictionary<AmsDirectExecutionController, AmsDirectExecutionController> amsDirectCntlMap = new Dictionary<AmsDirectExecutionController, AmsDirectExecutionController>();
         private readonly Dictionary<LineExecutionController, LineExecutionController> lineCntlMap = new Dictionary<LineExecutionController, LineExecutionController>();
         public List<TriggerRecord> triggerRecords = new List<TriggerRecord>();
         public Queue<TriggerRecord> triggerQueue = new Queue<TriggerRecord>();
@@ -105,7 +101,7 @@ namespace LoadInjector.RunTime.ViewModels
             }
         }
 
-        public void DistributeMessage(string triggerID, Tuple<Dictionary<String, String>, FlightNode> record)
+        public void DistributeMessage(string triggerID, Tuple<Dictionary<String, String>> record)
         {
             // used by rate driven sources
 
@@ -144,41 +140,6 @@ namespace LoadInjector.RunTime.ViewModels
         {
             //Used by event driven sources
 
-            if (rec.refreshFlight && rec.record.Item2 != null)
-            {
-                try
-                {
-                    FlightNode update = rec.record.Item2.RefeshFlight(executionController.amshost, executionController.token, executionController.apt_code).Result;
-                    if (update != null)
-                        rec.record.Item2.UpdateFlight(update);
-                }
-                catch (Exception e)
-                {
-                    sourceLogger.Warn(e, "Failed to update flight. Using original data");
-                }
-            }
-
-            if (rec.record.Item2 != null)
-            {
-                if (rec.expression != null)
-                {
-                    bool pass = rec.expression.Pass(rec.record.Item2.FightXML);
-                    if (!pass)
-                    {
-                        sourceLogger.Trace("Post Filtering: Flight did not pass filter");
-                        return;
-                    }
-                }
-                if (rec.topLevelFilter != null)
-                {
-                    bool pass = rec.topLevelFilter.Pass(rec.record.Item2.FightXML);
-                    if (!pass)
-                    {
-                        sourceLogger.Trace("Post Filtering: Flight did not pass filter");
-                        return;
-                    }
-                }
-            }
             map[rec.ID]?.Fire(new TriggerFiredEventArgs(rec.ID, rec.record));
 
             // Fire any chained elements

@@ -10,9 +10,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Xml;
 
-namespace LoadInjector.RunTime {
-
-    public abstract class DestinationControllerAbstract {
+namespace LoadInjector.RunTime
+{
+    public abstract class DestinationControllerAbstract
+    {
         public DestinationEndPoint destinationEndPoint;
         public readonly object _locker = new object();
         public XmlNode config;
@@ -24,12 +25,12 @@ namespace LoadInjector.RunTime {
         public List<string[]> variableCSVValues = new List<string[]>();
         public ClientHub clientHub;
 
-        internal bool PrePrepare() {
+        internal bool PrePrepare()
+        {
             return true;
         }
 
         public int excelRowStart;
-        public readonly List<FlightNode> flightPool = new List<FlightNode>();
         public readonly List<Variable> vars = new List<Variable>();
         public int maxMessages;
         public int deferTime;
@@ -72,9 +73,10 @@ namespace LoadInjector.RunTime {
 
         public abstract void Execute();
 
-        public abstract Task<bool> ProcessIteration(Tuple<Dictionary<string, string>, FlightNode> record);
+        public abstract Task<bool> ProcessIteration(Tuple<Dictionary<string, string>> record);
 
-        protected DestinationControllerAbstract(XmlNode node, NgExecutionController executionController) {
+        protected DestinationControllerAbstract(XmlNode node, NgExecutionController executionController)
+        {
             this.config = node;
             this.executionController = executionController;
 
@@ -84,9 +86,12 @@ namespace LoadInjector.RunTime {
             this.executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
             this.uuid = node.Attributes["uuid"]?.Value;
 
-            try {
+            try
+            {
                 name = config.Attributes["name"].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 Console.WriteLine("Error: No Name define <destination>");
                 return;
             }
@@ -105,36 +110,45 @@ namespace LoadInjector.RunTime {
             this.ConfigOK = true;
         }
 
-        public bool Prepare() {
+        public bool Prepare()
+        {
             // Some preparation for the end point if required.
 
             vars.Clear();
-            foreach (XmlNode variableConfig in config.SelectNodes(".//variable")) {
+            foreach (XmlNode variableConfig in config.SelectNodes(".//variable"))
+            {
                 Variable var = new Variable(variableConfig);
-                if (!var.ConfigOK) {
+                if (!var.ConfigOK)
+                {
                     this.ConfigOK = false;
                     Debug.WriteLine("Error in variable config");
                     SetOutput("Error: Variable Configuration Error - " + var.ErrorMsg);
 
                     return false;
-                } else {
+                }
+                else
+                {
                     vars.Add(var);
                 }
             }
             return true;
         }
 
-        public void Start() {
+        public void Start()
+        {
             EXECUTE_TEST = true;
-            thread = new Thread(Execute) {
+            thread = new Thread(Execute)
+            {
                 IsBackground = false,
                 Priority = ThreadPriority.AboveNormal
             };
             thread.Start();
         }
 
-        public void Stop() {
-            lock (_locker) {
+        public void Stop()
+        {
+            lock (_locker)
+            {
                 EXECUTE_TEST = false;
                 destinationEndPoint?.Stop();
                 Monitor.Pulse(_locker);
@@ -143,8 +157,10 @@ namespace LoadInjector.RunTime {
             SetOutput("Test Run Complete");
         }
 
-        public void Report(int messagesSent, int messageFail, double rate) {
-            if (rate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
+        public void Report(int messagesSent, int messageFail, double rate)
+        {
+            if (rate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0)
+            {
                 clientHub.SendDestinationReport(executionNodeID, uuid, messagesSent, messageFail, rate);
             }
         }
@@ -155,7 +171,8 @@ namespace LoadInjector.RunTime {
          * Helper Methods
          */
 
-        public double RoundToSignificantDigits(double d, int digits) {
+        public double RoundToSignificantDigits(double d, int digits)
+        {
             if (d == 0)
                 return 0;
 
@@ -166,69 +183,81 @@ namespace LoadInjector.RunTime {
             return di / scale;
         }
 
-        public void SetOutput(String s) {
+        public void SetOutput(String s)
+        {
             clientHub.SetDestinationOutput(executionNodeID, uuid, s);
         }
 
-        public void ConsoleMsg(String s) {
+        public void ConsoleMsg(String s)
+        {
             clientHub.ConsoleMsg(executionNodeID, uuid, s);
         }
 
-        //public void SetRate(double s) {
-        //    clientHub.SetDestinationRate(executionNodeID, uuid, s);
-        //}
-
-        //public void Sent(int s) {
-        //    clientHub.SetDestinationSent(executionNodeID, uuid, s);
-        //}
-
-        public bool SetVar(string attrib, bool defaultValue) {
+        public bool SetVar(string attrib, bool defaultValue)
+        {
             bool value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = bool.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        public string SetVar(string attrib, string defaultValue) {
+        public string SetVar(string attrib, string defaultValue)
+        {
             string value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = config.Attributes[attrib].Value;
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        public double SetVar(string attrib, double defaultValue) {
+        public double SetVar(string attrib, double defaultValue)
+        {
             double value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = double.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        public int SetVar(string attrib, int defaultValue) {
+        public int SetVar(string attrib, int defaultValue)
+        {
             int value;
-            try {
+            try
+            {
                 if (config.Attributes[attrib] == null) return defaultValue;
                 value = int.Parse(config.Attributes[attrib].Value);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 value = defaultValue;
             }
             return value;
         }
 
-        public string[] SetTriggerIDS() {
+        public string[] SetTriggerIDS()
+        {
             List<string> ids = new List<string>();
-            foreach (XmlNode sub in config.SelectNodes("./subscribed")) {
+            foreach (XmlNode sub in config.SelectNodes("./subscribed"))
+            {
                 ids.Add(sub.InnerText);
             }
             return ids.ToArray();

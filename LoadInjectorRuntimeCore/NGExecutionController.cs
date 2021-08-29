@@ -112,41 +112,51 @@ namespace LoadInjector.RunTime
         {
             // Client Server Mode
 
-            this.reportFile = reportFile;
-            this.LocalStart = localStart;
-
-            if (type == ExecutionControllerType.Client || type == ExecutionControllerType.Local)
+            try
             {
-                try
+                this.reportFile = reportFile;
+                this.LocalStart = localStart;
+
+                if (type == ExecutionControllerType.Client || type == ExecutionControllerType.Local)
                 {
-                    this.clientHub = new ClientHub(serverHub, this);
-                    this.eventDistributor = new TriggerEventDistributor(this);
+                    try
+                    {
+                        this.clientHub = new ClientHub(serverHub, this);
+                        this.eventDistributor = new TriggerEventDistributor(this);
+                    }
+                    catch (Exception ex)
+                    {
+                        ConsoleMsg(ex.Message);
+                    }
                 }
-                catch (Exception ex)
+
+                // Running directly from a local file
+                if (type == ExecutionControllerType.StandAlone)
                 {
-                    ConsoleMsg(ex.Message);
+                    this.standAloneMode = true;
+                    XmlDocument doc = new XmlDocument();
+                    if (executeFile.ToLower().EndsWith(".lia"))
+                    {
+                        doc = Utils.ExtractArchiveToDirectory(executeFile, ArchiveDirectory, "lia.lia");
+                    }
+                    else
+                    {
+                        doc.Load(executeFile);
+                    }
+
+                    this.clientHub = new ClientHub(this);
+                    this.eventDistributor = new TriggerEventDistributor(this);
+                    this.InitModel(doc);
+                    this.RunLocal();
                 }
             }
-
-            // Running directly from a local file
-            if (type == ExecutionControllerType.StandAlone)
+            catch (Exception ex)
             {
-                this.standAloneMode = true;
-                XmlDocument doc = new XmlDocument();
-                if (executeFile.ToLower().EndsWith(".lia"))
-                {
-                    //string archiveRoot = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) + "/LoadInjectorRTController";
-                    doc = LoadInjectorBase.Common.Utils.ExtractArchiveToDirectory(executeFile, ArchiveDirectory, "lia.lia");
-                }
-                else
-                {
-                    doc.Load(executeFile);
-                }
+                Console.WriteLine($"\nError Starting Load Injector Client: {ex.Message}");
+                Console.WriteLine("\nHit any key to exit");
+                Console.Read();
 
-                this.clientHub = new ClientHub(this);
-                this.eventDistributor = new TriggerEventDistributor(this);
-                this.InitModel(doc);
-                this.RunLocal();
+                throw (ex);
             }
         }
 
@@ -636,7 +646,7 @@ namespace LoadInjector.RunTime
                 }
                 foreach (XmlNode trigNode in node.SelectNodes(".//trigger"))
                 {
-                    string id = trigNode.Attributes["id"]?.Value;
+                    string id = trigNode.Attributes["triggerID"]?.Value;
                     if (id != null)
                     {
                         if (csvFields.Contains(id))
@@ -664,7 +674,7 @@ namespace LoadInjector.RunTime
                 }
                 foreach (XmlNode trigNode in node.SelectNodes(".//trigger"))
                 {
-                    string id = trigNode.Attributes["id"]?.Value;
+                    string id = trigNode.Attributes["triggerID"]?.Value;
                     if (id != null)
                     {
                         if (csvFields.Contains(id))
@@ -756,12 +766,10 @@ namespace LoadInjector.RunTime
                     if (logLevel.ToLower() == "trace")
                     {
                         rule.EnableLoggingForLevel(LogLevel.Trace);
-                        //                     logger.Info($"Logging Level set to TRACE for rule {rule.RuleName }");
                     }
                     else
                     {
                         rule.DisableLoggingForLevel(LogLevel.Trace);
-                        //                       logger.Info($"Logging Level set to INFO  for rule {rule.RuleName }");
                     }
                 }
 
@@ -1136,6 +1144,44 @@ namespace LoadInjector.RunTime
                 }
             }
             return disabled;
+        }
+
+        public string GetFileName(string uuid)
+        {
+            /*
+             *    Accepts the uuid of a file entry and returns the full local path name
+             *    taking into account if it is a local file or in the archive
+             */
+            XmlNode fileNode = dataModel.SelectSingleNode($"//*[@uuid = '{uuid}']");
+            bool isArchiveFile = bool.Parse(fileNode.Attributes["IsInArchive"].Value);
+            if (!isArchiveFile)
+            {
+                return fileNode.Attributes["fullPath"].Value;
+            }
+            else
+            {
+                if (fileNode.Name == "datafile")
+                {
+                    return Path.Combine(ArchiveDirectory, "Data", fileNode.Attributes["name"].Value);
+                }
+                else
+                {
+                    return Path.Combine(ArchiveDirectory, "Templates", fileNode.Attributes["name"].Value);
+                }
+            }
+        }
+
+        public string GetFileContent(string uuid)
+        {
+            string fileName = GetFileName(uuid);
+            if (File.Exists(fileName))
+            {
+                return File.ReadAllText(fileName);
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public void RetrieveStandAlone(string remoteUri)
