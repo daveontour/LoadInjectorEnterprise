@@ -1,12 +1,11 @@
 ﻿using Microsoft.VisualBasic.FileIO;
 using System;
 using System.Collections.Generic;
-using System.Net.Http;
 using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
-    public class CsvProcessor
+    public class CsvProcessor : ProcessorBase
     {
         private readonly string csvFile;
         private readonly string csvRestURL;
@@ -48,9 +47,13 @@ namespace LoadInjector.RunTime.EngineComponents
             {
                 parser = new TextFieldParser(csvFile);
             }
+            else if (csvSourceType.Contains("Post"))
+            {
+                parser = new TextFieldParser(GetDocumentFromPostSource(csvRestURL, node));
+            }
             else
             {
-                parser = new TextFieldParser(GetCSVDocument(csvRestURL, node));
+                parser = new TextFieldParser(GetDocumentFromGetSource(csvRestURL, node));
             }
 
             try
@@ -104,46 +107,6 @@ namespace LoadInjector.RunTime.EngineComponents
                 Console.WriteLine($"Error reading CSV Source File {csvFile}");
             }
             return records;
-        }
-
-        private string GetCSVDocument(string url, XmlNode config)
-        {
-            try
-            {
-                try
-                {
-                    using (var client = new HttpClient())
-                    {
-                        try
-                        {
-                            foreach (XmlNode header in config.SelectNodes(".//header"))
-                            {
-                                string key = header.Attributes["name"]?.Value;
-                                string value = header.InnerText;
-                                client.DefaultRequestHeaders.Add(key, value);
-                            }
-                            string res = client.GetStringAsync(url).Result;
-                            return res;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine($"Error retrieving CSV Document: {ex.Message}");
-                            return null;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"Error retrieving CSV Document: {ex.Message}");
-                    return null;
-                }
-            }
-            catch (Exception)
-            {
-                // NO-OP
-            }
-
-            return null;
         }
     }
 }

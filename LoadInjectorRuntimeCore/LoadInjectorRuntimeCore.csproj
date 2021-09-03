@@ -310,6 +310,7 @@
     <Compile Include="RunTime\TimedEventProceesors\DBProcessor.cs" />
     <Compile Include="RunTime\TimedEventProceesors\ExcelProcessor.cs" />
     <Compile Include="RunTime\TimedEventProceesors\JSONProcessor.cs" />
+    <Compile Include="RunTime\TimedEventProceesors\ProcessorBase.cs" />
     <Compile Include="RunTime\TimedEventProceesors\XMLProcessor.cs" />
     <Compile Include="RunTime\ViewModels\Destination\DestinationControllerAbstract.cs" />
     <Compile Include="RunTime\ViewModels\Destination\DestinationEndPoint.cs" />

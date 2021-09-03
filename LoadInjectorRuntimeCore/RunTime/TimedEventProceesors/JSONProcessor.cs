@@ -7,7 +7,7 @@ using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
-    public class JsonProcessor
+    public class JsonProcessor : ProcessorBase
     {
         public List<Dictionary<string, string>> GetRecords(string jsonFile, string jsonRestURL, string repeatingElement, string sourceType, List<string> jsonFieldInUse, XmlNode config)
         {
@@ -21,9 +21,13 @@ namespace LoadInjector.RunTime.EngineComponents
                 {
                     json = File.ReadAllText(jsonFile);
                 }
+                else if (sourceType.Contains("Post"))
+                {
+                    json = json = GetDocumentFromPostSource(jsonRestURL, config);
+                }
                 else
                 {
-                    json = GetJSONDocument(jsonRestURL, config);
+                    json = GetDocumentFromGetSource(jsonRestURL, config);
                 }
             }
             catch (Exception ex)
@@ -57,37 +61,6 @@ namespace LoadInjector.RunTime.EngineComponents
             }
 
             return records;
-        }
-
-        private string GetJSONDocument(string url, XmlNode config)
-        {
-            try
-            {
-                using (var client = new HttpClient())
-                {
-                    try
-                    {
-                        foreach (XmlNode header in config.SelectNodes(".//header"))
-                        {
-                            string key = header.Attributes["name"]?.Value;
-                            string value = header.InnerText;
-                            client.DefaultRequestHeaders.Add(key, value);
-                        }
-                        string res = client.GetStringAsync(url).Result;
-                        return res;
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error retrieving JSON Document.{ex.Message}");
-                        return null;
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error retrieving JSON Document: {ex.Message}");
-                return null;
-            }
         }
     }
 }

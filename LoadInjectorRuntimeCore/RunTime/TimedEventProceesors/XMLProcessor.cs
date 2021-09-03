@@ -5,7 +5,7 @@ using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
-    public class XmlProcessor
+    public class XmlProcessor : ProcessorBase
     {
         public List<Dictionary<string, string>> GetRecords(string xmlFile, string xmlRestURL, string repeatingElement, string sourceType, List<string> xmlElementsInUse, bool xmlToString, XmlNode config)
         {
@@ -50,6 +50,7 @@ namespace LoadInjector.RunTime.EngineComponents
         private XmlDocument GetXmlDocument(string xmlFile, string xmlRestURL, string sourceType, XmlNode config)
         {
             XmlDocument xmldoc;
+            string xml;
             if (sourceType.Contains("File"))
             {
                 try
@@ -64,60 +65,17 @@ namespace LoadInjector.RunTime.EngineComponents
                     return null;
                 }
             }
-
-            if (sourceType == "url")
+            else if (sourceType.Contains("Post"))
             {
-                try
-                {
-                    string url = xmlRestURL;
-                    try
-                    {
-                        using (var client = new HttpClient())
-                        {
-                            try
-                            {
-                                foreach (XmlNode header in config.SelectNodes(".//header"))
-                                {
-                                    string key = header.Attributes["name"]?.Value;
-                                    string value = header.InnerText;
-                                    client.DefaultRequestHeaders.Add(key, value);
-                                }
-                                string res = client.GetStringAsync(url).Result;
-
-                                try
-                                {
-                                    xmldoc = new XmlDocument();
-                                    xmldoc.Load(res);
-                                    return xmldoc;
-                                }
-                                catch (Exception ex)
-                                {
-                                    Console.WriteLine($"Error retrieving XML Document: {ex.Message}");
-                                    return null;
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                Console.WriteLine($"Error retrieving XML Document: {ex.Message}");
-                                return null;
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine($"Error retrieving XML Document: {ex.Message}");
-                        return null;
-                    }
-                }
-                catch (Exception)
-                {
-                    // NO-OP
-                }
-
-                return null;
+                xml = GetDocumentFromPostSource(xmlRestURL, config);
             }
-
-            return null;
+            else
+            {
+                xml = GetDocumentFromGetSource(xmlRestURL, config);
+            }
+            xmldoc = new XmlDocument();
+            xmldoc.LoadXml(xml);
+            return xmldoc;
         }
     }
 }
