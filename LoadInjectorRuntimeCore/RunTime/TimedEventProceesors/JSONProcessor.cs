@@ -3,13 +3,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
     public class JsonProcessor : ProcessorBase
     {
-        public List<Dictionary<string, string>> GetRecords(string jsonFile, string jsonRestURL, string repeatingElement, string sourceType, List<string> jsonFieldInUse, XmlNode config)
+        public async Task<List<Dictionary<string, string>>> GetRecords(string jsonFile, string postBodyText, string jsonRestURL, string repeatingElement, string sourceType, List<string> jsonFieldInUse, XmlNode config)
         {
             List<Dictionary<String, String>> records = new List<Dictionary<String, String>>();
 
@@ -23,7 +24,7 @@ namespace LoadInjector.RunTime.EngineComponents
                 }
                 else if (sourceType.Contains("Post"))
                 {
-                    json = json = GetDocumentFromPostSource(jsonRestURL, config);
+                    json = await GetDocumentFromPostSource(jsonRestURL, postBodyText, config);
                 }
                 else
                 {

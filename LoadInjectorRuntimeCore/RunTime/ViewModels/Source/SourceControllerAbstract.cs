@@ -22,12 +22,14 @@ namespace LoadInjector.RunTime.ViewModels
         public TriggerEventDistributor eventDistributor;
         public string name;
 
+        public string postBodyText;
+
         public int serverOffset;
         public double messagesPerMinute;
 
         public string dataFile;
         public string dataSourceFileOrURL;
-        public string dataRestURL;
+        public string datatURL;
         public string repeatingElement;
 
         public bool xmlToString;
@@ -78,27 +80,32 @@ namespace LoadInjector.RunTime.ViewModels
 
             dataSourceType = node.Attributes["dataType"]?.Value;
 
+            postBodyText = node.SelectSingleNode(".//postBody")?.InnerText;
+
             executionNodeID = node.Attributes["executionNodeUuid"]?.Value;
             uuid = node.Attributes["uuid"]?.Value;
+
+            string dfName = node.Attributes["dataFileID"]?.Value;
+            if (dfName != null)
+            {
+                dataFile = executionController.GetFileName(dfName);
+            }
 
             switch (dataSourceType)
             {
                 case "csv":
-                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
-                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    datatURL = node.Attributes["dataURL"]?.Value;
                     break;
 
                 case "excel":
-                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
                     excelSheet = node.Attributes["excelSheet"]?.Value;
                     excelStartRow = node.Attributes["excelStartRow"]?.Value;
                     excelEndRow = node.Attributes["excelEndRow"]?.Value;
                     break;
 
                 case "xml":
-                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
-                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    datatURL = node.Attributes["dataURL"]?.Value;
                     repeatingElement = node.Attributes["repeatingElement"]?.Value;
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
                     try
@@ -112,8 +119,7 @@ namespace LoadInjector.RunTime.ViewModels
                     break;
 
                 case "json":
-                    dataFile = executionController.GetFileName(node.Attributes["dataFile"]?.Value);
-                    dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                    datatURL = node.Attributes["dataURL"]?.Value;
                     dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
                     repeatingElement = node.Attributes["repeatingElement"]?.Value;
                     break;
@@ -220,9 +226,7 @@ namespace LoadInjector.RunTime.ViewModels
         public List<string> GetDataPointsInUse(string triggerType, string attToAdd)
         {
             List<string> inUse = new List<string>();
-            List<string> triggerIDS = new List<string> {
-                triggerID
-            };
+            List<string> triggerIDS = new List<string> { triggerID };
             foreach (XmlNode chain in node.SelectNodes("./chained"))
             {
                 if (chain.Attributes["useParentData"].Value.Equals("true", StringComparison.InvariantCultureIgnoreCase))
@@ -306,7 +310,7 @@ namespace LoadInjector.RunTime.ViewModels
             }
             else
             {
-                dataPointsInUse = GetDataPointsInUse("xmlElement", "xmlXPath");
+                dataPointsInUse = GetDataPointsInUse("xmlElement", "element");
             }
 
             if (dataPointsInUse.Count == 0)
@@ -318,7 +322,7 @@ namespace LoadInjector.RunTime.ViewModels
 
             try
             {
-                dataRecords = xmlProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, xmlToString, node);
+                dataRecords = xmlProcessor.GetRecords(dataFile, postBodyText, datatURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, xmlToString, node).Result;
             }
             catch (Exception ex)
             {
@@ -341,7 +345,7 @@ namespace LoadInjector.RunTime.ViewModels
             }
             else
             {
-                dataPointsInUse = GetDataPointsInUse("jsonElement", "field");
+                dataPointsInUse = GetDataPointsInUse("jsonElement", "element");
             }
             if (dataPointsInUse.Count == 0)
             {
@@ -351,7 +355,7 @@ namespace LoadInjector.RunTime.ViewModels
 
             try
             {
-                dataRecords = jsonProcessor.GetRecords(dataFile, dataRestURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, node);
+                dataRecords = jsonProcessor.GetRecords(dataFile, postBodyText, datatURL, repeatingElement, dataSourceFileOrURL, dataPointsInUse, node).Result;
             }
             catch (Exception ex)
             {
@@ -446,7 +450,7 @@ namespace LoadInjector.RunTime.ViewModels
             {
                 return true;
             }
-            CsvProcessor csvProcessor = new CsvProcessor(dataFile, dataRestURL, dataSourceFileOrURL, dataPointsInUse, node);
+            CsvProcessor csvProcessor = new CsvProcessor(dataFile, postBodyText, datatURL, dataSourceFileOrURL, dataPointsInUse, node);
 
             try
             {

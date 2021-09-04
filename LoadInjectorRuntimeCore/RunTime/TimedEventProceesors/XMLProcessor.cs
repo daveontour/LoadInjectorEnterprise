@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Threading.Tasks;
 using System.Xml;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
     public class XmlProcessor : ProcessorBase
     {
-        public List<Dictionary<string, string>> GetRecords(string xmlFile, string xmlRestURL, string repeatingElement, string sourceType, List<string> xmlElementsInUse, bool xmlToString, XmlNode config)
+        public async Task<List<Dictionary<string, string>>> GetRecords(string xmlFile, string postBodyText, string xmlRestURL, string repeatingElement, string sourceType, List<string> xmlElementsInUse, bool xmlToString, XmlNode config)
         {
             List<Dictionary<string, string>> records = new List<Dictionary<string, string>>();
 
-            XmlDocument xmldoc = GetXmlDocument(xmlFile, xmlRestURL, sourceType, config);
+            XmlDocument xmldoc = await GetXmlDocument(xmlFile, postBodyText, xmlRestURL, sourceType, config);
 
             try
             {
@@ -47,7 +48,7 @@ namespace LoadInjector.RunTime.EngineComponents
             return records;
         }
 
-        private XmlDocument GetXmlDocument(string xmlFile, string xmlRestURL, string sourceType, XmlNode config)
+        private async Task<XmlDocument> GetXmlDocument(string xmlFile, string postBodyText, string xmlRestURL, string sourceType, XmlNode config)
         {
             XmlDocument xmldoc;
             string xml;
@@ -67,7 +68,7 @@ namespace LoadInjector.RunTime.EngineComponents
             }
             else if (sourceType.Contains("Post"))
             {
-                xml = GetDocumentFromPostSource(xmlRestURL, config);
+                xml = await GetDocumentFromPostSource(xmlRestURL, postBodyText, config);
             }
             else
             {

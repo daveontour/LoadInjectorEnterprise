@@ -12,18 +12,20 @@ namespace LoadInjector.RunTime.EngineComponents
         private readonly string csvSourceType;
         private readonly List<string> fieldsInUse;
         private readonly XmlNode node;
+        private readonly string postBodyText;
 
         public CsvProcessor()
         {
         }
 
-        public CsvProcessor(string csvFile, string csvRestURL, string csvSourceType, List<string> fieldsInUse, XmlNode node)
+        public CsvProcessor(string csvFile, string postBodyText, string csvRestURL, string csvSourceType, List<string> fieldsInUse, XmlNode node)
         {
             this.csvFile = csvFile;
             this.csvRestURL = csvRestURL;
             this.csvSourceType = csvSourceType;
             this.fieldsInUse = fieldsInUse;
             this.node = node;
+            this.postBodyText = postBodyText;
         }
 
         public List<Dictionary<string, string>> GetRecords()
@@ -49,7 +51,7 @@ namespace LoadInjector.RunTime.EngineComponents
             }
             else if (csvSourceType.Contains("Post"))
             {
-                parser = new TextFieldParser(GetDocumentFromPostSource(csvRestURL, node));
+                parser = new TextFieldParser(GetDocumentFromPostSource(csvRestURL, postBodyText, node).Result);
             }
             else
             {

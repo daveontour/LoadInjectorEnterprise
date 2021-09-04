@@ -6,16 +6,16 @@ using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using LoadInjectorBase;
+using System.IO;
 
 namespace LoadInjector.RunTime.EngineComponents
 {
     public class ProcessorBase
     {
-        protected async Task<string> GetDocumentFromPostSource(string url, XmlNode node)
+        protected async Task<string> GetDocumentFromPostSource(string url, string postBodyText, XmlNode node)
         {
             try
             {
-                string body = "request bofy";
                 List<SourceVariable> vars = new List<SourceVariable>();
                 foreach (XmlNode variableConfig in node.SelectNodes(".//variable"))
                 {
@@ -34,7 +34,7 @@ namespace LoadInjector.RunTime.EngineComponents
                     try
                     {
                         url = url.Replace(v.token, v.GetValue());
-                        body = body.Replace(v.token, v.GetValue());
+                        postBodyText = postBodyText.Replace(v.token, v.GetValue());
                     }
                     catch (Exception ex)
                     {
@@ -42,7 +42,7 @@ namespace LoadInjector.RunTime.EngineComponents
                     }
                 }
 
-                var data = new StringContent(body, Encoding.UTF8, "application/text");
+                var data = new StringContent(postBodyText, Encoding.UTF8, "text/xml");
                 try
                 {
                     using (var client = new HttpClient())
@@ -52,7 +52,8 @@ namespace LoadInjector.RunTime.EngineComponents
                             foreach (XmlNode header in node.SelectNodes(".//header"))
                             {
                                 string key = header.Attributes["name"]?.Value;
-                                string value = header.InnerText;
+                                if (key == "Content-Type") continue;
+                                string value = header.Attributes["value"]?.Value;
                                 client.DefaultRequestHeaders.Add(key, value);
                             }
                             var response = await client.PostAsync(url, data);

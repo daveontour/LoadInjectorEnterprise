@@ -62,7 +62,7 @@ namespace LoadInjector.RunTime
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
                 dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
-                dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                datatURL = node.Attributes["dataURL"]?.Value;
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
             }
@@ -78,7 +78,7 @@ namespace LoadInjector.RunTime
             if (dataType == "xml")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
-                dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                datatURL = node.Attributes["dataURL"]?.Value;
                 repeatingElement = node.Attributes["repeatingElement"]?.Value;
                 timeElement = node.Attributes["timeElement"]?.Value;
                 timeElementFormat = node.Attributes["timeElementFormat"]?.Value;
@@ -95,7 +95,7 @@ namespace LoadInjector.RunTime
             if (dataType == "json")
             {
                 dataFile = nGExecutionController.GetFileName(node.Attributes["dataFile"]?.Value);
-                dataRestURL = node.Attributes["dataRestURL"]?.Value;
+                datatURL = node.Attributes["dataURL"]?.Value;
                 dataSourceFileOrURL = node.Attributes["sourceType"]?.Value;
                 repeatingElement = node.Attributes["repeatingElement"]?.Value;
                 timeElement = node.Attributes["timeElement"]?.Value;

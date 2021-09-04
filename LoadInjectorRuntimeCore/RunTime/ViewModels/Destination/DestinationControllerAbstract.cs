@@ -44,7 +44,7 @@ namespace LoadInjector.RunTime
         public string amsTimeout;
 
         public double interval;
-        public string templateFile;
+        public string templateFileID;
         public string template;
         public string dataSource;
         public string dataFile;

@@ -42,7 +42,7 @@ namespace LoadInjector.RunTime
 
             try
             {
-                templateFile = config.Attributes["templateID"].Value;
+                templateFileID = config.Attributes["templateFileID"].Value;
             }
             catch (Exception ex)
             {
@@ -56,13 +56,13 @@ namespace LoadInjector.RunTime
             }
             try
             {
-                template = executionController.GetFileContent(templateFile);
+                template = executionController.GetFileContent(templateFileID);
             }
             catch (Exception ex)
             {
                 if (LineType != "HTTPGET")
                 {
-                    destLogger.Error(ex, $"Template File {templateFile} cannot be read for {name}.");
+                    destLogger.Error(ex, $"Template File {templateFileID} cannot be read for {name}.");
                     SetOutput("Error: Template File Could Not Be Read");
                     return;
                 }
