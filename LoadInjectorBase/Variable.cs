@@ -434,11 +434,40 @@ namespace LoadInjectorBase
                     }
                 }
             }
-
             if (type == "intRange")
             {
-                return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
+                if (digits == -1)
+                {
+                    return ProcessValue(rand.Next(lowerLimit, upperLimit).ToString());
+                }
+
+                string digitsStr = rand.Next(lowerLimit, upperLimit).ToString().ToString();
+                while (digitsStr.Length < digits)
+                {
+                    digitsStr = "0" + digitsStr;
+                }
+
+                return ProcessValue(digitsStr);
             }
+
+            if (type == "sequence")
+            {
+                if (digits == -1)
+                {
+                    seqNum++;
+                    return ProcessValue(seqNum.ToString());
+                }
+
+                string digitsStr = seqNum.ToString();
+                while (digitsStr.Length < digits)
+                {
+                    digitsStr = "0" + digitsStr;
+                }
+
+                seqNum++;
+                return ProcessValue(digitsStr);
+            }
+
             if (type == "intgaussian")
             {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
@@ -447,15 +476,73 @@ namespace LoadInjectorBase
                              Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
                 double randNormal =
                              normalInt + stdDev * randStdNormal; //random normal(mean,stdDev^2)
-                return ProcessValue(Convert.ToInt32(randNormal).ToString());
+
+                string rtn = Convert.ToInt32(randNormal).ToString();
+
+                if (digits == -1)
+                {
+                    return ProcessValue(rtn);
+                }
+
+                while (rtn.Length < digits)
+                {
+                    rtn = "0" + rtn;
+                }
+
+                return ProcessValue(rtn);
             }
             if (type == "doublegaussian")
             {
                 double u1 = 1.0 - rand.NextDouble(); //uniform(0,1] random doubles
                 double u2 = 1.0 - rand.NextDouble();
-                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
-                double randNormal = normalDouble + stdDev * randStdNormal; //random normal(mean,stdDev^2)
+                double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) *
+                             Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+                double randNormal =
+                             normalDouble + stdDev * randStdNormal; //random normal(mean,stdDev^2)
+
                 return ProcessValue(randNormal.ToString(CultureInfo.CurrentCulture));
+            }
+
+            if (type == "uuid")
+            {
+                return ProcessValue(Guid.NewGuid().ToString());
+            }
+
+            if (type == "datetime")
+            {
+                int offset = rand.Next(lowerOffset, upperOffset);
+                if (dtRelative)
+                {
+                    return ProcessValue(DateTime.Now.AddMinutes(offset).AddMinutes(delta).ToString(format));
+                }
+                else
+                {
+                    return ProcessValue(DateTime.Now.ToString(format));
+                }
+            }
+
+            if (type == "fixed")
+            {
+                return ProcessValue(fixedValue);
+            }
+
+            if (type == "timestamp")
+            {
+                return ProcessValue(DateTime.Now.ToString(format));
+            }
+
+            if (type == "value")
+            {
+                return ProcessValue(values[rand.Next(0, values.Count)]);
+            }
+
+            if (type == "file")
+            {
+                if (seq >= listLength && abortOnListEnd)
+                {
+                    throw new ArgumentException("Ran out of iteration data");
+                }
+                return ProcessValue(File.ReadAllText(fileEntries[seq++ % listLength]));
             }
 
             return null;

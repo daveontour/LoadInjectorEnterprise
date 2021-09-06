@@ -14,10 +14,29 @@ namespace LoadInjector.RunTime.EngineComponents
 
             XmlDocument xmldoc = await GetXmlDocument(xmlFile, postBodyText, xmlRestURL, sourceType, config);
 
+            string passFilter = config.Attributes["passFilter"]?.Value;
+            string noPassFilter = config.Attributes["noPassFilter"]?.Value;
             try
             {
                 foreach (XmlNode node in xmldoc.SelectNodes(repeatingElement))
                 {
+                    // Filtering based on XPath
+                    if (passFilter != null)
+                    {
+                        if (node.SelectNodes(passFilter).Count < 1)
+                        {
+                            continue;
+                        }
+                    }
+                    if (noPassFilter != null)
+                    {
+                        if (node.SelectNodes(noPassFilter).Count < 0)
+                        {
+                            continue;
+                        }
+                    }
+
+                    // Only put in the elements of intereest
                     Dictionary<string, string> record = new Dictionary<string, string>();
 
                     foreach (string element in xmlElementsInUse)
