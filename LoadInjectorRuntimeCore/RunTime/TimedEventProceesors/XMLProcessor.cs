@@ -23,7 +23,9 @@ namespace LoadInjector.RunTime.EngineComponents
                     // Filtering based on XPath
                     if (passFilter != null)
                     {
-                        if (node.SelectNodes(passFilter).Count < 1)
+                        var nodes = node.SelectNodes(passFilter);
+
+                        if (nodes.Count == 0)
                         {
                             continue;
                         }
