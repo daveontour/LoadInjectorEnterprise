@@ -154,14 +154,14 @@ namespace LoadInjectorBase
             {
                 try
                 {
-                    normalInt = int.Parse(config.Attributes["normalInt"].Value);
+                    normalInt = int.Parse(config.Attributes["mean"].Value);
                 }
                 catch (Exception)
                 {
-                    if (config.Attributes["normalInt"] != null && config.Attributes["normalInt"].Value.StartsWith("@@"))
+                    if (config.Attributes["mean"] != null && config.Attributes["mean"].Value.StartsWith("@@"))
                     {
                         varSubstitionRequired = true;
-                        subDict.Add("normalInt", config.Attributes["normalInt"].Value);
+                        subDict.Add("mean", config.Attributes["mean"].Value);
                     }
                     else
                     {
@@ -176,14 +176,14 @@ namespace LoadInjectorBase
             {
                 try
                 {
-                    normalDouble = double.Parse(config.Attributes["normalDouble"].Value);
+                    normalDouble = double.Parse(config.Attributes["mean"].Value);
                 }
                 catch (Exception)
                 {
-                    if (config.Attributes["normalDouble"] != null && config.Attributes["normalDouble"].Value.StartsWith("@@"))
+                    if (config.Attributes["mean"] != null && config.Attributes["mean"].Value.StartsWith("@@"))
                     {
                         varSubstitionRequired = true;
-                        subDict.Add("normalDouble", config.Attributes["normalDouble"].Value);
+                        subDict.Add("mean", config.Attributes["mean"].Value);
                     }
                     else
                     {
@@ -534,6 +534,11 @@ namespace LoadInjectorBase
             if (type == "value")
             {
                 return ProcessValue(values[rand.Next(0, values.Count)]);
+            }
+
+            if (type == "valueSequence")
+            {
+                return ProcessValue(values[seq++ % values.Count]);
             }
 
             if (type == "file")
