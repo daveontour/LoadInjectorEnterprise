@@ -1,6 +1,5 @@
 ﻿using LoadInjector.RunTime.ViewModels;
 using LoadInjector.RuntimeCore;
-using LoadInjectorBase;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,10 +9,8 @@ using System.Threading.Tasks;
 using System.Timers;
 using System.Xml;
 
-namespace LoadInjector.RunTime
-{
-    public class RateDrivenSourceController : SourceControllerAbstract, LoadInjectorBase.Interfaces.IChainedSourceController
-    {
+namespace LoadInjector.RunTime {
+    public class RateDrivenSourceController : SourceControllerAbstract, LoadInjectorBase.Interfaces.IChainedSourceController {
         internal bool ConfigOK = true;
 
         private System.Timers.Timer sendTimer;
@@ -44,127 +41,88 @@ namespace LoadInjector.RunTime
         public bool finished;
         private bool STOP;
 
-        public RateDrivenSourceController(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) : base(node, chainDepth, triggersInUse, serverOffset, executionController)
-        {
-            if (chainDepth > 0)
-            {
+        public RateDrivenSourceController(XmlNode node, int chainDepth, List<string> triggersInUse, int serverOffset, NgExecutionController executionController) : base(node, chainDepth, triggersInUse, serverOffset, executionController) {
+            if (chainDepth > 0) {
                 isChained = true;
             }
             maxMsgPerMinuteProfile = node.Attributes["maxMsgPerMinuteProfile"]?.Value;
 
-            try
-            {
+            try {
                 var v = node.Attributes["messagesPerMinute"]?.Value;
                 messagesPerMinute = (v == null) ? 60.0 : double.Parse(v);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 messagesPerMinute = 60.0;
             }
             intervalMessagesPerMinute = messagesPerMinute;
 
-            try
-            {
+            try {
                 interval = 1000 * (60.0 / messagesPerMinute);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 interval = 1000 * (60.0);
             }
 
-            try
-            {
-                var v = node.Attributes["maxNumMessages"]?.Value;
+            try {
+                var v = node.Attributes["maxMessages"]?.Value;
                 maxNumMessages = (v == null) ? -1 : int.Parse(v);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 maxNumMessages = -1;
             }
 
-            try
-            {
+            try {
                 var v = node.Attributes["stopOnDataEnd"]?.Value;
                 abortOnListEnd = (v != null) && bool.Parse(v);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 abortOnListEnd = false;
             }
 
-            try
-            {
+            try {
                 var v = node.Attributes["delay"]?.Value;
                 chainDelay = (v == null) ? 0 : int.Parse(v);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 chainDelay = 0;
             }
 
-            try
-            {
+            try {
                 var v = node.Attributes["useParentData"]?.Value;
                 useParentData = (v != null) && bool.Parse(v);
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 useParentData = false;
             }
 
-            try
-            {
-                var v = node.Attributes["maxRunTime"]?.Value;
-                if (v != null)
-                {
+            try {
+                var v = node.Attributes["maxRuntime"]?.Value;
+                if (v != null) {
                     maxRunTime = int.Parse(v);
-                }
-                else
-                {
+                } else {
                     maxRunTime = -1;
                 }
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 maxRunTime = -1;
             }
 
-            try
-            {
+            try {
                 var v = node.Attributes["deferredStart"]?.Value;
-                if (v != null)
-                {
+                if (v != null) {
                     deferredStart = double.Parse(v);
-                }
-                else
-                {
+                } else {
                     deferredStart = 0.0;
                 }
-            }
-            catch (Exception)
-            {
+            } catch (Exception) {
                 deferredStart = 0.0;
             }
 
-            if (triggerID != null)
-            {
-                if (triggersInUse.Contains(triggerID))
-                {
+            if (triggerID != null) {
+                if (triggersInUse.Contains(triggerID)) {
                     lineInUse = true;
-                }
-                else
-                {
+                } else {
                     lineInUse = false;
                 }
-            }
-            else
-            {
+            } else {
                 lineInUse = false;
             }
         }
 
-        public void Start()
-        {
+        public void Start() {
             finished = false;
             STOP = false;
 
@@ -174,8 +132,7 @@ namespace LoadInjector.RunTime
             sourceLogger.Info($"Scheduling Start of Rate Source Controller: {name}");
             CancellationTokenSource source = new CancellationTokenSource();
 
-            if (lineInUse)
-            {
+            if (lineInUse) {
                 Task.Run(async delegate
                 {
                     await Task.Delay(TimeSpan.FromSeconds(deferredStart), source.Token);
@@ -187,34 +144,28 @@ namespace LoadInjector.RunTime
                     intervalStopWatch.Start();
 
                     sourceLogger.Info($"Starting timer with interval {interval}");
-                    sendTimer = new System.Timers.Timer(interval)
-                    {
+                    sendTimer = new System.Timers.Timer(interval) {
                         Enabled = true,
                         AutoReset = false
                     };
                     sendTimer.Elapsed += FireEvent;
                 });
-            }
-            else
-            {
+            } else {
                 sourceLogger.Warn($"No Destination configured to use Rate Source Controller: {name}");
             }
         }
 
-        public void ParentFired(Tuple<Dictionary<string, string>> data = null)
-        {
+        public void ParentFired(Tuple<Dictionary<string, string>> data = null) {
             // Called by the parent in a chain when it fires.
             // This schedules the firing of the trigger for this chain link after the delay time
 
-            if (!useParentData)
-            {
+            if (!useParentData) {
                 data = Next();
             }
 
             Task.Run(async delegate
             {
-                sendTimer = new System.Timers.Timer(chainDelay * 1000.0)
-                {
+                sendTimer = new System.Timers.Timer(chainDelay * 1000.0) {
                     Enabled = true,
                     AutoReset = false
                 };
@@ -222,41 +173,31 @@ namespace LoadInjector.RunTime
             });
         }
 
-        private void OnParentFiredTimedEvent(Tuple<Dictionary<string, string>> data)
-        {
+        private void OnParentFiredTimedEvent(Tuple<Dictionary<string, string>> data) {
             // Handler for the firing due to a parent
 
-            try
-            {
+            try {
                 eventDistributor.DistributeMessage(triggerID, data);
-                foreach (RateDrivenSourceController child in chainedController)
-                {
+                foreach (RateDrivenSourceController child in chainedController) {
                     child.ParentFired(data);
                 }
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 sourceLogger.Error(ex, "On Parent Fire error");
             }
 
             messagesSent++;
 
-            try
-            {
+            try {
                 ReportChain(name, messagesSent);
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 sourceLogger.Error(ex, "Set Output problem.");
             }
         }
 
         // The sendTimer calls this function each time the timer goes off
-        private void FireEvent(object sender, ElapsedEventArgs e)
-        {
+        private void FireEvent(object sender, ElapsedEventArgs e) {
             //Unset it if run parameters exceeded
-            if (maxRunTime > 0 && executionStopWatch.ElapsedMilliseconds / 1000 >= maxRunTime)
-            {
+            if (maxRunTime > 0 && executionStopWatch.ElapsedMilliseconds / 1000 >= maxRunTime) {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
                 sourceLogger.Info($"Rate Source {name}. Maximum Run Time Reached {messagesSent} Messages Sent");
@@ -264,8 +205,7 @@ namespace LoadInjector.RunTime
                 return;
             }
 
-            if (maxNumMessages > 0 && messagesSent >= maxNumMessages)
-            {
+            if (maxNumMessages > 0 && messagesSent >= maxNumMessages) {
                 sendTimer.Enabled = false;
                 sendTimer.Stop();
                 sourceLogger.Info($"Rate Source {name}. Maximum Number of Messages Reached. {messagesSent} Messages Sent");
@@ -276,13 +216,10 @@ namespace LoadInjector.RunTime
             // Reset the interval timer
             double avg = intervalStopWatch.Elapsed.TotalMilliseconds / intervalCount;
             double currentRate = RoundToSignificantDigits(60000 / avg, 2);
-            if (currentRate < intervalMessagesPerMinute)
-            {
+            if (currentRate < intervalMessagesPerMinute) {
                 sourceLogger.Trace($"Re scheduling timer with interval {interval / 4}");
                 sendTimer.Interval = interval / 4;
-            }
-            else
-            {
+            } else {
                 sourceLogger.Trace($"Re scheduling timer with interval {interval * 1.1}");
                 sendTimer.Interval = interval * 1.1;
             }
@@ -290,19 +227,16 @@ namespace LoadInjector.RunTime
             sendTimer.Enabled = true;
 
             bool immediateSent = false;
-            if (intervalMessagesPerMinute > 3800 && currentRate < intervalMessagesPerMinute && !STOP)
-            {
+            if (intervalMessagesPerMinute > 3800 && currentRate < intervalMessagesPerMinute && !STOP) {
                 immediateSent = true;
                 sendTimer.Enabled = false;
             }
 
             // Get the data for this iteration and send it to the event distributor which will notify all interested destinations
 
-            try
-            {
+            try {
                 Tuple<Dictionary<string, string>> data = Next();
-                if (data == null)
-                {
+                if (data == null) {
                     Console.WriteLine($"Source:{name}.No further data available");
                     SetSourceLineOutput("No further data available");
                     finished = true;
@@ -315,81 +249,39 @@ namespace LoadInjector.RunTime
                 avg = intervalStopWatch.Elapsed.TotalMilliseconds / intervalCount;
                 currentRate = RoundToSignificantDigits(60000 / avg, 2);
 
-                try
-                {
+                try {
                     eventDistributor.DistributeMessage(triggerID, data);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     sourceLogger.Error(ex, "Distributor Error");
                 }
-                try
-                {
-                    foreach (RateDrivenSourceController child in chainedController)
-                    {
+                try {
+                    foreach (RateDrivenSourceController child in chainedController) {
                         child.ParentFired(data);
                     }
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     sourceLogger.Error(ex, "Firing Child Error");
                 }
-                try
-                {
+                try {
                     Report(name, messagesSent, currentRate, messagesPerMinute);
-                }
-                catch (Exception ex)
-                {
+                } catch (Exception ex) {
                     sourceLogger.Error(ex, "Set Output Problem.");
                 }
-            }
-            catch (DispatcherNullException ex)
-            {
+            } catch (DispatcherNullException ex) {
                 sourceLogger.Error(ex, $"Source:{name}. NULL DISPATCHER");
                 SetSourceLineOutput("NULL DISPATCHER");
-            }
-            catch (FilterFailException)
-            {
+            } catch (FilterFailException) {
                 sourceLogger.Error($"Source:{name}. Post Filtering. Iteration Flight did not pass the configured filter");
                 SetSourceLineOutput("Iteration Flight did not pass the configured filter");
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 sourceLogger.Error(ex, "Error Distributing Rate Message");
             }
 
-            if (immediateSent && !STOP)
-            {
+            if (immediateSent && !STOP) {
                 FireEvent(null, null);
             }
         }
 
-        //private void Report(string v, int messagesSent, double currentRate, double messagesPerMinute) {
-        //    if (currentRate < Parameters.MAXREPORTRATE || messagesSent % Parameters.REPORTEPOCH == 0) {
-        //        ControllerStatusReport report = new ControllerStatusReport() {
-        //            Consolestr = v,
-        //            Sent = messagesSent,
-        //            Actual = currentRate,
-        //            Config = messagesPerMinute,
-        //            Type = Operation.LineReport
-        //        };
-
-        //        lineProgress.Report(report);
-        //    }
-        //}
-
-        //private void ReportChain(string v, int messagesSent) {
-        //    ControllerStatusReport report = new ControllerStatusReport() {
-        //        Consolestr = v,
-        //        Sent = messagesSent,
-        //        Type = Operation.LineSent
-        //    };
-
-        //    lineProgress.Report(report);
-        //}
-
-        public double RoundToSignificantDigits(double d, int digits)
-        {
+        public double RoundToSignificantDigits(double d, int digits) {
             if (d == 0)
                 return 0;
 
@@ -400,18 +292,15 @@ namespace LoadInjector.RunTime
             return di / scale;
         }
 
-        public bool Prepare()
-        {
-            if (!lineInUse)
-            {
+        public bool Prepare() {
+            if (!lineInUse) {
                 SetSourceLineOutput("No destination lines are configured to use this source");
                 return true;
             }
 
             prepOK = true;
 
-            switch (dataSourceType)
-            {
+            switch (dataSourceType) {
                 case "csv":
                     prepOK = PrepareCSV();
                     break;
@@ -440,44 +329,35 @@ namespace LoadInjector.RunTime
                     break;
             }
 
-            if (!prepOK)
-            {
+            if (!prepOK) {
                 return false;
             }
 
             eventDistributor.AddDispatcher(triggerID);
             eventDistributor.AddMonitorHandler(triggerID, this);
 
-            foreach (RateDrivenSourceController chain in chainedController)
-            {
+            foreach (RateDrivenSourceController chain in chainedController) {
                 chain.Prepare();
             }
 
             return prepOK;
         }
 
-        public Tuple<Dictionary<string, string>> Next()
-        {
-            if (dataSourceType == "PULSAR")
-            {
+        public Tuple<Dictionary<string, string>> Next() {
+            if (dataSourceType == "PULSAR") {
                 return new Tuple<Dictionary<string, string>>(new Dictionary<string, string>());
             }
             Dictionary<string, string> data = null;
 
-            try
-            {
-                if (dataRecords.Count != 0)
-                {
-                    if (index >= dataRecords.Count && abortOnListEnd)
-                    {
+            try {
+                if (dataRecords.Count != 0) {
+                    if (index >= dataRecords.Count && abortOnListEnd) {
                         return null;
                     }
                     data = dataRecords[index % dataRecords.Count];
                 }
                 index++;
-            }
-            catch (Exception ex)
-            {
+            } catch (Exception ex) {
                 logger.Error($"Error getting next piece of data {ex.Message}");
             }
 
@@ -486,49 +366,38 @@ namespace LoadInjector.RunTime
         }
 
         // Called when one of the messages is sent
-        public void TriggerHandler(object sender, TriggerFiredEventArgs e)
-        {
-            if (intervalMessagesPerMinute < 1500)
-            {
+        public void TriggerHandler(object sender, TriggerFiredEventArgs e) {
+            if (intervalMessagesPerMinute < 1500) {
                 sourceLogger.Info($"Rate Event Fired. Source: {name}");
                 return;
             }
 
-            if (intervalCount % Parameters.REPORTEPOCH == 0)
-            {
+            if (intervalCount % Parameters.REPORTEPOCH == 0) {
                 sourceLogger.Info($"Rate Event Fired. Source: {name}. {Parameters.REPORTEPOCH} instances");
             }
         }
 
-        protected void PrepareProfileThreads()
-        {
-            if (maxMsgPerMinuteProfile == null)
-            {
+        protected void PrepareProfileThreads() {
+            if (maxMsgPerMinuteProfile == null) {
                 return;
             }
-            try
-            {
+            try {
                 string[] pairs = maxMsgPerMinuteProfile.Split(',');
-                foreach (string pair in pairs)
-                {
+                foreach (string pair in pairs) {
                     string[] pairString = pair.Split(':');
 
                     int secFromStart = int.Parse(pairString[0]);
                     double intervalMessagesPerMinute = int.Parse(pairString[1]);
                     double intervalThrottleInterval;
 
-                    if (intervalMessagesPerMinute == 0)
-                    {
+                    if (intervalMessagesPerMinute == 0) {
                         intervalThrottleInterval = double.MaxValue;
-                    }
-                    else
-                    {
+                    } else {
                         intervalThrottleInterval = 60000 / intervalMessagesPerMinute;
                     }
 
                     int waitBeforeStart = secFromStart * 1000;
-                    if (waitBeforeStart == 0)
-                    {
+                    if (waitBeforeStart == 0) {
                         MsgPerMin = pairString[1];
                         messagesPerMinute = double.Parse(MsgPerMin);
                         interval = 1000 * (60.0 / messagesPerMinute);
@@ -536,8 +405,7 @@ namespace LoadInjector.RunTime
                         continue;
                     }
 
-                    System.Timers.Timer resetTimer = new System.Timers.Timer
-                    {
+                    System.Timers.Timer resetTimer = new System.Timers.Timer {
                         AutoReset = false,
                         Interval = waitBeforeStart,
                         Enabled = true
@@ -547,9 +415,7 @@ namespace LoadInjector.RunTime
                     resetTimer.Start();
                     resetTimers.Add(resetTimer);
                 }
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 sourceLogger.Error("**********************************");
                 sourceLogger.Error("* Message Throttle Profile Error *");
                 sourceLogger.Error("**********************************");
@@ -558,8 +424,7 @@ namespace LoadInjector.RunTime
             }
         }
 
-        private void ProfileThreadUpdateInterval(double intervalThrottleInterval, double maxMess, double configuredMaxMess)
-        {
+        private void ProfileThreadUpdateInterval(double intervalThrottleInterval, double maxMess, double configuredMaxMess) {
             interval = intervalThrottleInterval;
             intervalStopWatch.Restart();
             intervalCount = 0;
@@ -569,8 +434,7 @@ namespace LoadInjector.RunTime
             sourceLogger.Error($"Rate Source: {name}. Setting interval to {interval}, interval count to {intervalCount}, messages per minute to {configuredMaxMess}");
         }
 
-        internal void Stop()
-        {
+        internal void Stop() {
             STOP = true;
             sendTimer?.Stop();
             Report("Test Run Complete.", messagesSent, 0, 0);
